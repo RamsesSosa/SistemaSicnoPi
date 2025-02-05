@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import *
+from .models import Usuario, Cliente, Equipo, EstadoCalibracion, HistorialEquipo, Alerta, Reporte, EntregaRecoleccion
 
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
