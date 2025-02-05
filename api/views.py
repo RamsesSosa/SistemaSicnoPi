@@ -1,6 +1,16 @@
 from rest_framework import viewsets
-from .serializer import *
-from .models import *
+
+from .models import Usuario, Cliente, Equipo, EstadoCalibracion, HistorialEquipo, Alerta, Reporte, EntregaRecoleccion
+from .serializer import (
+    UsuarioSerializer,
+    ClienteSerializer,
+    EquipoSerializer,
+    EstadoCalibracionSerializer,
+    HistorialEquipoSerializer,
+    AlertaSerializer,
+    ReporteSerializer,
+    EntregaRecoleccionSerializer,
+)
 
 # ViewSet para cada modelo
 
