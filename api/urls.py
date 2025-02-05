@@ -4,6 +4,8 @@ from api import views
 
 router = routers.DefaultRouter()
 
+#Esto generará automáticamente las rutas para cada ViewSet en la API
+
 router.register(r'usuarios', views.UsuarioViewSet) 
 router.register(r'clientes', views.ClienteViewSet)
 router.register(r'equipos', views.EquipoViewSet)
