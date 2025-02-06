@@ -45,4 +45,3 @@ class ReporteViewSet(viewsets.ModelViewSet):
 class EntregaRecoleccionViewSet(viewsets.ModelViewSet):
     queryset = EntregaRecoleccion.objects.all()
     serializer_class = EntregaRecoleccionSerializer
-    
