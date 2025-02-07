@@ -5,9 +5,13 @@ class Usuario(models.Model):
     correo = models.EmailField(max_length=100, unique=True)
     contrasena = models.CharField(max_length=30)
     
+    def __str__(self):
+        return self.fullName
+    
 class Cliente(models.Model):
     nombre_cliente = models.CharField(max_length=100)
-    
+    def __str__(self):
+        return self.nombre
 
 class Equipo(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
@@ -19,6 +23,9 @@ class Equipo(models.Model):
     fecha_entrada = models.DateTimeField(auto_now_add=True)
     accesorios = models.TextField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
+    
+    def __str__(self):
+        return self.nombre_equipo
     
 class EstadoCalibracion(models.Model):
     nombre_estado = models.CharField(max_length=50)
