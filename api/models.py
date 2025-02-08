@@ -11,7 +11,7 @@ class Usuario(models.Model):
 class Cliente(models.Model):
     nombre_cliente = models.CharField(max_length=100)
     def __str__(self):
-        return self.nombre
+        return self.nombre_cliente
 
 class Equipo(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
