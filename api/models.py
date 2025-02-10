@@ -73,4 +73,4 @@ class EntregaRecoleccion(models.Model):
     responsable_entrega = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"Entrega de {self.equipo.nombre_equipo}"
+        return f"Entrega de {self.equipo.nombre_equipo}" 
