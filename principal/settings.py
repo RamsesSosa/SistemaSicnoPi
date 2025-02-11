@@ -78,10 +78,19 @@ WSGI_APPLICATION = 'principal.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'SistemaSicnoDB',  
+        'USER': 'dbmasteruser',  # Usuario de la BD 
+        'PASSWORD': 'SicnoLab2025',  # Contraseña 
+        'HOST': 'ls-ef4300d410ebc1a8304030b638b03ed2da87f5c1.c90u2ss6wl6d.us-east-2.rds.amazonaws.com',  # El host/endpoint de Lightsail
+        'PORT': '3306',  
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
+
 
 
 # Password validation
