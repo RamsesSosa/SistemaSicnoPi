@@ -10,3 +10,5 @@ Por ejemplo:
 ```feature/formulario-de-registro```
 
 ```feature/conexion-base-de-datos```
+
+<h1>Versiones de tecnologías que estamos usando</h1>
