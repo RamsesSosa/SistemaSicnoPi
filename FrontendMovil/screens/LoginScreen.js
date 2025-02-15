@@ -3,16 +3,16 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 
 const LoginScreen = ({ navigation }) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    if (!username || !password) {
+    if (!correo || !password) {
       Alert.alert('Error', 'Por favor, completa todos los campos.');
       return;
     }
-    // Aquí llamarás a la API para autenticar al usuario
-    console.log('Usuario:', username);
+    // Aquí llama a la API para autenticar al usuario
+    console.log('Usuario:', email);
     console.log('Contraseña:', password);
     navigation.navigate('Home'); // Redirige a la pantalla principal después del login
   };
@@ -20,12 +20,12 @@ const LoginScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Bienvenido!!!</Text>
-      <Text style={styles.subtitle}>Inicia sesión con tu usuario y contraseña.</Text>
+      <Text style={styles.subtitle}>Inicia sesión con tu correo y contraseña.</Text>
       <TextInput
         style={styles.input}
-        placeholder="Nombre del usuario"
-        value={username}
-        onChangeText={setUsername}
+        placeholder="Correo"
+        value={email}
+        onChangeText={setEmail}
       />
       <TextInput
         style={styles.input}
