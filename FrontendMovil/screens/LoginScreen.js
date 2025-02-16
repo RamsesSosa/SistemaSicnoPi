@@ -1,22 +1,21 @@
-// screens/LoginScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Importa íconos
+import Icon from 'react-native-vector-icons/FontAwesome'; 
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
+  const [showPassword, setShowPassword] = useState(false); 
 
   const handleLogin = () => {
     if (!email || !password) {
       Alert.alert('Error', 'Por favor, completa todos los campos.');
       return;
     }
-    // Aquí llamarás a la API para autenticar al usuario
+
     console.log('Correo:', email);
     console.log('Contraseña:', password);
-    navigation.navigate('Home'); // Redirige a la pantalla principal después del login
+    navigation.navigate('Home'); 
   };
 
   return (
@@ -77,19 +76,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 16,
-    backgroundColor: '#f5f5f5', // Fondo claro
+    backgroundColor: '#f5f5f5',
   },
   title: {
     fontSize: 24,
     marginBottom: 16,
     textAlign: 'center',
-    color: '#333', // Color de texto oscuro
+    color: '#333', 
   },
   subtitle: {
     fontSize: 16,
     marginBottom: 24,
     textAlign: 'center',
-    color: '#666', // Color de texto gris
+    color: '#666', 
   },
   inputContainer: {
     flexDirection: 'row',
@@ -99,7 +98,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 8,
     borderRadius: 30,
-    backgroundColor: '#fff', // Fondo blanco para los inputs
+    backgroundColor: '#fff', 
   },
   icon: {
     marginRight: 8,
@@ -107,17 +106,17 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: 40,
-    color: '#333', // Color de texto oscuro
+    color: '#333', 
   },
   customButton: {
-    backgroundColor: '#FF8F00', // Color naranja
+    backgroundColor: '#FF8F00',
     paddingVertical: 12,
     borderRadius: 30,
     alignItems: 'center',
     marginTop: 16,
   },
   customButtonText: {
-    color: '#fff', // Texto blanco
+    color: '#fff', 
     fontSize: 16,
     fontWeight: 'bold',
   },

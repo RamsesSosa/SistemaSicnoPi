@@ -1,7 +1,6 @@
-// screens/RegisterScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Importa íconos
+import Icon from 'react-native-vector-icons/FontAwesome'; 
 
 const RegisterScreen = ({ navigation }) => {
   const [fullName, setFullName] = useState('');
