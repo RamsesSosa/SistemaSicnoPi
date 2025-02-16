@@ -23,13 +23,16 @@ const LoginScreen = ({ navigation }) => {
       <Text style={styles.subtitle}>Inicia sesión con tu usuario y contraseña.</Text>
       <TextInput
         style={styles.input}
-        placeholder="Nombre del usuario"
+        placeholder="Correo electrónico"
+        placeholderTextColor="#999"
         value={username}
         onChangeText={setUsername}
+        keyboardType="email-address" // Esto ayuda a que el teclado sea más adecuado para correos electrónicos
       />
       <TextInput
         style={styles.input}
         placeholder="Contraseña"
+        placeholderTextColor="#999"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
