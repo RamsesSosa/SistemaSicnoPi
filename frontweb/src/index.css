@@ -7,7 +7,6 @@ body {
   height: 100vh;
   margin: 0;
 }
-
 .login-container,
 .register-container {
   background: white;
@@ -17,12 +16,10 @@ body {
   width: 300px;
   text-align: center;
 }
-
 .input-group {
   margin-bottom: 15px;
   position: relative;
 }
-
 .input-group input,
 .input-group select {
   width: 100%;
@@ -30,7 +27,6 @@ body {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
-
 .input-group .icon {
   position: absolute;
   right: 10px;
@@ -38,7 +34,6 @@ body {
   transform: translateY(-50%);
   cursor: pointer;
 }
-
 button {
   width: 100%;
   padding: 10px;
@@ -48,16 +43,13 @@ button {
   border-radius: 4px;
   cursor: pointer;
 }
-
 button:hover {
   background-color: #ffa600b3;
 }
-
 a {
   color: #000000;
   text-decoration: none;
 }
-
 a:hover {
   text-decoration: underline;
 }
@@ -66,7 +58,6 @@ a:hover {
   font-size: 0.875rem;
   margin-top: 5px;
 }
-
 .home-container {
   text-align: center;
   padding: 20px;
@@ -76,11 +67,9 @@ a:hover {
   max-width: 600px;
   margin: 50px auto;
 }
-
 .home-container h1 {
   color: #333;
 }
-
 .home-container p {
   color: #666;
 }
