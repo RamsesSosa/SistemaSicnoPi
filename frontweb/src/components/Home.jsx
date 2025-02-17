@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const Home = () => {
-  // Datos de ejemplo para gráficos y tablas
+
   const calibrationData = [
     { month: 'Enero', calibraciones: 120 },
     { month: 'Febrero', calibraciones: 150 },
