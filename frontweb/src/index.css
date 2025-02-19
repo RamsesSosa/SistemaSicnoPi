@@ -1,0 +1,114 @@
+/* Estilos globales para eliminar márgenes y paddings */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* Evita el desplazamiento innecesario */
+}
+
+/* Asegura que el wrapper ocupe toda la pantalla */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Ajusta el contenido principal para que ocupe el espacio restante */
+.content-wrapper {
+  flex: 1;
+  overflow-y: auto; /* Permite el desplazamiento vertical si es necesario */
+}
+
+/* Ajusta el sidebar para que ocupe toda la altura */
+.main-sidebar {
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+/* Ajusta el navbar para que no cree espacios innecesarios */
+.main-header {
+  position: fixed;
+  width: 100%;
+  z-index: 1000;
+}
+
+/* Ajusta el contenido para que no se solape con el navbar */
+.content {
+  padding-top: 57px; /* Altura del navbar */
+}
+/* Login y register */
+/* Estilos para centrar los formularios */
+.login-page, .register-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Ocupa toda la altura de la pantalla */
+  background-color: #f8f9fa; /* Fondo claro */
+}
+
+.login-container, .register-container {
+  max-width: 400px;
+  width: 100%;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.login-container h1, .register-container h1 {
+  margin-bottom: 20px;
+}
+
+.input-group {
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.input-group input, .input-group select {
+  width: 100%;
+  padding: 10px;
+  padding-left: 40px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.input-group .icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 5px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background-color: #ffa600;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #ffa600;
+}
+
+a {
+  color: #ffa600;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
