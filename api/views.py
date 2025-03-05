@@ -1,4 +1,7 @@
 from rest_framework import viewsets
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth import get_user_model
 
 from .models import Usuario, Cliente, Equipo, EstadoCalibracion, HistorialEquipo, Alerta, Reporte, EntregaRecoleccion
 from .serializer import (
@@ -13,6 +16,23 @@ from .serializer import (
 )
 
 # ViewSet para cada modelo
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['correo'] = user.correo
+        return token
+
+    def validate(self, attrs):
+        credentials = {
+            'correo': attrs.get('correo'),
+            'password': attrs.get('password')
+        }
+        return super().validate(credentials)
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import axios from 'axios';
 
 // Esquema de validación con Yup
 const schema = yup.object().shape({
@@ -23,10 +24,18 @@ const Login = () => {
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data) => {
-    console.log('Datos del formulario:', data);
-    // Simulamos un inicio de sesión exitoso
-    navigate('/home');
+  const onSubmit = async (data) => {
+    try {
+      const response = await axios.post('http://localhost:8000/api/token/', {
+        correo: data.email,
+        password: data.password,
+      });
+      localStorage.setItem('access_token', response.data.access);
+      localStorage.setItem('refresh_token', response.data.refresh);
+      navigate('/home');  // Redirect to Home page after successful login
+    } catch (error) {
+      console.error('Error al iniciar sesión:', error);
+    }
   };
 
   return (

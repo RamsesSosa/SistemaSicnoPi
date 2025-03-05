@@ -4,7 +4,7 @@ from .models import Usuario, Cliente, Equipo, EstadoCalibracion, HistorialEquipo
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = '__all__'
+        fields = ['id', 'fullName', 'correo', 'is_active', 'is_staff']
 
 class ClienteSerializer(serializers.ModelSerializer):
     class Meta:
