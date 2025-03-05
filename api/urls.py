@@ -15,8 +15,3 @@ router.register(r'historial-equipos', views.HistorialEquipoViewSet)
 router.register(r'alertas', views.AlertaViewSet)
 router.register(r'reportes', views.ReporteViewSet)
 router.register(r'entregas-recolecciones', views.EntregaRecoleccionViewSet)
-
-# Con esto se definen las rutas de la API
-urlpatterns = [
-    path('', include(router.urls))
-]
