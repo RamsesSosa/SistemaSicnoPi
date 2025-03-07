@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'; 
-
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -11,7 +10,6 @@ const LoginScreen = ({ navigation }) => {
       Alert.alert('Error', 'Por favor, completa todos los campos.');
       return;
     }
-
     console.log('Correo:', email);
     console.log('Contraseña:', password);
     navigation.navigate('Home'); 
