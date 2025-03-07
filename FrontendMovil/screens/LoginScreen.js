@@ -6,7 +6,6 @@ const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false); 
-
   const handleLogin = () => {
     if (!email || !password) {
       Alert.alert('Error', 'Por favor, completa todos los campos.');
@@ -17,7 +16,6 @@ const LoginScreen = ({ navigation }) => {
     console.log('Contraseña:', password);
     navigation.navigate('Home'); 
   };
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Bienvenido!!!</Text>
@@ -36,7 +34,6 @@ const LoginScreen = ({ navigation }) => {
           autoCapitalize="none"
         />
       </View>
-
       {/* Campo de contraseña */}
       <View style={styles.inputContainer}>
         <Icon name="lock" size={20} color="#999" style={styles.icon} />
