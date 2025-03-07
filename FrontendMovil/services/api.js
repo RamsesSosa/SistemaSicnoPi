@@ -22,4 +22,3 @@ export const register = async (fullName, username, email, password) => {
     throw error.response.data;
   }
 };
-
