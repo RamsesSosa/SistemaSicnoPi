@@ -23,19 +23,15 @@ class ClienteViewSet(viewsets.ModelViewSet):
 class EquipoViewSet(viewsets.ModelViewSet):
     queryset = Equipo.objects.all()
     serializer_class = EquipoSerializer
-
 class EstadoCalibracionViewSet(viewsets.ModelViewSet):
     queryset = EstadoCalibracion.objects.all()
     serializer_class = EstadoCalibracionSerializer
-
 class HistorialEquipoViewSet(viewsets.ModelViewSet):
     queryset = HistorialEquipo.objects.all()
     serializer_class = HistorialEquipoSerializer
-
 class AlertaViewSet(viewsets.ModelViewSet):
     queryset = Alerta.objects.all()
     serializer_class = AlertaSerializer
-
 class ReporteViewSet(viewsets.ModelViewSet):
     queryset = Reporte.objects.all()
     serializer_class = ReporteSerializer
