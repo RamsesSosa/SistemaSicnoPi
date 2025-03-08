@@ -67,7 +67,6 @@ const RegisterScreen = ({ navigation }) => {
           <Icon name={showPassword ? 'eye' : 'eye-slash'} size={20} color="#999" />
         </TouchableOpacity>
       </View>
-
       {/* Campo de confirmar contraseña */}
       <View style={styles.inputContainer}>
         <Icon name="lock" size={20} color="#999" style={styles.icon} />
@@ -83,12 +82,10 @@ const RegisterScreen = ({ navigation }) => {
           <Icon name={showPassword ? 'eye' : 'eye-slash'} size={20} color="#999" />
         </TouchableOpacity>
       </View>
-
       {/* Botón de registro personalizado */}
       <TouchableOpacity style={styles.customButton} onPress={handleRegister}>
         <Text style={styles.customButtonText}>Crear</Text>
       </TouchableOpacity>
-
       {/* Enlace para iniciar sesión */}
       <TouchableOpacity onPress={() => navigation.navigate('Login')}>
         <Text style={styles.link}>¿Ya tienes una cuenta? Inicia sesión</Text>
@@ -96,7 +93,6 @@ const RegisterScreen = ({ navigation }) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -146,5 +142,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-
 export default RegisterScreen;
