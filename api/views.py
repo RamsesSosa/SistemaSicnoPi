@@ -11,9 +11,7 @@ from .serializer import (
     ReporteSerializer,
     EntregaRecoleccionSerializer,
 )
-
 # ViewSet para cada modelo
-
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
