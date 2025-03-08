@@ -24,7 +24,6 @@ const RegisterScreen = ({ navigation }) => {
     console.log('Contraseña:', password);
     navigation.navigate('Login'); // Redirige a la pantalla de login después del registro
   };
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Registro de usuario</Text>
@@ -40,7 +39,6 @@ const RegisterScreen = ({ navigation }) => {
           onChangeText={setFullName}
         />
       </View>
-
       {/* Campo de correo electrónico */}
       <View style={styles.inputContainer}>
         <Icon name="envelope" size={20} color="#999" style={styles.icon} />
@@ -54,7 +52,6 @@ const RegisterScreen = ({ navigation }) => {
           autoCapitalize="none"
         />
       </View>
-
       {/* Campo de contraseña */}
       <View style={styles.inputContainer}>
         <Icon name="lock" size={20} color="#999" style={styles.icon} />
