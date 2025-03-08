@@ -15,11 +15,9 @@ from .serializer import (
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
-
 class ClienteViewSet(viewsets.ModelViewSet):
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
-
 class EquipoViewSet(viewsets.ModelViewSet):
     queryset = Equipo.objects.all()
     serializer_class = EquipoSerializer
@@ -35,7 +33,6 @@ class AlertaViewSet(viewsets.ModelViewSet):
 class ReporteViewSet(viewsets.ModelViewSet):
     queryset = Reporte.objects.all()
     serializer_class = ReporteSerializer
-
 class EntregaRecoleccionViewSet(viewsets.ModelViewSet):
     queryset = EntregaRecoleccion.objects.all()
     serializer_class = EntregaRecoleccionSerializer
