@@ -16,6 +16,7 @@ class EquipoSerializer(serializers.ModelSerializer):
 class EstadoCalibracionSerializer(serializers.ModelSerializer):
     class Meta:
         model = EstadoCalibracion
+        
         fields = '__all__'
 
 class HistorialEquipoSerializer(serializers.ModelSerializer):
