@@ -24,6 +24,7 @@ class HistorialEquipoSerializer(serializers.ModelSerializer):
         model = HistorialEquipo
         fields = '__all__'
 
+
 class AlertaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Alerta
