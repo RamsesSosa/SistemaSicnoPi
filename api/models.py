@@ -63,7 +63,6 @@ class Reporte(models.Model):
     tipo_reporte = models.CharField(max_length=20, choices=TIPOS_REPORTE)
     fecha_generado = models.DateTimeField(auto_now_add=True)
     datos_reporte = models.TextField()
-
     def __str__(self):
         return f"Reporte: {self.tipo_reporte}"
 
@@ -71,6 +70,5 @@ class EntregaRecoleccion(models.Model):
     equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)  # FK a Equipo
     fecha_hora = models.DateTimeField(auto_now_add=True)
     responsable_entrega = models.CharField(max_length=100)
-
     def __str__(self):
         return f"Entrega de {self.equipo.nombre_equipo}" 
