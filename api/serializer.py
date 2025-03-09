@@ -13,7 +13,6 @@ class EquipoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Equipo
         fields = '__all__'
-
 class EstadoCalibracionSerializer(serializers.ModelSerializer):
     class Meta:
         model = EstadoCalibracion
