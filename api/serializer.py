@@ -28,6 +28,7 @@ class AlertaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Alerta
         fields = '__all__'
+        
 
 class ReporteSerializer(serializers.ModelSerializer):
     class Meta:
