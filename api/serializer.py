@@ -16,9 +16,7 @@ class EquipoSerializer(serializers.ModelSerializer):
 class EstadoCalibracionSerializer(serializers.ModelSerializer):
     class Meta:
         model = EstadoCalibracion
-        
         fields = '__all__'
-
 class HistorialEquipoSerializer(serializers.ModelSerializer):
     class Meta:
         model = HistorialEquipo
@@ -26,13 +24,11 @@ class HistorialEquipoSerializer(serializers.ModelSerializer):
 class AlertaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Alerta
-        fields = '__all__'
-        
+        fields = '__all__'  
 class ReporteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reporte
         fields = '__all__'
-
 class EntregaRecoleccionSerializer(serializers.ModelSerializer):
     class Meta:
         model = EntregaRecoleccion
