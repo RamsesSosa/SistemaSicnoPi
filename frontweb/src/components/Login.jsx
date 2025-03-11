@@ -26,7 +26,6 @@ const Login = () => {
   const onSubmit = (data) => {
     // Obtener los datos de registro almacenados en localStorage
     const registeredUser = JSON.parse(localStorage.getItem('registeredUser'));
-
     if (
       registeredUser &&
       registeredUser.email === data.email &&
