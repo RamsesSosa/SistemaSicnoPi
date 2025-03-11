@@ -41,7 +41,6 @@ const Login = () => {
       setLoginError('Correo electrónico o contraseña incorrectos');
     }
   };
-
   return (
     <div className="login-container">
       <h1>Iniciar Sesión</h1>
