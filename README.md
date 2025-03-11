@@ -15,3 +15,19 @@ Por ejemplo:
 <h3>Django: 5.1.5</h3>
 <h3>npm: 9.9.4</h3>
 <h3>node: 18.20.6</h3>
+
+<h1>Comandos para preparar el entorno virtual</h1>
+
+```pip install django==5.1.5```
+
+```pip install django-cors-headers```
+
+```pip install djangorestframework```
+
+```pip install coreapi```
+
+```pip install --upgrade setuptools```
+
+```pip install mysqlclient```
+
+```pip install djangorestframework-simplejwt```
