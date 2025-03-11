@@ -37,7 +37,6 @@ const Register = () => {
     console.log('Usuario registrado:', userData);
     navigate('/login'); // Redirigir al usuario a la página de inicio de sesión
   };
-
   return (
     <div className="register-container">
       <h1>Registro de Usuario</h1>
