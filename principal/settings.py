@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
-    'coreapi',  # Ensure this line is included
+    'coreapi',  
     'api'
 ]
 
