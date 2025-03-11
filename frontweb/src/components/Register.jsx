@@ -15,11 +15,9 @@ const registerSchema = yup.object().shape({
     .required('La confirmación de contraseña es requerida'),
   role: yup.string().required('El rol es requerido'),
 });
-
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-
   const {
     register,
     handleSubmit,
@@ -27,7 +25,6 @@ const Register = () => {
   } = useForm({
     resolver: yupResolver(registerSchema),
   });
-
   const onSubmit = (data) => {
     // Guardar los datos de registro en localStorage
     const userData = {
