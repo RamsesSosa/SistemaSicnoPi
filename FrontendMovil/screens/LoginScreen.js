@@ -47,17 +47,14 @@ const LoginScreen = ({ navigation }) => {
           <Icon name={showPassword ? 'eye-slash' : 'eye'} size={20} color="#999" />
         </TouchableOpacity>
       </View>
-
       {/* Botón de inicio de sesión personalizado */}
       <TouchableOpacity style={styles.customButton} onPress={handleLogin}>
         <Text style={styles.customButtonText}>Iniciar Sesión</Text>
       </TouchableOpacity>
-
       {/* Enlace para registrarse */}
       <TouchableOpacity onPress={() => navigation.navigate('Register')}>
         <Text style={styles.link}>Registrarse</Text>
       </TouchableOpacity>
-
       {/* Enlace para recuperar contraseña */}
       <TouchableOpacity>
         <Text style={styles.link}>¿Olvidaste tu contraseña?</Text>
@@ -120,5 +117,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-
 export default LoginScreen;
