@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'; 
+
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false); 
+
   const handleLogin = () => {
     if (!email || !password) {
       Alert.alert('Error', 'Por favor, completa todos los campos.');
       return;
     }
+
+  
     console.log('Correo:', email);
     console.log('Contraseña:', password);
-    navigation.navigate('Home'); 
+    navigation.replace('Menu');  // Cambia 'Home' por 'Menu' y usa replace en lugar de navigate
+
   };
   return (
     <View style={styles.container}>
@@ -32,6 +37,7 @@ const LoginScreen = ({ navigation }) => {
           autoCapitalize="none"
         />
       </View>
+
       {/* Campo de contraseña */}
       <View style={styles.inputContainer}>
         <Icon name="lock" size={20} color="#999" style={styles.icon} />
@@ -120,4 +126,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
 export default LoginScreen;

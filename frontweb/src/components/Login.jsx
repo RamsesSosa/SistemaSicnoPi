@@ -9,10 +9,12 @@ const loginSchema = yup.object().shape({
   email: yup.string().email('Correo electrónico inválido').required('El correo electrónico es requerido'),
   password: yup.string().required('La contraseña es requerida'),
 });
+
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState(''); // Estado para manejar errores de inicio de sesión
   const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
@@ -20,9 +22,13 @@ const Login = () => {
   } = useForm({
     resolver: yupResolver(loginSchema),
   });
+
+
   const onSubmit = (data) => {
     // Obtener los datos de registro almacenados en localStorage
     const registeredUser = JSON.parse(localStorage.getItem('registeredUser'));
+
+
     if (
       registeredUser &&
       registeredUser.email === data.email &&
@@ -37,6 +43,7 @@ const Login = () => {
       setLoginError('Correo electrónico o contraseña incorrectos');
     }
   };
+
   return (
     <div className="login-container">
       <h1>Iniciar Sesión</h1>
@@ -74,4 +81,5 @@ const Login = () => {
     </div>
   );
 };
+  
 export default Login;
