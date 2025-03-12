@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   View, Text, TextInput, Button, Alert, ScrollView, 
   StyleSheet 
@@ -9,19 +9,14 @@ import { useNavigation } from '@react-navigation/native';
 const RegistroClienteScreen = () => {
   const navigation = useNavigation();
   const [nombres, setNombres] = useState('');
-  const [edad, setEdad] = useState('');
-  const [fechaNacimiento, setFechaNacimiento] = useState('');
-  const [correo, setCorreo] = useState('');
-  const [celular, setCelular] = useState('');
 
   const handleSubmit = async () => {
-    const cliente = {
-      nombres,
-      edad,
-      fechaNacimiento,
-      correo,
-      celular,
-    };
+    if (!nombres.trim()) {
+      Alert.alert('Error', 'Por favor, ingrese un nombre válido');
+      return;
+    }
+
+    const cliente = { nombres };
 
     try {
       const clientesRegistrados = await AsyncStorage.getItem('clientes');
@@ -50,47 +45,12 @@ const RegistroClienteScreen = () => {
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Registro de Cliente</Text>
 
-      <Text>Nombres</Text>
+      <Text style={styles.label}>Nombres</Text>
       <TextInput
         style={styles.input}
         placeholder="Ingrese los nombres"
         value={nombres}
         onChangeText={setNombres}
-      />
-
-      <Text>Edad</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Ingrese la edad"
-        value={edad}
-        onChangeText={setEdad}
-        keyboardType="numeric"
-      />
-
-      <Text>Fecha de Nacimiento</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="YYYY-MM-DD"
-        value={fechaNacimiento}
-        onChangeText={setFechaNacimiento}
-      />
-
-      <Text>Correo Electrónico</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Ingrese el correo"
-        value={correo}
-        onChangeText={setCorreo}
-        keyboardType="email-address"
-      />
-
-      <Text>Número Celular</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Ingrese el número celular"
-        value={celular}
-        onChangeText={setCelular}
-        keyboardType="phone-pad"
       />
 
       <Button title="Guardar" onPress={handleSubmit} />
@@ -110,6 +70,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+    fontWeight: '600',
   },
   input: {
     borderWidth: 1,
