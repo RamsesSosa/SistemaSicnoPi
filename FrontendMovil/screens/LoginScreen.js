@@ -12,8 +12,6 @@ const LoginScreen = ({ navigation }) => {
       Alert.alert('Error', 'Por favor, completa todos los campos.');
       return;
     }
-
-  
     console.log('Correo:', email);
     console.log('Contraseña:', password);
     navigation.replace('Menu');  // Cambia 'Home' por 'Menu' y usa replace en lugar de navigate
