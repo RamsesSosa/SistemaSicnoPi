@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'admin-lte/dist/css/adminlte.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
+
 const App = () => {
   return (
     <Router>
@@ -22,7 +23,9 @@ const App = () => {
         {/* Sidebar */}
         <aside className="main-sidebar sidebar-dark-primary elevation-4">
           <a href="#" className="brand-link">
+
             <span className="brand-text font-weight-light">AdminLTE Panel</span>
+
           </a>
           <div className="sidebar">
             <nav className="mt-2">
@@ -54,7 +57,9 @@ const App = () => {
                 <li className="nav-item">
                   <Link to="/estadisticas" className="nav-link">
                     <i className="nav-icon fas fa-chart-bar"></i>
+
                     <p>Estadísticas</p>
+
                   </Link>
                 </li>
               </ul>
@@ -64,6 +69,7 @@ const App = () => {
 
         {/* Main content */}
         <div className="content-wrapper" style={{ minHeight: '130vh', marginLeft: '250px' }}>
+
           <div className="content-header">
             <div className="container-fluid">
               <h1 className="m-0">Panel de Control</h1>
@@ -175,6 +181,7 @@ const App = () => {
 
             </div>
           </div>
+
         </div>
       </div>
     </Router>

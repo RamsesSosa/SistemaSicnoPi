@@ -23,9 +23,11 @@ const Login = () => {
     resolver: yupResolver(loginSchema),
   });
 
+
   const onSubmit = (data) => {
     // Obtener los datos de registro almacenados en localStorage
     const registeredUser = JSON.parse(localStorage.getItem('registeredUser'));
+
 
     if (
       registeredUser &&
@@ -79,5 +81,5 @@ const Login = () => {
     </div>
   );
 };
-
+  
 export default Login;

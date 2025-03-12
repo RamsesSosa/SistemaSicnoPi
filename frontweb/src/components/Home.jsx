@@ -32,6 +32,7 @@ const Home = () => {
                 <h3 className="card-title">📌 Accesos Rápidos</h3>
               </div>
               <div className="card-body">
+
                 <div className="btn-group">
                   <Link to="/registrar-equipo" className="btn btn-primary">
                     Registrar nuevo equipo
@@ -46,6 +47,7 @@ const Home = () => {
                     Consultar clientes registrados
                   </Link>
                   <Link to="/historial-calibraciones" className="btn btn-primary">
+
                     Historial de calibraciones
                   </Link>
                 </div>
@@ -56,7 +58,9 @@ const Home = () => {
 
         {/* Tablero de Estado */}
         <div className="row">
+
           <div className="col-md-4">
+
             <div className="card">
               <div className="card-header">
                 <h3 className="card-title">📊 Equipos en Calibración</h3>
@@ -67,7 +71,9 @@ const Home = () => {
               </div>
             </div>
           </div>
+
           <div className="col-md-4">
+
             <div className="card">
               <div className="card-header">
                 <h3 className="card-title">📅 Equipos Pendientes de Entrega</h3>
@@ -77,7 +83,9 @@ const Home = () => {
               </div>
             </div>
           </div>
+
           <div className="col-md-4">
+
             <div className="card">
               <div className="card-header">
                 <h3 className="card-title">📈 Resumen Mensual</h3>
@@ -108,7 +116,9 @@ const Home = () => {
               <div className="card-header">
                 <h3 className="card-title">📌 Últimos Equipos Registrados</h3>
               </div>
+
               <div className="card-body">
+
                 <table className="table table-bordered">
                   <thead>
                     <tr>
@@ -148,7 +158,9 @@ const Home = () => {
               </div>
               <div className="card-body">
                 <div className="chart">
+
                   {/* Aquí puedes integrar una librería de gráficos como Chart.js */}
+
                   <canvas id="calibrationChart" style={{ height: '300px' }}></canvas>
                 </div>
               </div>
@@ -181,4 +193,5 @@ const Home = () => {
     </div>
   );
 };
+
 export default Home;

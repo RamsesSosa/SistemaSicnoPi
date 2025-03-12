@@ -16,9 +16,11 @@ const registerSchema = yup.object().shape({
   role: yup.string().required('El rol es requerido'),
 });
 
+
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+
 
   const {
     register,
