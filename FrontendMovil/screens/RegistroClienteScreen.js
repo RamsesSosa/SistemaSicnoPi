@@ -15,9 +15,7 @@ const RegistroClienteScreen = () => {
       Alert.alert('Error', 'Por favor, ingrese un nombre válido');
       return;
     }
-
     const cliente = { nombres };
-
     try {
       const clientesRegistrados = await AsyncStorage.getItem('clientes');
       const clientes = clientesRegistrados ? JSON.parse(clientesRegistrados) : [];
@@ -29,7 +27,6 @@ const RegistroClienteScreen = () => {
       Alert.alert('Error', 'No se pudo registrar el cliente');
     }
   };
-
   const handleCancelar = () => {
     Alert.alert(
       'Cancelar',
@@ -40,7 +37,6 @@ const RegistroClienteScreen = () => {
       ]
     );
   };
-
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Registro de Cliente</Text>
@@ -52,13 +48,11 @@ const RegistroClienteScreen = () => {
         value={nombres}
         onChangeText={setNombres}
       />
-
       <Button title="Guardar" onPress={handleSubmit} />
       <Button title="Cancelar" onPress={handleCancelar} color="red" />
     </ScrollView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -85,5 +79,4 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
-
 export default RegistroClienteScreen;
