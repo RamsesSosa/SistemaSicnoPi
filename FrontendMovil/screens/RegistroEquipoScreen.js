@@ -18,7 +18,6 @@ const RegistroEquipoScreen = () => {
   const [observaciones, setObservaciones] = useState('');
   const [clientesRegistrados, setClientesRegistrados] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-
   useEffect(() => {
     const obtenerClientes = async () => {
       const clientes = await AsyncStorage.getItem('clientes');
@@ -28,7 +27,6 @@ const RegistroEquipoScreen = () => {
     };
     obtenerClientes();
   }, []);
-
   const handleSubmit = async () => {
     const equipo = {
       cliente: clienteSeleccionado,
@@ -40,7 +38,6 @@ const RegistroEquipoScreen = () => {
       accesorios,
       observaciones,
     };
-
     try {
       const equiposGuardados = await AsyncStorage.getItem('equipos');
       const equipos = equiposGuardados ? JSON.parse(equiposGuardados) : [];
@@ -52,7 +49,6 @@ const RegistroEquipoScreen = () => {
       Alert.alert('Error', 'No se pudo registrar el equipo');
     }
   };
-
   const handleCancelar = () => {
     Alert.alert(
       'Cancelar',
@@ -63,12 +59,10 @@ const RegistroEquipoScreen = () => {
       ]
     );
   };
-
   const seleccionarCliente = (cliente) => {
     setClienteSeleccionado(cliente.nombres);
     setModalVisible(false);
   };
-
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Registro de Equipos</Text>
@@ -119,7 +113,6 @@ const RegistroEquipoScreen = () => {
     </ScrollView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -157,5 +150,4 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
-
 export default RegistroEquipoScreen;
