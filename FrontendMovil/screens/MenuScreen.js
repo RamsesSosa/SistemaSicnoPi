@@ -11,7 +11,6 @@ const ContenidoScreen = () => (
     <Text style={styles.title}>Contenido Screen</Text>
   </View>
 );
-
 const ScannerScreen = ({ navigation }) => (
   <View style={styles.container}>
     <Text style={styles.title}>Scanner</Text>
