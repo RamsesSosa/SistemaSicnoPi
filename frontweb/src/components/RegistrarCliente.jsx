@@ -4,28 +4,37 @@ import { useNavigate } from 'react-router-dom';
 const RegistrarCliente = () => {
   const navigate = useNavigate();
   const [nombres, setNombres] = useState('');
-  
 
-  const handleSubmit = (e) => {
+  // Marca la función handleSubmit como async
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Crear el objeto del cliente
     const cliente = {
-      nombres
-     
+      nombre_cliente: nombres, // 'nombres' es el valor que el usuario introduce
     };
 
-    // Obtener clientes existentes de localStorage
-    const clientesRegistrados = JSON.parse(localStorage.getItem('clientes')) || [];
+    
+    try {
+      // Enviar los datos a la API de Django
+      const response = await fetch('http://127.0.0.1:8000/api/clientes/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(cliente),
+      });
 
-    // Agregar el nuevo cliente
-    clientesRegistrados.push(cliente);
+      if (!response.ok) {
+        throw new Error('Error al guardar el cliente');
+      }
 
-    // Guardar en localStorage
-    localStorage.setItem('clientes', JSON.stringify(clientesRegistrados));
-
-    // Redirigir a la página de inicio
-    navigate('/home');
+      // Redirigir a la página de inicio
+      navigate('/home');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Hubo un error al guardar el cliente');
+    }
   };
 
   const handleCancelar = () => {
@@ -53,17 +62,7 @@ const RegistrarCliente = () => {
               required
             />
           </div>
-          
         </div>
-
-        {/* Sección de Contacto */}
-       
-          
-            
-            
-         
-            
-       
 
         {/* Botones de acción */}
         <div className="form-actions">

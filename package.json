@@ -5,8 +5,22 @@
     "expo": "^52.0.35",
     "react-native": "^0.77.0"
   },
+
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "start": "vite preview"
+  },
+
+
   "devDependencies": {
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-react": "^7.26.3",
     "@types/react": "~18.3.12",
-    "typescript": "^5.3.3"
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.3.3",
+    "vite": "^6.2.1"
   }
 }

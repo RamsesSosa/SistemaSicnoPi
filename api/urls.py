@@ -9,6 +9,7 @@ router = routers.DefaultRouter()
 
 # Se registra los ViewSets en el router
 
+
 router.register(r'usuarios', views.UsuarioViewSet) 
 router.register(r'clientes', views.ClienteViewSet)
 router.register(r'equipos', views.EquipoViewSet)

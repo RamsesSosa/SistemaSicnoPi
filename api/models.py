@@ -32,7 +32,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         return self.fullName
 
 class Cliente(models.Model):
-    nombre_cliente = models.CharField(max_length=100)
+    nombre_cliente = models.CharField(max_length=255)
     
     def __str__(self):
         return self.nombre_cliente

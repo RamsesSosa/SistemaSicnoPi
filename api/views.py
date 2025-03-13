@@ -2,8 +2,20 @@ from rest_framework import viewsets
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
-from .models import Usuario, Cliente, Equipo, EstadoCalibracion, HistorialEquipo, Alerta, Reporte, EntregaRecoleccion
+
+from .models import (
+    Usuario, 
+    Cliente, 
+    Equipo, 
+    EstadoCalibracion, 
+    HistorialEquipo, 
+    Alerta, 
+    Reporte, 
+    EntregaRecoleccion)
+
 from .serializer import (
     UsuarioSerializer,
     ClienteSerializer,
@@ -38,9 +50,14 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
 
+
+# vista para manejar la creación de clientes
 class ClienteViewSet(viewsets.ModelViewSet):
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
+
+
+
 
 class EquipoViewSet(viewsets.ModelViewSet):
     queryset = Equipo.objects.all()
