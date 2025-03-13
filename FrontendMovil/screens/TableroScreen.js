@@ -12,7 +12,6 @@ const TableroScreen = () => (
     {/* Aquí puedes agregar más gráficos, tablas o elementos interactivos */}
   </View>
 );
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
