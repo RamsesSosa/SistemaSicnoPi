@@ -3,6 +3,7 @@ from rest_framework import routers
 from api import views
 from rest_framework_simplejwt.views import TokenRefreshView
 
+
 # Aqui se crea un router predeterminado
 router = routers.DefaultRouter()
 

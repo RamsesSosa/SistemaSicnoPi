@@ -148,5 +148,6 @@ AUTH_USER_MODEL = 'api.Usuario'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:5173",
+    "http://localhost:5174",
     # Add other origins as needed
 ]
