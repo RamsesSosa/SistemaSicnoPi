@@ -57,7 +57,6 @@ class Reporte(models.Model):
     datos_reporte = models.TextField()
     def __str__(self):
         return f"Reporte: {self.tipo_reporte}"
-
 class EntregaRecoleccion(models.Model):
     equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)  # FK a Equipo
     fecha_hora = models.DateTimeField(auto_now_add=True)
