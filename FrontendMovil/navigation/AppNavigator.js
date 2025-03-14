@@ -12,7 +12,6 @@
   import ReporteScreen from '../screens/ReporteScreen';
   import ActualizarEquipoScreen from '../screens/ActualizarEquipoScreen';
 
-
   const Stack = createStackNavigator();
 
   const AppNavigator = () => {
