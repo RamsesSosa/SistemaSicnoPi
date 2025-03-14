@@ -28,8 +28,6 @@
           <Stack.Screen name="Reporte" component={ReporteScreen} />
           <Stack.Screen name="ActualizarEquipo" component={ActualizarEquipoScreen} />
 
-
-
         </Stack.Navigator>
       </NavigationContainer>
     );
