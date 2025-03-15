@@ -61,4 +61,11 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+# Ignorar archivos __pycache__
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignorar la carpeta venv/
 venv/
