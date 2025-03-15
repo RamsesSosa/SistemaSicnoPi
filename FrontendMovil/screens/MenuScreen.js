@@ -11,7 +11,6 @@ const ContenidoScreen = () => (
     <Text style={styles.title}>Contenido Screen</Text>
   </View>
 );
-
 const ScannerScreen = ({ navigation }) => (
   <View style={styles.container}>
     <Text style={styles.title}>Scanner</Text>
@@ -23,13 +22,11 @@ const ScannerScreen = ({ navigation }) => (
     </TouchableOpacity>
   </View>
 );
-
 const TableroScreen = () => (
   <View style={styles.container}>
     <Text style={styles.title}>Tablero</Text>
   </View>
 );
-
 const QuickAccess = ({ navigation }) => (
   <View style={styles.container}>
     <Text style={styles.title}>Accesos Rápidos</Text>
@@ -53,14 +50,12 @@ const QuickAccess = ({ navigation }) => (
     />
   </View>
 );
-
 const ScannerStack = () => (
   <Stack.Navigator>
     <Stack.Screen name="Scanner" component={ScannerScreen} />
     <Stack.Screen name="Contenido" component={ContenidoScreen} />
   </Stack.Navigator>
 );
-
 const MenuScreen = () => {
   return (
     <Tab.Navigator>
@@ -82,7 +77,6 @@ const MenuScreen = () => {
     </Tab.Navigator>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -117,5 +111,4 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 });
-
 export default MenuScreen;

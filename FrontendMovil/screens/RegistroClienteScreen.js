@@ -21,8 +21,10 @@ const RegistroClienteScreen = () => {
       return;
     }
 
+
     setIsLoading(true);
     const cliente = { nombre_cliente: nombres.trim() };
+
 
     try {
       const response = await axios.post(
@@ -54,7 +56,6 @@ const RegistroClienteScreen = () => {
       setIsLoading(false);
     }
   };
-
   const handleCancelar = () => {
     Alert.alert(
       'Cancelar',
@@ -65,7 +66,6 @@ const RegistroClienteScreen = () => {
       ]
     );
   };
-
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Registro de Cliente</Text>
@@ -78,6 +78,7 @@ const RegistroClienteScreen = () => {
         onChangeText={setNombres}
       />
 
+
       <Button
         title={isLoading ? 'Registrando...' : 'Guardar'}
         onPress={handleSubmit}
@@ -86,11 +87,11 @@ const RegistroClienteScreen = () => {
       />
       {isLoading && <ActivityIndicator size="small" color="#0000ff" />}
       <View style={{ marginVertical: 10 }} />
+
       <Button title="Cancelar" onPress={handleCancelar} color="red" />
     </ScrollView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -117,5 +118,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
+
+
 
 export default RegistroClienteScreen;

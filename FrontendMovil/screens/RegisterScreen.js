@@ -24,11 +24,9 @@
       console.log('Contraseña:', password);
       navigation.navigate('Login'); // Redirige a la pantalla de login después del registro
     };
-
     return (
       <View style={styles.container}>
         <Text style={styles.title}>Registro de usuario</Text>
-
         {/* Campo de nombre completo */}
         <View style={styles.inputContainer}>
           <Icon name="user" size={20} color="#999" style={styles.icon} />
@@ -40,7 +38,6 @@
             onChangeText={setFullName}
           />
         </View>
-
         {/* Campo de correo electrónico */}
         <View style={styles.inputContainer}>
           <Icon name="envelope" size={20} color="#999" style={styles.icon} />
@@ -54,7 +51,6 @@
             autoCapitalize="none"
           />
         </View>
-
         {/* Campo de contraseña */}
         <View style={styles.inputContainer}>
           <Icon name="lock" size={20} color="#999" style={styles.icon} />
@@ -70,7 +66,6 @@
             <Icon name={showPassword ? 'eye' : 'eye-slash'} size={20} color="#999" />
           </TouchableOpacity>
         </View>
-
         {/* Campo de confirmar contraseña */}
         <View style={styles.inputContainer}>
           <Icon name="lock" size={20} color="#999" style={styles.icon} />
@@ -86,12 +81,10 @@
             <Icon name={showPassword ? 'eye' : 'eye-slash'} size={20} color="#999" />
           </TouchableOpacity>
         </View>
-
         {/* Botón de registro personalizado */}
         <TouchableOpacity style={styles.customButton} onPress={handleRegister}>
           <Text style={styles.customButtonText}>Crear</Text>
         </TouchableOpacity>
-
         {/* Enlace para iniciar sesión */}
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
           <Text style={styles.link}>¿Ya tienes una cuenta? Inicia sesión</Text>
@@ -99,7 +92,6 @@
       </View>
     );
   };
-
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -149,6 +141,4 @@
       textAlign: 'center',
     },
   });
-
   export default RegisterScreen;
-

@@ -9,7 +9,6 @@ const ConsultaEquipoScreen = () => {
       </View>
     );
   };
-  
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -23,5 +22,4 @@ const ConsultaEquipoScreen = () => {
       marginBottom: 20,
     },
   });
-
 export default ConsultaEquipoScreen;

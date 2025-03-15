@@ -9,7 +9,6 @@ const ReporteScreen = () => {
      </View>
    );
  };
- 
  const styles = StyleSheet.create({
    container: {
      flex: 1,
@@ -23,5 +22,4 @@ const ReporteScreen = () => {
      marginBottom: 20,
    },
  });
-
 export default ReporteScreen;
