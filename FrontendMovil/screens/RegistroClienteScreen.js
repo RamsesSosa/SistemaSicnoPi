@@ -1,32 +1,57 @@
 import React, { useState } from 'react';
 import { 
   View, Text, TextInput, Button, Alert, ScrollView, 
-  StyleSheet 
+  StyleSheet, ActivityIndicator 
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 
 const RegistroClienteScreen = () => {
   const navigation = useNavigation();
   const [nombres, setNombres] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async () => {
     if (!nombres.trim()) {
-      Alert.alert('Error', 'Por favor, ingrese un nombre válido');
+      Alert.alert('Error', 'El nombre no puede estar vacío');
+      return;
+    }
+    if (nombres.length < 3) {
+      Alert.alert('Error', 'El nombre debe tener al menos 3 caracteres');
       return;
     }
 
-    const cliente = { nombres };
+    setIsLoading(true);
+    const cliente = { nombre_cliente: nombres.trim() };
 
     try {
-      const clientesRegistrados = await AsyncStorage.getItem('clientes');
-      const clientes = clientesRegistrados ? JSON.parse(clientesRegistrados) : [];
-      clientes.push(cliente);
-      await AsyncStorage.setItem('clientes', JSON.stringify(clientes));
-      Alert.alert('Éxito', 'Cliente registrado correctamente');
-      navigation.navigate('Home');
+      const response = await axios.post(
+        'http://192.168.1.175:8000/api/clientes/', 
+        cliente,
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+
+      console.log('Respuesta del servidor:', response);
+
+      if (response.status === 201) {
+        Alert.alert('Éxito', 'Cliente registrado correctamente');
+        setNombres('');
+        navigation.navigate('Home');
+      } else {
+        Alert.alert('Error', 'No se pudo registrar el cliente');
+      }
     } catch (error) {
-      Alert.alert('Error', 'No se pudo registrar el cliente');
+      console.error('Error completo:', error);
+      if (error.response) {
+        console.error('Respuesta del servidor:', error.response.data);
+        Alert.alert('Error', error.response.data?.error || 'Error al registrar el cliente');
+      } else if (error.request) {
+        Alert.alert('Error', 'No se recibió respuesta del servidor');
+      } else {
+        Alert.alert('Error', 'Error al realizar la solicitud');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -36,7 +61,7 @@ const RegistroClienteScreen = () => {
       '¿Estás seguro de que deseas salir? Los cambios no guardados se perderán.',
       [
         { text: 'No', style: 'cancel' },
-        { text: 'Sí', onPress: () => navigation.navigate('Home') }
+        { text: 'Sí', onPress: () => navigation.goBack() }
       ]
     );
   };
@@ -53,7 +78,14 @@ const RegistroClienteScreen = () => {
         onChangeText={setNombres}
       />
 
-      <Button title="Guardar" onPress={handleSubmit} />
+      <Button
+        title={isLoading ? 'Registrando...' : 'Guardar'}
+        onPress={handleSubmit}
+        disabled={isLoading}
+        color="#4CAF50"
+      />
+      {isLoading && <ActivityIndicator size="small" color="#0000ff" />}
+      <View style={{ marginVertical: 10 }} />
       <Button title="Cancelar" onPress={handleCancelar} color="red" />
     </ScrollView>
   );
