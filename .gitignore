@@ -1,5 +1,15 @@
 # OSX
 .DS_Store
+
+
+
+# Ignorar archivos de Expo
+.expo/
+
+# Ignorar archivos de Gradle
+FrontendMovil/android/.gradle/
+
+
 # Xcode
 build/
 *.pbxuser
@@ -61,6 +71,7 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
 # Ignorar archivos __pycache__
 __pycache__/
 *.pyc
@@ -68,4 +79,6 @@ __pycache__/
 *.pyd
 
 # Ignorar la carpeta venv/
+
+
 venv/

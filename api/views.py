@@ -1,3 +1,4 @@
+from rest_framework import status
 from rest_framework import viewsets
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -51,10 +52,31 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     serializer_class = UsuarioSerializer
 
 
+
 # vista para manejar la creación de clientes
 class ClienteViewSet(viewsets.ModelViewSet):
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
+
+
+    def create(self, request, *args, **kwargs):
+        print("Datos recibidos:", request.data)
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                serializer.save()
+                print("Cliente creado:", serializer.data)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                print("Error después de guardar:", str(e))
+                return Response({'status': 'error', 'message': 'Error interno del servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            print("Error al crear cliente:", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
 
 
 

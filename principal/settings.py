@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-cjkp3*_g1)z-b(bz8jg(=1@3ylkcyp_4j==j9115rw6b#$u$ju'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -38,8 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+<<<<<<< HEAD
     'rest_framework',
     'coreapi',  
+=======
+    'rest_framework',  
+>>>>>>> 3dd0c1235b06a864ae24886e66ecb7007e197783
     'api'
 ]
 
@@ -53,6 +57,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "DELETE"]
 
 ROOT_URLCONF = 'principal.urls'
 
@@ -141,6 +149,13 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
+<<<<<<< HEAD
+=======
+
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ]
+>>>>>>> 3dd0c1235b06a864ae24886e66ecb7007e197783
 }
 
 AUTH_USER_MODEL = 'api.Usuario'

@@ -6,10 +6,12 @@ class UsuarioSerializer(serializers.ModelSerializer):
         model = Usuario
         fields = ['id', 'fullName', 'correo', 'is_active', 'is_staff']
 
+
 class ClienteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cliente
         fields = '__all__'
+
 
 class EquipoSerializer(serializers.ModelSerializer):
     class Meta:
