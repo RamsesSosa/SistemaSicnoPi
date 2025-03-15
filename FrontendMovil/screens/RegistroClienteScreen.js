@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { 
   View, Text, TextInput, Button, Alert, ScrollView, 
+
   StyleSheet, ActivityIndicator 
 } from 'react-native';
 import axios from 'axios';
@@ -9,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 const RegistroClienteScreen = () => {
   const navigation = useNavigation();
   const [nombres, setNombres] = useState('');
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -62,6 +64,7 @@ const RegistroClienteScreen = () => {
       '¿Estás seguro de que deseas salir? Los cambios no guardados se perderán.',
       [
         { text: 'No', style: 'cancel' },
+
         { text: 'Sí', onPress: () => navigation.goBack() }
       ]
     );
@@ -77,6 +80,7 @@ const RegistroClienteScreen = () => {
         value={nombres}
         onChangeText={setNombres}
       />
+
 
 
       <Button
@@ -118,6 +122,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
+
 
 
 

@@ -38,7 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+<<<<<<< HEAD
+    'rest_framework',
+    'coreapi',  
+=======
     'rest_framework',  
+>>>>>>> 3dd0c1235b06a864ae24886e66ecb7007e197783
     'api'
 ]
 
@@ -144,10 +149,13 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
+<<<<<<< HEAD
+=======
 
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ]
+>>>>>>> 3dd0c1235b06a864ae24886e66ecb7007e197783
 }
 
 AUTH_USER_MODEL = 'api.Usuario'

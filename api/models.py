@@ -36,6 +36,7 @@ class Cliente(models.Model):
     
     def __str__(self):
         return self.nombre_cliente
+
     
 
     
@@ -68,6 +69,10 @@ class HistorialEquipo(models.Model):
 
     def __str__(self):
         return f"Historial de {self.equipo.nombre_equipo}"
+<<<<<<< HEAD
+
+=======
+>>>>>>> 3dd0c1235b06a864ae24886e66ecb7007e197783
 class Alerta(models.Model):
     TIPOS_ALERTA = (
         ('retraso', 'Retraso en calibración'),
@@ -80,6 +85,10 @@ class Alerta(models.Model):
 
     def __str__(self):
         return f"Alerta: {self.tipo_alerta}"
+<<<<<<< HEAD
+
+=======
+>>>>>>> 3dd0c1235b06a864ae24886e66ecb7007e197783
 class Reporte(models.Model):
     TIPOS_REPORTE = (
         ('tiempo', 'Tiempo promedio de calibración'),
@@ -91,6 +100,10 @@ class Reporte(models.Model):
 
     def __str__(self):
         return f"Reporte: {self.tipo_reporte}"
+<<<<<<< HEAD
+
+=======
+>>>>>>> 3dd0c1235b06a864ae24886e66ecb7007e197783
 class EntregaRecoleccion(models.Model):
     equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)  # FK a Equipo
     fecha_hora = models.DateTimeField(auto_now_add=True)

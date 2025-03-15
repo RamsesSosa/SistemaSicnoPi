@@ -53,13 +53,11 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 
 
 
-
-
-
 # vista para manejar la creación de clientes
 class ClienteViewSet(viewsets.ModelViewSet):
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
+
 
     def create(self, request, *args, **kwargs):
         print("Datos recibidos:", request.data)
