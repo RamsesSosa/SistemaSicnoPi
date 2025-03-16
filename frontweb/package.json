@@ -3,7 +3,6 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -11,7 +10,6 @@
     "preview": "vite preview",
     "start": "vite preview"
   },
-  
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
     "admin-lte": "^4.0.0-beta3",
