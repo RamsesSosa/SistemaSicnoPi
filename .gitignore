@@ -1,15 +1,10 @@
 # OSX
 .DS_Store
-
-
-
 # Ignorar archivos de Expo
 .expo/
 
 # Ignorar archivos de Gradle
 FrontendMovil/android/.gradle/
-
-
 # Xcode
 build/
 *.pbxuser
@@ -79,6 +74,5 @@ __pycache__/
 *.pyd
 
 # Ignorar la carpeta venv/
-
 
 venv/
