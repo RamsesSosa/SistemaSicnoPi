@@ -99,7 +99,7 @@ const Home = () => {
 
           {/* Historial de Calibraciones */}
           <li>
-            <Link to="/calibraciones">
+            <Link to="/historial-calibraciones">
               <i className="fas fa-history"></i> Historial de Calibraciones
             </Link>
           </li>
