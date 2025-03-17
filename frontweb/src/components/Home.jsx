@@ -18,7 +18,7 @@ const Home = () => {
     <div className="home-container">
       {/* Sidebar */}
       <aside className="sidebar">
-        <h2>AdminLTE Panel</h2>
+        <h2>Inicio</h2>
         <ul>
           {/* Accesos Rápidos */}
           <li>
@@ -67,12 +67,6 @@ const Home = () => {
                 <li>
                   <Link to="/equipos-calibracion">
                     <i className="fas fa-wrench"></i> Equipos en calibración
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/equipos-pendientes">
-                    <i className="fas fa-clock"></i> Equipos pendientes de
-                    entrega
                   </Link>
                 </li>
                 <li>
