@@ -18,7 +18,7 @@ const Home = () => {
     <div className="home-container">
       {/* Sidebar */}
       <aside className="sidebar">
-        <h2>AdminLTE Panel</h2>
+        <h2>Inicio</h2>
         <ul>
           {/* Accesos Rápidos */}
           <li>
@@ -70,12 +70,6 @@ const Home = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/equipos-pendientes">
-                    <i className="fas fa-clock"></i> Equipos pendientes de
-                    entrega
-                  </Link>
-                </li>
-                <li>
                   <Link to="/resumen-mensual">
                     <i className="fas fa-chart-bar"></i> Resumen mensual
                   </Link>
@@ -105,7 +99,7 @@ const Home = () => {
 
           {/* Historial de Calibraciones */}
           <li>
-            <Link to="/calibraciones">
+            <Link to="/historial-calibraciones">
               <i className="fas fa-history"></i> Historial de Calibraciones
             </Link>
           </li>

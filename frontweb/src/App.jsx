@@ -15,7 +15,6 @@ import ConsultarEquipos from "./components/ConsultarEquipos";
 import ConsultarClientes from "./components/ConsultarClientes";
 import HistorialCalibraciones from "./components/HistorialCalibraciones";
 import EquiposCalibracion from "./components/EquiposCalibracion";
-import EquiposPendientes from "./components/EquiposPendientes";
 import ResumenMensual from "./components/ResumenMensual";
 import BusquedaEquipo from "./components/BusquedaEquipo";
 import UltimosRegistros from "./components/UltimosRegistros";
@@ -48,10 +47,7 @@ const App = () => {
         />
         <Route path="/equipos-calibracion" element={<EquiposCalibracion />} />{" "}
         {/* Nueva ruta */}
-        <Route
-          path="/equipos-pendientes"
-          element={<EquiposPendientes />}
-        />{" "}
+        
         {/* Nueva ruta */}
         <Route path="/resumen-mensual" element={<ResumenMensual />} />{" "}
         {/* Nueva ruta */}

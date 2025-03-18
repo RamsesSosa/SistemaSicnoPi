@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const RegistrarEquipo = () => {
@@ -11,14 +11,16 @@ const RegistrarEquipo = () => {
   const [consecutivo, setConsecutivo] = useState('');
   const [accesorios, setAccesorios] = useState('');
   const [observaciones, setObservaciones] = useState('');
+  const [clientesRegistrados, setClientesRegistrados] = useState([]);
 
-  // Obtener clientes registrados de localStorage
-  const clientesRegistrados = JSON.parse(localStorage.getItem('clientes')) || [];
+  useEffect(() => {
+    const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+    setClientesRegistrados(clientes);
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Crear el objeto del equipo
     const equipo = {
       cliente: clienteSeleccionado,
       nombreEquipo,
@@ -30,12 +32,10 @@ const RegistrarEquipo = () => {
       observaciones,
     };
 
-    // Guardar el equipo en localStorage (opcional)
     const equiposRegistrados = JSON.parse(localStorage.getItem('equipos')) || [];
     equiposRegistrados.push(equipo);
     localStorage.setItem('equipos', JSON.stringify(equiposRegistrados));
 
-    // Redirigir a la página de inicio
     navigate('/home');
   };
 
@@ -50,7 +50,6 @@ const RegistrarEquipo = () => {
     <div className="registrar-equipo-container">
       <h1>Registro de Equipo</h1>
       <form className="registrar-equipo-form" onSubmit={handleSubmit}>
-        {/* Campo para seleccionar cliente */}
         <div className="form-section">
           <h2>Cliente</h2>
           <div className="form-group">
@@ -63,15 +62,14 @@ const RegistrarEquipo = () => {
             >
               <option value="">Seleccione un cliente</option>
               {clientesRegistrados.map((cliente, index) => (
-                <option key={index} value={cliente.nombres}>
-                  {cliente.nombres}
+                <option key={index} value={cliente.nombre_cliente}>
+                  {cliente.nombre_cliente}
                 </option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* Sección de Información del Equipo */}
         <div className="form-section">
           <h2>Información del Equipo</h2>
           <div className="form-group">
@@ -120,7 +118,6 @@ const RegistrarEquipo = () => {
           </div>
         </div>
 
-        {/* Sección de Fecha de Entrada */}
         <div className="form-section">
           <h2>Fecha de Entrada</h2>
           <div className="form-group">
@@ -157,14 +154,9 @@ const RegistrarEquipo = () => {
           </div>
         </div>
 
-        {/* Botones de acción */}
         <div className="form-actions">
-          <button type="submit" className="btn-guardar">
-            Guardar e imprimir
-          </button>
-          <button type="button" className="btn-cancelar" onClick={handleCancelar}>
-            Cancelar
-          </button>
+          <button type="submit" className="btn-guardar">Guardar e imprimir</button>
+          <button type="button" className="btn-cancelar" onClick={handleCancelar}>Cancelar</button>
         </div>
       </form>
     </div>
