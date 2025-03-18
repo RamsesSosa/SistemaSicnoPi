@@ -50,13 +50,12 @@ const RegistrarCliente = () => {
       <form className="registrar-cliente-form" onSubmit={handleSubmit}>
         {/* Sección de Información Personal */}
         <div className="form-section">
-          <h2>Información Personal</h2>
           <div className="form-group">
-            <label htmlFor="nombres">Nombres</label>
+            <label htmlFor="nombres">Nombre de la empresa</label>
             <input
               type="text"
               id="nombres"
-              placeholder="Ingrese los nombres"
+              placeholder="Grupo Bimbo"
               value={nombres}
               onChange={(e) => setNombres(e.target.value)}
               required
