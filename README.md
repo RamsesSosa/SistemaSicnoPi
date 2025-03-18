@@ -10,3 +10,8 @@ Por ejemplo:
 ```feature/formulario-de-registro```
 
 ```feature/conexion-base-de-datos```
+
+<h1>Versiones de tecnologías que estamos usando</h1>
+<h3>Django: 5.1.5</h3>
+<h3>npm: 9.9.4</h3>
+<h3>node: 18.20.6</h3>

@@ -65,7 +65,6 @@ class HistorialEquipo(models.Model):
 
     def __str__(self):
         return f"Historial de {self.equipo.nombre_equipo}"
-
 class Alerta(models.Model):
     TIPOS_ALERTA = (
         ('retraso', 'Retraso en calibración'),
