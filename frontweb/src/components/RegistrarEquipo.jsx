@@ -117,7 +117,6 @@ const RegistrarEquipo = () => {
             />
           </div>
         </div>
-
         <div className="form-section">
           <h2>Fecha de Entrada</h2>
           <div className="form-group">
