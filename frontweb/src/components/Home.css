@@ -216,3 +216,12 @@
   .btn-info:hover {
     background-color: #555; /* Gris más claro */
   }
+
+  /* Contenido principal */
+.main-content {
+  flex: 1;
+  padding: 20px;
+  background-color: #fff; /* Fondo blanco */
+  overflow-y: auto; /* Permite el desplazamiento vertical */
+  max-height: calc(100vh - 40px); /* Ajusta la altura máxima para que no exceda la ventana */
+}
