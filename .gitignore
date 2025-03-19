@@ -72,6 +72,8 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+api/__pycache__/
+principal/__pycache__/
 # Ignorar la carpeta venv/
 
 venv/
