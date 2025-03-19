@@ -1,25 +1,66 @@
+/* Estilos globales para eliminar márgenes y paddings */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* Evita el desplazamiento innecesario */
+}
 
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
+/* Asegura que el wrapper ocupe toda la pantalla */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
 
+/* Ajusta el contenido principal para que ocupe el espacio restante */
+.content-wrapper {
+  flex: 1;
+  overflow-y: auto; /* Permite el desplazamiento vertical si es necesario */
+}
+
+/* Ajusta el sidebar para que ocupe toda la altura */
+.main-sidebar {
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+/* Ajusta el navbar para que no cree espacios innecesarios */
+.main-header {
+  position: fixed;
+  width: 100%;
+  z-index: 1000;
+}
+
+/* Ajusta el contenido para que no se solape con el navbar */
+.content {
+  padding-top: 57px; /* Altura del navbar */
+}
+/* Login y register */
+/* Estilos para centrar los formularios */
+.login-page, .register-page {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  margin: 0;
-
+  min-height: 100vh; /* Ocupa toda la altura de la pantalla */
+  background-color: #f8f9fa; /* Fondo claro */
 }
 
-.login-container,
-.register-container {
-  background: white;
+.login-container, .register-container {
+  max-width: 400px;
+  width: 100%;
   padding: 20px;
+  border: 1px solid #ccc;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-
-  width: 300px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
+}
+
+.login-container h1, .register-container h1 {
+  margin-bottom: 20px;
 }
 
 .input-group {
@@ -27,22 +68,26 @@ body {
   position: relative;
 }
 
-
-.input-group input,
-.input-group select {
+.input-group input, .input-group select {
   width: 100%;
   padding: 10px;
+  padding-left: 40px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
 
 .input-group .icon {
   position: absolute;
-
-  right: 10px;
+  left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  cursor: pointer;
+  color: #666;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 5px;
 }
 
 button {
@@ -56,12 +101,11 @@ button {
 }
 
 button:hover {
-
-  background-color: #ffa600b3;
+  background-color: #ffa600;
 }
 
 a {
-  color: #000000;
+  color: #ffa600;
   text-decoration: none;
 }
 
@@ -69,26 +113,197 @@ a:hover {
   text-decoration: underline;
 }
 
-.error {
-  color: red;
-  font-size: 0.875rem;
-  margin-top: 5px;
-}
 
-.home-container {
-  text-align: center;
+/* Pagina de RegistrarCliente */
+
+/* Estilos para el contenedor principal */
+.registrar-equipo-container {
+  max-width: 800px;
+  margin: 20px auto; /* Añade margen superior e inferior */
   padding: 20px;
-  background-color: #f9f9f9;
+  background-color: #fff;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
-  margin: 50px auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow-y: auto; /* Habilita el scroll vertical */
+  max-height: 90vh; /* Limita la altura máxima al 90% de la altura de la ventana */
 }
 
-.home-container h1 {
+.registrar-equipo-container h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.registrar-equipo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-section {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-section h2 {
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
   color: #333;
 }
 
-.home-container p {
-  color: #666;
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-guardar {
+  background-color: #28a745;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.btn-guardar:hover {
+  background-color: #218838;
+}
+
+.btn-cancelar {
+  background-color: #dc3545;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.btn-cancelar:hover {
+  background-color: #c82333;
+}
+
+
+/* Pagina de RegistraCliente */
+/* Estilos para el formulario de registro de cliente */
+.registrar-cliente-container {
+  max-width: 800px;
+  margin: 20px auto; /* Añade margen superior e inferior */
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow-y: auto; /* Habilita el scroll vertical */
+  max-height: 90vh; /* Limita la altura máxima al 90% de la altura de la ventana */
+}
+
+.registrar-cliente-container h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.registrar-cliente-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-section {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-section h2 {
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-guardar {
+  background-color: #28a745;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.btn-guardar:hover {
+  background-color: #218838;
+}
+
+.btn-cancelar {
+  background-color: #dc3545;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.btn-cancelar:hover {
+  background-color: #c82333;
 }
