@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Home.css"; // Importar estilos específicos para Home
-
 const Home = () => {
   const [accesosRapidosAbierto, setAccesosRapidosAbierto] = useState(false);
   const [equiposAbierto, setEquiposAbierto] = useState(false);
