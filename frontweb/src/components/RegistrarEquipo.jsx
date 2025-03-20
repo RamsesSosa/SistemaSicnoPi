@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 
 const RegistrarEquipo = () => {
   const navigate = useNavigate();
-  const [clienteSeleccionado, setClienteSeleccionado] = useState('');
   const [nombreEquipo, setNombreEquipo] = useState('');
   const [marca, setMarca] = useState('');
   const [modelo, setModelo] = useState('');
@@ -12,31 +11,58 @@ const RegistrarEquipo = () => {
   const [accesorios, setAccesorios] = useState('');
   const [observaciones, setObservaciones] = useState('');
   const [clientesRegistrados, setClientesRegistrados] = useState([]);
+  const [clienteSeleccionado, setClienteSeleccionado] = useState('');
 
+  // Obtener la lista de clientes desde la API al cargar el componente
   useEffect(() => {
-    const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-    setClientesRegistrados(clientes);
+    const fetchClientes = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/clientes/');
+        if (!response.ok) throw new Error('Error al obtener los clientes');
+        const data = await response.json();
+        setClientesRegistrados(data);
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Hubo un error al cargar los clientes');
+      }
+    };
+
+    fetchClientes();
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const equipo = {
-      cliente: clienteSeleccionado,
-      nombreEquipo,
-      marca,
-      modelo,
-      numeroSerie,
-      consecutivo,
-      accesorios,
-      observaciones,
+      nombre_equipo: nombreEquipo,
+      numero_serie: numeroSerie,
+      marca: marca,
+      modelo: modelo,
+      consecutivo: consecutivo,
+      accesorios: accesorios,
+      observaciones: observaciones,
+      cliente: clienteSeleccionado, // Asegúrate de que esto sea el ID del cliente
     };
 
-    const equiposRegistrados = JSON.parse(localStorage.getItem('equipos')) || [];
-    equiposRegistrados.push(equipo);
-    localStorage.setItem('equipos', JSON.stringify(equiposRegistrados));
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/equipos/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(equipo),
+      });
 
-    navigate('/home');
+      if (!response.ok) {
+        const errorData = await response.json(); // Lee el mensaje de error del servidor
+        console.error('Error del servidor:', errorData);
+        throw new Error('Error al guardar el equipo');
+      }
+
+      alert('Equipo registrado exitosamente');
+      navigate('/home');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Hubo un error al guardar el equipo');
+    }
   };
 
   const handleCancelar = () => {
@@ -61,8 +87,8 @@ const RegistrarEquipo = () => {
               required
             >
               <option value="">Seleccione un cliente</option>
-              {clientesRegistrados.map((cliente, index) => (
-                <option key={index} value={cliente.nombre_cliente}>
+              {clientesRegistrados.map((cliente) => (
+                <option key={cliente.id} value={cliente.id}>
                   {cliente.nombre_cliente}
                 </option>
               ))}

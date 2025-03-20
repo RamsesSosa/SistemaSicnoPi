@@ -31,26 +31,33 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.fullName
 
+
+
 class Cliente(models.Model):
     nombre_cliente = models.CharField(max_length=255)
     
     def __str__(self):
         return self.nombre_cliente
 
+
+
 class Equipo(models.Model):
-    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     nombre_equipo = models.CharField(max_length=50)
     numero_serie = models.CharField(max_length=50, unique=True)
     marca = models.CharField(max_length=50)
     modelo = models.CharField(max_length=50)
     consecutivo = models.CharField(max_length=20, unique=True)
-    fecha_entrada = models.DateTimeField(auto_now_add=True)
-    accesorios = models.TextField(blank=True, null=True)
-    observaciones = models.TextField(blank=True, null=True)
-    
+    accesorios = models.TextField(null=True, blank=True)
+    observaciones = models.TextField(null=True, blank=True)
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    fecha_entrada = models.DateTimeField(auto_now_add=True)  # Fecha automática
+
     def __str__(self):
         return self.nombre_equipo
     
+
+
+
 class EstadoCalibracion(models.Model):
     nombre_estado = models.CharField(max_length=50)
 

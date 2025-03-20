@@ -11,10 +11,14 @@ class ClienteSerializer(serializers.ModelSerializer):
         model = Cliente
         fields = '__all__'
 
+
+
 class EquipoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Equipo
         fields = '__all__'
+
+        
 
 class EstadoCalibracionSerializer(serializers.ModelSerializer):
     class Meta:
