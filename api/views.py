@@ -6,7 +6,6 @@ from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-
 from .models import (
     Usuario, 
     Cliente, 
@@ -51,8 +50,6 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
 
-
-
 # vista para manejar la creación de clientes
 class ClienteViewSet(viewsets.ModelViewSet):
     queryset = Cliente.objects.all()
@@ -73,12 +70,6 @@ class ClienteViewSet(viewsets.ModelViewSet):
         else:
             print("Error al crear cliente:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
-
 
 
 class EquipoViewSet(viewsets.ModelViewSet):
