@@ -38,7 +38,7 @@ class Cliente(models.Model):
         return self.nombre_cliente
 
 class Equipo(models.Model):
-    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE) 
     nombre_equipo = models.CharField(max_length=50)
     numero_serie = models.CharField(max_length=50, unique=True)
     marca = models.CharField(max_length=50)
@@ -47,7 +47,7 @@ class Equipo(models.Model):
     fecha_entrada = models.DateTimeField(auto_now_add=True)
     accesorios = models.TextField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
-    
+
     def __str__(self):
         return self.nombre_equipo
     
