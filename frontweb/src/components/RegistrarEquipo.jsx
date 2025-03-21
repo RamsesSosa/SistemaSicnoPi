@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2'; // Importar SweetAlert2
 
 const RegistrarEquipo = () => {
   const navigate = useNavigate();
@@ -12,6 +13,8 @@ const RegistrarEquipo = () => {
   const [observaciones, setObservaciones] = useState('');
   const [clientesRegistrados, setClientesRegistrados] = useState([]);
   const [clienteSeleccionado, setClienteSeleccionado] = useState('');
+  const [fechaEntrada, setFechaEntrada] = useState('');
+  const [fechaSalida, setFechaSalida] = useState('');
 
   // Obtener la lista de clientes desde la API al cargar el componente
   useEffect(() => {
@@ -23,11 +26,22 @@ const RegistrarEquipo = () => {
         setClientesRegistrados(data);
       } catch (error) {
         console.error('Error:', error);
-        alert('Hubo un error al cargar los clientes');
+        Swal.fire({
+          title: "Error",
+          text: "Hubo un error al cargar los clientes",
+          icon: "error",
+          confirmButtonText: "Aceptar",
+        });
       }
     };
 
     fetchClientes();
+  }, []);
+
+  // Establecer la fecha de entrada al cargar el componente
+  useEffect(() => {
+    const fechaActual = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+    setFechaEntrada(fechaActual);
   }, []);
 
   const handleSubmit = async (e) => {
@@ -41,7 +55,8 @@ const RegistrarEquipo = () => {
       consecutivo: consecutivo,
       accesorios: accesorios,
       observaciones: observaciones,
-      cliente: clienteSeleccionado, // Asegúrate de que esto sea el ID del cliente
+      cliente: clienteSeleccionado,
+      fecha_entrada: fechaEntrada,
     };
 
     try {
@@ -52,16 +67,31 @@ const RegistrarEquipo = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json(); // Lee el mensaje de error del servidor
+        const errorData = await response.json();
         console.error('Error del servidor:', errorData);
         throw new Error('Error al guardar el equipo');
       }
 
-      alert('Equipo registrado exitosamente');
+      // Mostrar mensaje de éxito con SweetAlert2
+      Swal.fire({
+        title: "¡Éxito!",
+        text: "Se ha guardado exitosamente el equipo",
+        icon: "success",
+        confirmButtonText: "Aceptar",
+        customClass: {
+          popup: "sweet-alert-popup", // Clase personalizada para el diseño
+        },
+      });
+
       navigate('/home');
     } catch (error) {
       console.error('Error:', error);
-      alert('Hubo un error al guardar el equipo');
+      Swal.fire({
+        title: "Error",
+        text: "Hubo un error al guardar el equipo",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
     }
   };
 
@@ -76,6 +106,7 @@ const RegistrarEquipo = () => {
     <div className="registrar-equipo-container">
       <h1>Registro de Equipo</h1>
       <form className="registrar-equipo-form" onSubmit={handleSubmit}>
+        {/* Sección de cliente */}
         <div className="form-section">
           <h2>Cliente</h2>
           <div className="form-group">
@@ -96,6 +127,7 @@ const RegistrarEquipo = () => {
           </div>
         </div>
 
+        {/* Sección de información del equipo */}
         <div className="form-section">
           <h2>Información del Equipo</h2>
           <div className="form-group">
@@ -143,8 +175,38 @@ const RegistrarEquipo = () => {
             />
           </div>
         </div>
+
+        {/* Nueva sección para la fecha de entrada */}
         <div className="form-section">
           <h2>Fecha de Entrada</h2>
+          <div className="form-group">
+            <label htmlFor="fecha-entrada">Fecha de Entrada</label>
+            <input
+              type="text"
+              id="fecha-entrada"
+              value={fechaEntrada}
+              readOnly // Campo de solo lectura
+            />
+          </div>
+        </div>
+
+        {/* Sección de fecha de salida */}
+        <div className="form-section">
+          <h2>Fecha de Salida</h2>
+          <div className="form-group">
+            <label htmlFor="fecha-salida">Fecha de Salida</label>
+            <input
+              type="date"
+              id="fecha-salida"
+              value={fechaSalida}
+              onChange={(e) => setFechaSalida(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Sección de otros datos */}
+        <div className="form-section">
+          <h2>Otros Datos</h2>
           <div className="form-group">
             <label htmlFor="consecutivo">Consecutivo</label>
             <input
@@ -179,6 +241,7 @@ const RegistrarEquipo = () => {
           </div>
         </div>
 
+        {/* Botones de acción */}
         <div className="form-actions">
           <button type="submit" className="btn-guardar">Guardar e imprimir</button>
           <button type="button" className="btn-cancelar" onClick={handleCancelar}>Cancelar</button>
