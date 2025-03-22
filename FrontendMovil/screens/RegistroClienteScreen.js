@@ -30,7 +30,7 @@ const RegistroClienteScreen = () => {
 
     try {
       const response = await axios.post(
-        'http://192.168.1.175:8000/api/clientes/', 
+        'http://192.168.1.159:8000/api/clientes/', //cambiar la ip de tu router
         cliente,
         { headers: { 'Content-Type': 'application/json' } }
       );
