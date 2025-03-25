@@ -31,12 +31,7 @@ const Home = () => {
             </a>
             {accesosRapidosAbierto && (
               <ul>
-                <li>
-                  <Link to="/consultar-equipos">
-                    <i className="fas fa-tools"></i> Consultar equipos
-                    registrados
-                  </Link>
-                </li>
+              
                 <li>
                   <Link to="/consultar-clientes">
                     <i className="fas fa-users"></i> Consultar clientes
