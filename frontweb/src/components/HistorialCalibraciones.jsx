@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "./HistorialCalibraciones.css"; // Importar el archivo CSS
+import "./HistorialCalibraciones.css";
 
 const HistorialCalibraciones = () => {
   const [equiposRegistrados, setEquiposRegistrados] = useState([]);
@@ -7,8 +7,9 @@ const HistorialCalibraciones = () => {
   const [clienteSeleccionado, setClienteSeleccionado] = useState("");
   const [equiposFiltrados, setEquiposFiltrados] = useState([]);
   const [busquedaConsecutivo, setBusquedaConsecutivo] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Obtener los equipos y clientes desde la API
   useEffect(() => {
     const fetchEquipos = async () => {
       try {
@@ -16,11 +17,12 @@ const HistorialCalibraciones = () => {
         if (!response.ok) throw new Error("Error al obtener los equipos");
         const data = await response.json();
         setEquiposRegistrados(data);
-        setEquiposFiltrados(data); // Mostrar todos los equipos inicialmente
-        console.log("Equipos registrados:", data); // Verificar los datos obtenidos
+        setEquiposFiltrados(data);
+        setLoading(false);
       } catch (error) {
         console.error("Error:", error);
-        alert("Hubo un error al cargar los equipos");
+        setError("Hubo un error al cargar los equipos");
+        setLoading(false);
       }
     };
 
@@ -30,10 +32,8 @@ const HistorialCalibraciones = () => {
         if (!response.ok) throw new Error("Error al obtener los clientes");
         const data = await response.json();
         setClientes(data);
-        console.log("Clientes registrados:", data); // Verificar los datos obtenidos
       } catch (error) {
         console.error("Error:", error);
-        alert("Hubo un error al cargar los clientes");
       }
     };
 
@@ -41,18 +41,15 @@ const HistorialCalibraciones = () => {
     fetchClientes();
   }, []);
 
-  // Función para filtrar los equipos por cliente y consecutivo
   useEffect(() => {
     let filtrados = equiposRegistrados;
 
-    // Filtrar por cliente
     if (clienteSeleccionado) {
       filtrados = filtrados.filter(
-        (equipo) => equipo.cliente === Number(clienteSeleccionado) // Convertir a número
+        (equipo) => equipo.cliente === Number(clienteSeleccionado)
       );
     }
 
-    // Filtrar por consecutivo
     if (busquedaConsecutivo) {
       filtrados = filtrados.filter((equipo) =>
         equipo.consecutivo.toLowerCase().includes(busquedaConsecutivo.toLowerCase())
@@ -60,83 +57,103 @@ const HistorialCalibraciones = () => {
     }
 
     setEquiposFiltrados(filtrados);
-    console.log("Equipos filtrados:", filtrados); // Verificar los equipos filtrados
   }, [clienteSeleccionado, busquedaConsecutivo, equiposRegistrados]);
 
-  // Manejar el cambio en la selección del cliente
   const handleClienteChange = (e) => {
-    const clienteId = e.target.value;
-    setClienteSeleccionado(clienteId);
-    console.log("Cliente seleccionado:", clienteId); // Verificar el cliente seleccionado
+    setClienteSeleccionado(e.target.value);
   };
 
-  // Manejar el cambio en el campo de búsqueda de consecutivo
   const handleBusquedaConsecutivoChange = (e) => {
-    const consecutivo = e.target.value;
-    setBusquedaConsecutivo(consecutivo);
-    console.log("Búsqueda por consecutivo:", consecutivo); // Verificar el consecutivo buscado
+    setBusquedaConsecutivo(e.target.value);
   };
+
+  if (loading) {
+    return (
+      <div className="loading-overlay">
+        <div className="loading-spinner"></div>
+        <p>Cargando equipos...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-overlay">
+        <div className="error-content">
+          <div className="error-icon">!</div>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="historial-calibraciones-container">
-      <h1>Historial de Calibraciones</h1>
+    <div className="historial-container">
+      <div className="historial-header">
+        <h1>Historial de Calibraciones</h1>
+        
+        <div className="filters-container">
+          <div className="filter-group">
+            <label htmlFor="cliente">Filtrar por cliente:</label>
+            <select
+              id="cliente"
+              value={clienteSeleccionado}
+              onChange={handleClienteChange}
+            >
+              <option value="">Todos los clientes</option>
+              {clientes.map((cliente) => (
+                <option key={cliente.id} value={cliente.id}>
+                  {cliente.nombre_cliente}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      {/* Filtro de cliente */}
-      <div className="filtro-cliente">
-        <label htmlFor="cliente">Filtrar por cliente:</label>
-        <select
-          id="cliente"
-          value={clienteSeleccionado}
-          onChange={handleClienteChange}
-        >
-          <option value="">Todos los clientes</option>
-          {clientes.map((cliente) => (
-            <option key={cliente.id} value={cliente.id}>
-              {cliente.nombre_cliente}
-            </option>
-          ))}
-        </select>
+          <div className="filter-group">
+            <label htmlFor="buscar-consecutivo">Buscar por consecutivo:</label>
+            <input
+              type="text"
+              id="buscar-consecutivo"
+              placeholder="Ingrese el consecutivo"
+              value={busquedaConsecutivo}
+              onChange={handleBusquedaConsecutivoChange}
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Buscador por consecutivo */}
-      <div className="buscador-consecutivo">
-        <label htmlFor="buscar-consecutivo">Buscar por consecutivo:</label>
-        <input
-          type="text"
-          id="buscar-consecutivo"
-          placeholder="Ingrese el consecutivo"
-          value={busquedaConsecutivo}
-          onChange={handleBusquedaConsecutivoChange}
-        />
-      </div>
-
-      {/* Tabla de equipos */}
-      <table className="historial-table">
-        <thead>
-          <tr>
-            <th>Equipo</th>
-            <th>Marca</th>
-            <th>Consecutivo</th>
-            <th>Fecha de Entrada</th>
-          </tr>
-        </thead>
-        <tbody>
-          {equiposFiltrados.length > 0 ? (
-            equiposFiltrados.map((equipo) => (
-              <tr key={equipo.id}>
-                <td>{equipo.nombre_equipo}</td>
-                <td>{equipo.marca}</td>
-                <td>{equipo.consecutivo}</td>
-                <td>{equipo.fecha_entrada || "No disponible"}</td>
+      <div className="table-container">
+        <div className="table-scroll-wrapper">
+          <table className="historial-table">
+            <thead>
+              <tr>
+                <th>Equipo</th>
+                <th>Marca</th>
+                <th>Consecutivo</th>
+                <th>Fecha de Entrada</th>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="4">No hay registros disponibles</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {equiposFiltrados.length > 0 ? (
+                equiposFiltrados.map((equipo) => (
+                  <tr key={equipo.id}>
+                    <td>{equipo.nombre_equipo}</td>
+                    <td>{equipo.marca}</td>
+                    <td>{equipo.consecutivo}</td>
+                    <td>{equipo.fecha_entrada || "No disponible"}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" className="no-results">
+                    No hay registros disponibles
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };
