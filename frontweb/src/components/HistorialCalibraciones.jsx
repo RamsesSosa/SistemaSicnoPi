@@ -52,7 +52,9 @@ const HistorialCalibraciones = () => {
 
     if (busquedaConsecutivo) {
       filtrados = filtrados.filter((equipo) =>
-        equipo.consecutivo.toLowerCase().includes(busquedaConsecutivo.toLowerCase())
+        equipo.consecutivo
+          .toLowerCase()
+          .includes(busquedaConsecutivo.toLowerCase())
       );
     }
 
@@ -91,7 +93,7 @@ const HistorialCalibraciones = () => {
     <div className="historial-container">
       <div className="historial-header">
         <h1>Historial de Calibraciones</h1>
-        
+
         <div className="filters-container">
           <div className="filter-group">
             <label htmlFor="cliente">Filtrar por cliente:</label>
@@ -140,7 +142,13 @@ const HistorialCalibraciones = () => {
                     <td>{equipo.nombre_equipo}</td>
                     <td>{equipo.marca}</td>
                     <td>{equipo.consecutivo}</td>
-                    <td>{equipo.fecha_entrada || "No disponible"}</td>
+                    <td>
+                      {equipo.fecha_entrada
+                        ? new Date(equipo.fecha_entrada).toLocaleDateString(
+                            "es-ES"
+                          )
+                        : "No disponible"}
+                    </td>
                   </tr>
                 ))
               ) : (
