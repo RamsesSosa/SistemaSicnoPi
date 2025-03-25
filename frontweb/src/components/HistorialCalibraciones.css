@@ -1,34 +1,47 @@
-
 /* Estilos generales del contenedor */
 .historial-calibraciones-container {
     padding: 20px;
     font-family: Arial, sans-serif;
     max-width: 1200px;
     margin: 0 auto;
-  }
-  
-  /* Estilos para el título */
-  .historial-calibraciones-container h1 {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 40px); /* Ajuste para el padding */
+    gap: 20px;
+}
+
+/* Estilos para el título */
+.historial-calibraciones-container h1 {
     text-align: center;
     color: #333;
     margin-bottom: 20px;
     font-size: 24px;
-  }
-  
-  /* Estilos para el filtro de cliente */
-  .filtro-cliente {
-    margin-bottom: 20px;
+}
+
+/* Contenedor de filtros */
+.filters-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para el filtro de cliente */
+.filtro-cliente {
     display: flex;
     align-items: center;
     gap: 10px;
-  }
-  
-  .filtro-cliente label {
+}
+
+.filtro-cliente label {
     font-size: 16px;
     color: #555;
-  }
-  
-  .filtro-cliente select {
+}
+
+.filtro-cliente select {
     padding: 8px 12px;
     font-size: 14px;
     border: 1px solid #ccc;
@@ -36,94 +49,112 @@
     background-color: #fff;
     cursor: pointer;
     transition: border-color 0.3s ease;
-  }
-  
-  .filtro-cliente select:hover {
+}
+
+.filtro-cliente select:hover {
     border-color: #888;
-  }
-  
-  .filtro-cliente select:focus {
+}
+
+.filtro-cliente select:focus {
     outline: none;
     border-color: #007bff;
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-  }
-  
-  /* Estilos para la tabla */
-  .historial-table {
-    width: 100%;
-    border-collapse: collapse;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  
-  .historial-table thead {
-    background-color: #007bff;
-    color: #fff;
-  }
-  
-  .historial-table th,
-  .historial-table td {
-    padding: 12px 15px;
-    text-align: left;
-  }
-  
-  .historial-table th {
-    font-weight: bold;
-  }
-  
-  .historial-table tbody tr {
-    border-bottom: 1px solid #ddd;
-  }
-  
-  .historial-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-  
-  .historial-table tbody tr:hover {
-    background-color: #f1f1f1;
-  }
-  
-  .historial-table tbody tr:last-child {
-    border-bottom: 2px solid #007bff;
-  }
-  
-  /* Estilos para el mensaje "No hay registros disponibles" */
-  .historial-table tbody tr td[colspan] {
-    text-align: center;
-    padding: 20px;
-    color: #888;
-    font-style: italic;
-  }
+}
 
-  /* Estilos para el buscador de consecutivo */
+/* Estilos para el buscador de consecutivo */
 .buscador-consecutivo {
-    margin-bottom: 20px;
     display: flex;
     align-items: center;
     gap: 10px;
-  }
-  
-  .buscador-consecutivo label {
+}
+
+.buscador-consecutivo label {
     font-size: 16px;
     color: #555;
-  }
-  
-  .buscador-consecutivo input {
+}
+
+.buscador-consecutivo input {
     padding: 8px 12px;
     font-size: 14px;
     border: 1px solid #ccc;
     border-radius: 4px;
     width: 300px;
     transition: border-color 0.3s ease;
-  }
-  
-  .buscador-consecutivo input:hover {
+}
+
+.buscador-consecutivo input:hover {
     border-color: #888;
-  }
-  
-  .buscador-consecutivo input:focus {
+}
+
+.buscador-consecutivo input:focus {
     outline: none;
     border-color: #007bff;
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-  }
+}
+
+/* Contenedor de la tabla */
+.table-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    overflow: hidden;
+}
+
+/* Wrapper para el scroll */
+.table-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+
+/* Estilos para la tabla */
+.historial-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.historial-table thead {
+    background-color: #007bff;
+    color: #fff;
+    position: sticky;
+    top: 0;
+}
+
+.historial-table th,
+.historial-table td {
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.historial-table th {
+    font-weight: bold;
+}
+
+.historial-table tbody tr {
+    border-bottom: 1px solid #ddd;
+}
+
+.historial-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.historial-table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.historial-table tbody tr:last-child {
+    border-bottom: 2px solid #007bff;
+}
+
+/* Estilos para el mensaje "No hay registros disponibles" */
+.historial-table tbody tr td[colspan] {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+    font-style: italic;
+}
