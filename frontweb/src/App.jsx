@@ -11,12 +11,10 @@ import GraficosMetricasClave from "./components/GraficosMetricasClave";
 import Notificaciones from "./components/Notificaciones";
 import RegistrarEquipo from "./components/RegistrarEquipo";
 import RegistrarCliente from "./components/RegistrarCliente";
-
 import ConsultarClientes from "./components/ConsultarClientes";
 import HistorialCalibraciones from "./components/HistorialCalibraciones";
-import EquiposCalibracion from "./components/EquiposCalibracion";
+import EquiposProceso from "./components/EquiposProceso";
 import ResumenMensual from "./components/ResumenMensual";
-import BusquedaEquipo from "./components/BusquedaEquipo";
 import UltimosRegistros from "./components/UltimosRegistros";
 
 const App = () => {
@@ -44,12 +42,11 @@ const App = () => {
           path="/historial-calibraciones"
           element={<HistorialCalibraciones />}
         />
-        <Route path="/equipos-calibracion" element={<EquiposCalibracion />} />{" "}
+        <Route path="/equipos-proceso" element={<EquiposProceso />} />{" "}
         {/* Nueva ruta */}
         {/* Nueva ruta */}
         <Route path="/resumen-mensual" element={<ResumenMensual />} />{" "}
         {/* Nueva ruta */}
-        <Route path="/busqueda-equipo" element={<BusquedaEquipo />} />{" "}
         {/* Nueva ruta */}
         <Route path="/" element={<Navigate to="/login" />} />
       </Routes>

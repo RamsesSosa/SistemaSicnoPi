@@ -39,10 +39,7 @@ const Home = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/historial-calibraciones">
-                    <i className="fas fa-history"></i> Historial de
-                    calibraciones
-                  </Link>
+                  
                 </li>
               </ul>
             )}
@@ -59,8 +56,8 @@ const Home = () => {
             {equiposAbierto && (
               <ul>
                 <li>
-                  <Link to="/equipos-calibracion">
-                    <i className="fas fa-wrench"></i> Equipos en calibración
+                  <Link to="/equipos-proceso">
+                    <i className="fas fa-wrench"></i> Equipos en proceso
                   </Link>
                 </li>
                 <li>
@@ -68,11 +65,7 @@ const Home = () => {
                     <i className="fas fa-chart-bar"></i> Resumen mensual
                   </Link>
                 </li>
-                <li>
-                  <Link to="/busqueda-equipo">
-                    <i className="fas fa-search"></i> Búsqueda de equipo
-                  </Link>
-                </li>
+              
               </ul>
             )}
           </li>
@@ -86,9 +79,7 @@ const Home = () => {
 
           {/* Clientes */}
           <li>
-            <Link to="/clientes">
-              <i className="fas fa-user"></i> Clientes
-            </Link>
+           
           </li>
 
           {/* Historial de Calibraciones */}
