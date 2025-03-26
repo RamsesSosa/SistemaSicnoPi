@@ -30,7 +30,7 @@ const RegistroClienteScreen = () => {
 
     try {
       const response = await axios.post(
-        'http://192.168.1.159:8000/api/clientes/', //cambiar la ip de tu router
+        'http://192.192.168.1.79/api/clientes/', //cambiar la ip de tu router
         cliente,
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -73,15 +73,13 @@ const RegistroClienteScreen = () => {
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Registro de Cliente</Text>
 
-      <Text style={styles.label}>Nombres</Text>
+      <Text style={styles.label}>Nombre de la empresa</Text>
       <TextInput
         style={styles.input}
-        placeholder="Ingrese los nombres"
+        placeholder="Grupo Bimbo"
         value={nombres}
         onChangeText={setNombres}
       />
-
-
 
       <Button
         title={isLoading ? 'Registrando...' : 'Guardar'}
@@ -122,8 +120,4 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
-
-
-
-
 export default RegistroClienteScreen;
