@@ -89,8 +89,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'SistemaSicnoDB',  
-        'USER': 'dbmasteruser',  # Usuario de la BD 
-        'PASSWORD': 'SicnoLab2025',  # Contraseña 
+        'USER': 'dbmasteruser',   
+        'PASSWORD': 'SicnoLab2025',
         'HOST': 'ls-ef4300d410ebc1a8304030b638b03ed2da87f5c1.c90u2ss6wl6d.us-east-2.rds.amazonaws.com',  # El host/endpoint de Lightsail
         'PORT': '3306',  
         'OPTIONS': {
@@ -166,8 +166,8 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30), 
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30), #Es el tiempo de vida del token
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    #Es el tiempo de vida del token refresh
     'ROTATE_REFRESH_TOKENS': True,                 
     'BLACKLIST_AFTER_ROTATION': True,              
 }
