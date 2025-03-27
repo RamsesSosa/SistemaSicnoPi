@@ -44,12 +44,20 @@ class Equipo(models.Model):
     marca = models.CharField(max_length=50)
     modelo = models.CharField(max_length=50)
     consecutivo = models.CharField(max_length=20, unique=True)
+<<<<<<< HEAD
     fecha_entrada = models.DateTimeField(auto_now_add=True)
     accesorios = models.TextField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
+=======
+    accesorios = models.TextField(null=True, blank=True)
+    observaciones = models.TextField(null=True, blank=True)
+    fecha_entrada = models.DateTimeField(auto_now_add=True)  # Fecha automática
+>>>>>>> 29faebdf3c81ef89890164ccb62da1a59fb0eb96
 
     def __str__(self):
         return self.nombre_equipo
+    
+
     
 class EstadoCalibracion(models.Model):
     nombre_estado = models.CharField(max_length=50)

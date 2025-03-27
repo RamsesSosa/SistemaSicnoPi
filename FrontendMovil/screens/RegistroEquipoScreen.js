@@ -1,85 +1,124 @@
 import React, { useState, useEffect } from 'react';
 import { 
   View, Text, TextInput, Button, Alert, ScrollView, 
-  StyleSheet, Modal, TouchableOpacity, FlatList 
+  StyleSheet, Modal, TouchableOpacity, FlatList, ActivityIndicator 
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
 const RegistroEquipoScreen = () => {
   const navigation = useNavigation();
-  const [clienteSeleccionado, setClienteSeleccionado] = useState('');
   const [nombreEquipo, setNombreEquipo] = useState('');
+  const [numeroSerie, setNumeroSerie] = useState('');
   const [marca, setMarca] = useState('');
   const [modelo, setModelo] = useState('');
-  const [numeroSerie, setNumeroSerie] = useState('');
   const [consecutivo, setConsecutivo] = useState('');
   const [accesorios, setAccesorios] = useState('');
   const [observaciones, setObservaciones] = useState('');
-  const [clientesRegistrados, setClientesRegistrados] = useState([]);
+  const [clientes, setClientes] = useState([]);
+  const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Obtener lista de clientes
   useEffect(() => {
-    const obtenerClientes = async () => {
-      const clientes = await AsyncStorage.getItem('clientes');
-      if (clientes) {
-        setClientesRegistrados(JSON.parse(clientes));
+    const fetchClientes = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http:// 192.168.0.26:8000/api/clientes/');
+        const data = await response.json();
+        if (response.ok) {
+          setClientes(data);
+        } else {
+          throw new Error(data.message || 'Error al cargar clientes');
+        }
+      } catch (error) {
+        Alert.alert('Error', error.message);
+      } finally {
+        setLoading(false);
       }
     };
-    obtenerClientes();
+    fetchClientes();
   }, []);
+
   const handleSubmit = async () => {
+    if (!clienteSeleccionado) {
+      Alert.alert('Error', 'Debe seleccionar un cliente');
+      return;
+    }
+
     const equipo = {
-      cliente: clienteSeleccionado,
-      nombreEquipo,
-      marca,
-      modelo,
-      numeroSerie,
-      consecutivo,
-      accesorios,
-      observaciones,
+      nombre_equipo: nombreEquipo,
+      numero_serie: numeroSerie,
+      marca: marca,
+      modelo: modelo,
+      consecutivo: consecutivo,
+      accesorios: accesorios,
+      observaciones: observaciones,
+      cliente: clienteSeleccionado.id,
     };
+
     try {
-      const equiposGuardados = await AsyncStorage.getItem('equipos');
-      const equipos = equiposGuardados ? JSON.parse(equiposGuardados) : [];
-      equipos.push(equipo);
-      await AsyncStorage.setItem('equipos', JSON.stringify(equipos));
-      Alert.alert('Éxito', 'Equipo registrado correctamente');
-      navigation.navigate('Home');
+      setLoading(true);
+      const response = await fetch('http://192.168.1.74:8000/api/equipos/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(equipo),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || JSON.stringify(data));
+      }
+
+      Alert.alert('Éxito', 'Equipo registrado correctamente', [
+        { text: 'OK', onPress: () => navigation.goBack() }
+      ]);
     } catch (error) {
-      Alert.alert('Error', 'No se pudo registrar el equipo');
+      console.error('Error:', error);
+      Alert.alert('Error', error.message || 'Error al registrar equipo');
+    } finally {
+      setLoading(false);
     }
   };
-  const handleCancelar = () => {
-    Alert.alert(
-      'Cancelar',
-      '¿Estás seguro de que deseas salir? Los cambios no guardados se perderán.',
-      [
-        { text: 'No', style: 'cancel' },
-        { text: 'Sí', onPress: () => navigation.navigate('Home') }
-      ]
-    );
-  };
-  const seleccionarCliente = (cliente) => {
-    setClienteSeleccionado(cliente.nombres);
-    setModalVisible(false);
-  };
-  return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Registro de Equipos</Text>
 
-      <Text>Seleccionar Cliente</Text>
-      <TouchableOpacity style={styles.selector} onPress={() => setModalVisible(true)}>
-        <Text>{clienteSeleccionado || 'Seleccione un cliente'}</Text>
+  if (loading && clientes.length === 0) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Registro de Equipo</Text>
+
+      {/* Selector de Cliente */}
+      <Text style={styles.label}>Cliente*</Text>
+      <TouchableOpacity 
+        style={styles.selector} 
+        onPress={() => setModalVisible(true)}
+      >
+        <Text>{clienteSeleccionado?.nombre_cliente || 'Seleccione un cliente'}</Text>
       </TouchableOpacity>
 
       <Modal visible={modalVisible} animationType="slide">
         <View style={styles.modalContainer}>
           <FlatList
-            data={clientesRegistrados}
-            keyExtractor={(item, index) => index.toString()}
+            data={clientes}
+            keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
-              <TouchableOpacity style={styles.item} onPress={() => seleccionarCliente(item)}>
-                <Text>{item.nombres}</Text>
+              <TouchableOpacity
+                style={styles.item}
+                onPress={() => {
+                  setClienteSeleccionado(item);
+                  setModalVisible(false);
+                }}
+              >
+                <Text>{item.nombre_cliente}</Text>
               </TouchableOpacity>
             )}
           />
@@ -87,37 +126,76 @@ const RegistroEquipoScreen = () => {
         </View>
       </Modal>
 
-      <Text>Nombre de equipo</Text>
-      <TextInput value={nombreEquipo} onChangeText={setNombreEquipo} placeholder="Ingrese el nombre del equipo" style={styles.input} />
+      {/* Campos del formulario */}
+      <Text style={styles.label}>Nombre del Equipo*</Text>
+      <TextInput
+        value={nombreEquipo}
+        onChangeText={setNombreEquipo}
+        style={styles.input}
+        placeholder="Ej: Bomba centrífuga"
+      />
 
-      <Text>Marca</Text>
-      <TextInput value={marca} onChangeText={setMarca} placeholder="Ingrese la marca del equipo" style={styles.input} />
+      <Text style={styles.label}>Número de Serie*</Text>
+      <TextInput
+        value={numeroSerie}
+        onChangeText={setNumeroSerie}
+        style={styles.input}
+        placeholder="Ej: SN12345678"
+      />
 
-      <Text>Modelo</Text>
-      <TextInput value={modelo} onChangeText={setModelo} placeholder="Ingrese el modelo del equipo" style={styles.input} />
+      <Text style={styles.label}>Marca*</Text>
+      <TextInput
+        value={marca}
+        onChangeText={setMarca}
+        style={styles.input}
+        placeholder="Ej: Siemens"
+      />
 
-      <Text>Número de Serie</Text>
-      <TextInput value={numeroSerie} onChangeText={setNumeroSerie} placeholder="Ingrese el número de serie" style={styles.input} />
+      <Text style={styles.label}>Modelo*</Text>
+      <TextInput
+        value={modelo}
+        onChangeText={setModelo}
+        style={styles.input}
+        placeholder="Ej: Model X2000"
+      />
 
-      <Text>Consecutivo</Text>
-      <TextInput value={consecutivo} onChangeText={setConsecutivo} placeholder="Ingrese el consecutivo" style={styles.input} />
+      <Text style={styles.label}>Consecutivo*</Text>
+      <TextInput
+        value={consecutivo}
+        onChangeText={setConsecutivo}
+        style={styles.input}
+        placeholder="Ej: C-001-2023"
+      />
 
-      <Text>Accesorios</Text>
-      <TextInput value={accesorios} onChangeText={setAccesorios} placeholder="Ingrese los accesorios" style={styles.input} />
+      <Text style={styles.label}>Accesorios</Text>
+      <TextInput
+        value={accesorios}
+        onChangeText={setAccesorios}
+        style={styles.input}
+        placeholder="Lista de accesorios incluidos"
+      />
 
-      <Text>Observaciones</Text>
-      <TextInput value={observaciones} onChangeText={setObservaciones} placeholder="Ingrese las observaciones" multiline style={styles.input} />
+      <Text style={styles.label}>Observaciones</Text>
+      <TextInput
+        value={observaciones}
+        onChangeText={setObservaciones}
+        style={[styles.input, { height: 100 }]}
+        multiline
+        placeholder="Detalles adicionales del equipo"
+      />
 
-      <Button title="Guardar e Imprimir" onPress={handleSubmit} />
-      <Button title="Cancelar" onPress={handleCancelar} color="red" />
+      <Button 
+        title="Registrar Equipo" 
+        onPress={handleSubmit} 
+        disabled={loading}
+      />
     </ScrollView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 20,
-    backgroundColor: '#f5f5f5',
   },
   title: {
     fontSize: 24,
@@ -125,29 +203,42 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
   },
-  selector: {
-    padding: 10,
-    borderWidth: 1,
-    borderRadius: 5,
-    marginBottom: 10,
-    backgroundColor: '#fff',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 20,
-  },
-  item: {
-    padding: 15,
-    borderBottomWidth: 1,
+  label: {
+    fontWeight: '600',
+    marginBottom: 5,
   },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    padding: 10,
     borderRadius: 5,
-    marginBottom: 10,
+    padding: 10,
+    marginBottom: 15,
     backgroundColor: '#fff',
   },
+  selector: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 15,
+    marginBottom: 15,
+    backgroundColor: '#fff',
+  },
+  modalContainer: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#f5f5f5',
+  },
+  item: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    backgroundColor: '#fff',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
+
 export default RegistroEquipoScreen;

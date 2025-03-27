@@ -59,6 +59,12 @@ yarn-error.log
 .metro-health-check*
 # testing
 /coverage
+
+__pycache__/
+*.pyc
+*.pyo
+
+
 # Yarn
 .yarn/*
 !.yarn/patches
