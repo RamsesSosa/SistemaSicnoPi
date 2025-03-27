@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import './UltimosRegistros.css';
+import { useState, useEffect } from "react";
+import "./HistorialCalibraciones.css";
 
 const UltimosRegistros = () => {
   const [ultimosRegistros, setUltimosRegistros] = useState([]);
@@ -12,12 +12,11 @@ const UltimosRegistros = () => {
         const response = await fetch("http://127.0.0.1:8000/api/equipos/");
         if (!response.ok) throw new Error("Error al obtener los registros");
         const data = await response.json();
-        
-        // Ordenar por fecha de entrada descendente y tomar los primeros 10
+
         const registrosOrdenados = data
           .sort((a, b) => new Date(b.fecha_entrada) - new Date(a.fecha_entrada))
           .slice(0, 10);
-        
+
         setUltimosRegistros(registrosOrdenados);
         setLoading(false);
       } catch (error) {
@@ -51,12 +50,14 @@ const UltimosRegistros = () => {
   }
 
   return (
-    <div className="ultimos-registros-container">
-      <h1>Últimos Registros</h1>
-      
-      <div className="table-wrapper">
-        <div className="table-scroll-container">
-          <table className="registros-table">
+    <div className="historial-container">
+      <div className="historial-header">
+        <h1>Últimos Registros</h1>
+      </div>
+
+      <div className="table-container">
+        <div className="table-scroll-wrapper">
+          <table className="historial-table">
             <thead>
               <tr>
                 <th>Equipo</th>
@@ -74,7 +75,14 @@ const UltimosRegistros = () => {
                     <td>{registro.consecutivo}</td>
                     <td>
                       {registro.fecha_entrada
-                        ? new Date(registro.fecha_entrada).toLocaleDateString("es-ES")
+                        ? new Date(registro.fecha_entrada).toLocaleDateString(
+                            "es-MX",
+                            {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                            }
+                          )
                         : "No disponible"}
                     </td>
                   </tr>
