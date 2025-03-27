@@ -26,7 +26,6 @@ INSTALLED_APPS = [
     'coreapi',  
     'api'
 ]
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -37,7 +36,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
 DEBUG = True
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -66,14 +64,13 @@ WSGI_APPLICATION = 'principal.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'SistemaSicnoDB',  
         'USER': 'dbmasteruser',   
         'PASSWORD': 'SicnoLab2025',
-        'HOST': 'ls-ef4300d410ebc1a8304030b638b03ed2da87f5c1.c90u2ss6wl6d.us-east-2.rds.amazonaws.com',  # El host/endpoint de Lightsail
+        'HOST': 'ls-ef4300d410ebc1a8304030b638b03ed2da87f5c1.c90u2ss6wl6d.us-east-2.rds.amazonaws.com', 
         'PORT': '3306',  
         'OPTIONS': {
             'charset': 'utf8mb4',
