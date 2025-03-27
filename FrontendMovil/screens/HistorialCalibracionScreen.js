@@ -1,95 +1,143 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, 
-  TextInput, Modal, Button 
+  View, Text, StyleSheet, FlatList, TouchableOpacity, 
+  TextInput, Modal, ActivityIndicator, Alert, Button 
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native'; // Importa useNavigation
+import axios from 'axios';
 
 const HistorialCalibracionScreen = () => {
   const [equipos, setEquipos] = useState([]);
   const [clientes, setClientes] = useState([]);
-  const [clienteSeleccionado, setClienteSeleccionado] = useState('');
+  const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
   const [consecutivoBusqueda, setConsecutivoBusqueda] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const navigation = useNavigation(); // Usa useNavigation para acceder a la navegación
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const obtenerEquipos = async () => {
-      const equiposGuardados = await AsyncStorage.getItem('equipos');
-      if (equiposGuardados) {
-        setEquipos(JSON.parse(equiposGuardados));
-      }
-    };
-    obtenerEquipos();
+  const API_URL = 'http://192.168.1.74:8000/api';
 
-    const obtenerClientes = async () => {
-      const clientesGuardados = await AsyncStorage.getItem('clientes');
-      if (clientesGuardados) {
-        setClientes(JSON.parse(clientesGuardados));
-      }
-    };
-    obtenerClientes();
-  }, []);
-
-  const eliminarEquipo = async (index) => {
-    const nuevosEquipos = [...equipos];
-    nuevosEquipos.splice(index, 1);
-    setEquipos(nuevosEquipos);
-    await AsyncStorage.setItem('equipos', JSON.stringify(nuevosEquipos));
+  // Función corregida para obtener equipos
+  const fetchEquipos = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API_URL}/equipos`);
+      
+      // Mapeo corregido usando el campo "cliente" que viene de la API
+      const equiposFormateados = response.data.map(equipo => ({
+        id: equipo.id,
+        nombre_equipo: equipo.nombre_equipo,
+        marca: equipo.marca,
+        modelo: equipo.modelo,
+        numero_serie: equipo.numero_serie,
+        consecutivo: equipo.consecutivo,
+        accesorios: equipo.accesorios,
+        observaciones: equipo.observaciones,
+        cliente_id: equipo.cliente, // ¡Aquí está la corrección! Usamos equipo.cliente
+        fecha_entrada: equipo.fecha_entrada
+      }));
+      
+      console.log('Equipos cargados:', equiposFormateados);
+      setEquipos(equiposFormateados);
+    } catch (error) {
+      console.error('Error al obtener equipos:', error);
+      Alert.alert('Error', 'No se pudieron cargar los equipos');
+    }
   };
 
-  const confirmarEliminacion = (index) => {
-    Alert.alert(
-      'Eliminar Equipo',
-      '¿Estás seguro de que deseas eliminar este equipo?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Eliminar', onPress: () => eliminarEquipo(index) },
-      ]
+  // Función para obtener clientes
+  const fetchClientes = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/clientes`);
+      
+      setClientes(response.data.map(cliente => ({
+        id: cliente.id,
+        nombres: cliente.nombre_cliente
+      })));
+    } catch (error) {
+      console.error('Error al obtener clientes:', error);
+      Alert.alert('Error', 'No se pudieron cargar los clientes');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función de filtrado
+  const filtrarEquipos = () => {
+    if (!clienteSeleccionado) {
+      return equipos.filter(equipo => 
+        !consecutivoBusqueda || 
+        equipo.consecutivo.toLowerCase().includes(consecutivoBusqueda.toLowerCase())
+      );
+    }
+
+    // Filtramos por cliente seleccionado (usando cliente_id que ahora es correcto)
+    const equiposDelCliente = equipos.filter(
+      equipo => equipo.cliente_id === clienteSeleccionado.id
+    );
+
+    // Filtramos adicionalmente por consecutivo si hay búsqueda
+    return equiposDelCliente.filter(equipo => 
+      !consecutivoBusqueda || 
+      equipo.consecutivo.toLowerCase().includes(consecutivoBusqueda.toLowerCase())
     );
   };
 
-  const filtrarEquipos = () => {
-    let equiposFiltrados = equipos;
+  useEffect(() => {
+    fetchEquipos();
+    fetchClientes();
+  }, []);
 
-    if (clienteSeleccionado) {
-      equiposFiltrados = equiposFiltrados.filter(equipo => equipo.cliente === clienteSeleccionado);
-    }
+  // Renderizado de cada equipo
+  const renderItem = ({ item }) => (
+    <View style={styles.row}>
+      <Text style={styles.cell}>{item.nombre_equipo}</Text>
+      <Text style={styles.cell}>{item.marca}</Text>
+      <Text style={styles.cell}>{item.consecutivo}</Text>
+      <Text style={styles.cell}>
+        {new Date(item.fecha_entrada).toLocaleDateString('es-ES')}
+      </Text>
+    </View>
+  );
 
-    if (consecutivoBusqueda) {
-      equiposFiltrados = equiposFiltrados.filter(equipo => equipo.consecutivo.includes(consecutivoBusqueda));
-    }
-
-    return equiposFiltrados;
-  };
-
-  const seleccionarCliente = (cliente) => {
-    setClienteSeleccionado(cliente.nombres);
-    setModalVisible(false);
-  };
-
-  const navegarAScannerScreen = (equipo) => {
-    navigation.navigate('Scanner', { equipo }); // Navega a ScannerScreen y pasa los datos del equipo
-  };
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Cargando datos...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Historial de Equipos</Text>
+      <Text style={styles.title}>Historial de Calibración</Text>
 
-      <Text>Filtrar por Cliente</Text>
-      <TouchableOpacity style={styles.selector} onPress={() => setModalVisible(true)}>
-        <Text>{clienteSeleccionado || 'Seleccione un cliente'}</Text>
+      {/* Selector de cliente */}
+      <Text style={styles.label}>Filtrar por Cliente</Text>
+      <TouchableOpacity 
+        style={styles.selector} 
+        onPress={() => setModalVisible(true)}
+      >
+        <Text style={styles.selectorText}>
+          {clienteSeleccionado ? clienteSeleccionado.nombres : 'Todos los clientes'}
+        </Text>
       </TouchableOpacity>
 
+      {/* Modal de selección de cliente */}
       <Modal visible={modalVisible} animationType="slide">
         <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Seleccione un cliente</Text>
           <FlatList
-            data={clientes}
-            keyExtractor={(item, index) => index.toString()}
+            data={[{id: null, nombres: 'Todos los clientes'}, ...clientes]}
+            keyExtractor={item => item.id ? item.id.toString() : 'all'}
             renderItem={({ item }) => (
-              <TouchableOpacity style={styles.item} onPress={() => seleccionarCliente(item)}>
-                <Text>{item.nombres}</Text>
+              <TouchableOpacity 
+                style={styles.item} 
+                onPress={() => {
+                  setClienteSeleccionado(item.id ? item : null);
+                  setModalVisible(false);
+                }}
+              >
+                <Text style={styles.itemText}>{item.nombres}</Text>
               </TouchableOpacity>
             )}
           />
@@ -97,7 +145,8 @@ const HistorialCalibracionScreen = () => {
         </View>
       </Modal>
 
-      <Text>Buscar por Consecutivo</Text>
+      {/* Búsqueda por consecutivo */}
+      <Text style={styles.label}>Buscar por Consecutivo</Text>
       <TextInput
         value={consecutivoBusqueda}
         onChangeText={setConsecutivoBusqueda}
@@ -105,122 +154,112 @@ const HistorialCalibracionScreen = () => {
         style={styles.input}
       />
 
-      <View style={styles.table}>
-        <View style={styles.headerRow}>
-          <Text style={styles.headerCell}>Nombre</Text>
-          <Text style={styles.headerCell}>Marca</Text>
-          <Text style={styles.headerCell}>Consecutivo</Text>
-          <Text style={styles.headerCell}>Acciones</Text>
-        </View>
-        <FlatList
-          data={filtrarEquipos()}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item, index }) => (
-            <TouchableOpacity onPress={() => navegarAScannerScreen(item)}> {/* Navega a ScannerScreen */}
-              <View style={styles.row}>
-                <View style={styles.cell}>
-                  <Text>{item.nombreEquipo}</Text>
-                </View>
-                <View style={styles.cell}>
-                  <Text>{item.marca}</Text>
-                </View>
-                <View style={styles.cell}>
-                  <Text>{item.consecutivo}</Text>
-                </View>
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={() => confirmarEliminacion(index)}
-                >
-                  <Text style={styles.deleteButtonText}>Eliminar</Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableOpacity>
-          )}
-        />
+      {/* Lista de equipos */}
+      <View style={styles.tableHeader}>
+        <Text style={styles.headerCell}>Equipo</Text>
+        <Text style={styles.headerCell}>Marca</Text>
+        <Text style={styles.headerCell}>Consecutivo</Text>
+        <Text style={styles.headerCell}>Fecha Entrada</Text>
       </View>
+      
+      <FlatList
+        data={filtrarEquipos()}
+        keyExtractor={item => item.id.toString()}
+        renderItem={renderItem}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text>No se encontraron equipos</Text>
+            {clienteSeleccionado && (
+              <Text>para el cliente: {clienteSeleccionado.nombres}</Text>
+            )}
+          </View>
+        }
+      />
     </View>
   );
 };
 
+// Estilos (se mantienen iguales)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
-    backgroundColor: '#f5f5f5',
+    padding: 16,
+    backgroundColor: '#fff',
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 20,
     textAlign: 'center',
   },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
   selector: {
-    padding: 10,
+    padding: 12,
     borderWidth: 1,
-    borderRadius: 5,
-    marginBottom: 10,
-    backgroundColor: '#fff',
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginBottom: 16,
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 20,
-  },
-  item: {
-    padding: 15,
-    borderBottomWidth: 1,
+  selectorText: {
+    fontSize: 16,
   },
   input: {
+    padding: 12,
     borderWidth: 1,
     borderColor: '#ccc',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
-    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginBottom: 16,
   },
-  table: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    overflow: 'hidden',
-  },
-  headerRow: {
+  tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#ddd',
-    paddingVertical: 10,
+    backgroundColor: '#e0e0e0',
+    paddingVertical: 12,
   },
   headerCell: {
     flex: 1,
     fontWeight: 'bold',
     textAlign: 'center',
-    padding: 5,
-    borderRightWidth: 1,
-    borderColor: '#ccc',
   },
   row: {
     flexDirection: 'row',
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderColor: '#ccc',
-    paddingVertical: 10,
+    borderColor: '#eee',
   },
   cell: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 5,
-    borderRightWidth: 1,
-    borderColor: '#ccc',
+    textAlign: 'center',
   },
-  deleteButton: {
-    backgroundColor: 'red',
-    padding: 5,
-    borderRadius: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
+  modalContainer: {
+    flex: 1,
+    padding: 16,
   },
-  deleteButtonText: {
-    color: 'white',
+  modalTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  item: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  itemText: {
+    fontSize: 16,
+  },
+  emptyContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
