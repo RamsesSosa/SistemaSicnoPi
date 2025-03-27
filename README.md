@@ -1,4 +1,4 @@
-<h1>Sistema de automatización</h1>
+<h1>Sistema de automatización de Sicno</h1>
 
 -Estado del proyecto: En desarrollo
 
