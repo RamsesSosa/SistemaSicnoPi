@@ -6,29 +6,42 @@ const ConsultarClientes = () => {
   const [clientesFiltrados, setClientesFiltrados] = useState([]);
   const [busquedaNombre, setBusquedaNombre] = useState("");
   const [clienteExpandido, setClienteExpandido] = useState(null);
-  const [equiposCliente, setEquiposCliente] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [equipos, setEquipos] = useState([]); // Todos los equipos
+  const [loading, setLoading] = useState({
+    clientes: true,
+    equipos: true
+  });
   const [error, setError] = useState(null);
 
+  // Cargar clientes y equipos al inicio
   useEffect(() => {
-    const fetchClientes = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/clientes/");
-        if (!response.ok) throw new Error("Error al obtener los clientes");
-        const data = await response.json();
-        setClientes(data);
-        setClientesFiltrados(data);
-        setLoading(false);
+        // Cargar clientes
+        const clientesResponse = await fetch("http://127.0.0.1:8000/api/clientes/");
+        if (!clientesResponse.ok) throw new Error("Error al obtener clientes");
+        const clientesData = await clientesResponse.json();
+        
+        // Cargar equipos
+        const equiposResponse = await fetch("http://127.0.0.1:8000/api/equipos/");
+        if (!equiposResponse.ok) throw new Error("Error al obtener equipos");
+        const equiposData = await equiposResponse.json();
+
+        setClientes(clientesData);
+        setClientesFiltrados(clientesData);
+        setEquipos(equiposData);
+        setLoading({ clientes: false, equipos: false });
       } catch (error) {
         console.error("Error:", error);
-        setError("Hubo un error al cargar los clientes");
-        setLoading(false);
+        setError("Hubo un error al cargar los datos");
+        setLoading({ clientes: false, equipos: false });
       }
     };
 
-    fetchClientes();
+    fetchData();
   }, []);
 
+  // Filtrar clientes por nombre
   useEffect(() => {
     if (busquedaNombre.trim() === "") {
       setClientesFiltrados(clientes);
@@ -42,40 +55,25 @@ const ConsultarClientes = () => {
     }
   }, [busquedaNombre, clientes]);
 
-  const fetchEquiposCliente = async (clienteId) => {
-    try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/api/equipos/?cliente=${clienteId}`
-      );
-      if (!response.ok)
-        throw new Error("Error al obtener los equipos del cliente");
-      const data = await response.json();
-      setEquiposCliente(data);
-    } catch (error) {
-      console.error("Error:", error);
-      setEquiposCliente([]);
-    }
+  // Obtener equipos de un cliente específico
+  const getEquiposCliente = (clienteId) => {
+    return equipos.filter(equipo => equipo.cliente === clienteId);
   };
 
   const handleClienteClick = (clienteId) => {
-    if (clienteExpandido === clienteId) {
-      setClienteExpandido(null);
-    } else {
-      setClienteExpandido(clienteId);
-      fetchEquiposCliente(clienteId);
-    }
+    setClienteExpandido(clienteExpandido === clienteId ? null : clienteId);
   };
 
   const handleBusquedaChange = (e) => {
     setBusquedaNombre(e.target.value);
   };
 
-  if (loading) {
+  if (loading.clientes || loading.equipos) {
     return (
       <div className="loading-overlay">
         <div className="loading-content">
           <div className="spinner"></div>
-          <p>Cargando clientes...</p>
+          <p>Cargando datos...</p>
         </div>
       </div>
     );
@@ -122,88 +120,91 @@ const ConsultarClientes = () => {
             </thead>
             <tbody>
               {clientesFiltrados.length > 0 ? (
-                clientesFiltrados.map((cliente) => (
-                  <>
-                    <tr
-                      key={cliente.id}
-                      className={`elegant-row ${
-                        clienteExpandido === cliente.id ? "active" : ""
-                      }`}
-                      onClick={() => handleClienteClick(cliente.id)}
-                    >
-                      <td className="td-client">
-                        <div className="client-info">
-                          <span className="client-name">
-                            {cliente.nombre_cliente}
-                          </span>
-                          <span
-                            className={`expand-icon ${
-                              clienteExpandido === cliente.id ? "expanded" : ""
-                            }`}
-                          >
-                            <svg viewBox="0 0 24 24">
-                              <path d="M7 10l5 5 5-5z" />
-                            </svg>
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-                    {clienteExpandido === cliente.id && (
-                      <tr className="equipos-row">
-                        <td colSpan="1">
-                          <div className="equipos-container">
-                            <h4 className="equipos-title">Equipos asociados</h4>
-                            {equiposCliente.length > 0 ? (
-                              <div className="equipos-grid">
-                                {equiposCliente.map((equipo) => (
-                                  <div key={equipo.id} className="equipo-card">
-                                    <div className="equipo-header">
-                                      <h5 className="equipo-name">
-                                        {equipo.nombre_equipo}
-                                      </h5>
-                                      <span className="equipo-brand">
-                                        {equipo.marca} • {equipo.modelo}
-                                      </span>
-                                    </div>
-                                    <div className="equipo-details">
-                                      <div className="detail-item">
-                                        <span className="detail-label">
-                                          N° Serie:
-                                        </span>
-                                        <span className="detail-value">
-                                          {equipo.numero_serie || "N/A"}
-                                        </span>
-                                      </div>
-                                      <div className="detail-item">
-                                        <span className="detail-label">
-                                          Fecha Entrada:
-                                        </span>
-                                        <span className="detail-value">
-                                          {equipo.fecha_entrada
-                                            ? new Date(
-                                                equipo.fecha_entrada
-                                              ).toLocaleDateString()
-                                            : "No registrada"}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <div className="no-equipos">
-                                <svg viewBox="0 0 24 24">
-                                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-                                </svg>
-                                <p>No hay equipos registrados</p>
-                              </div>
-                            )}
+                clientesFiltrados.map((cliente) => {
+                  const equiposDelCliente = getEquiposCliente(cliente.id);
+                  return (
+                    <>
+                      <tr
+                        key={cliente.id}
+                        className={`elegant-row ${
+                          clienteExpandido === cliente.id ? "active" : ""
+                        }`}
+                        onClick={() => handleClienteClick(cliente.id)}
+                      >
+                        <td className="td-client">
+                          <div className="client-info">
+                            <span className="client-name">
+                              {cliente.nombre_cliente}
+                            </span>
+                            <span
+                              className={`expand-icon ${
+                                clienteExpandido === cliente.id ? "expanded" : ""
+                              }`}
+                            >
+                              <svg viewBox="0 0 24 24">
+                                <path d="M7 10l5 5 5-5z" />
+                              </svg>
+                            </span>
                           </div>
                         </td>
                       </tr>
-                    )}
-                  </>
-                ))
+                      {clienteExpandido === cliente.id && (
+                        <tr className="equipos-row">
+                          <td colSpan="1">
+                            <div className="equipos-container">
+                              <h4 className="equipos-title">Equipos asociados</h4>
+                              {equiposDelCliente.length > 0 ? (
+                                <div className="equipos-grid">
+                                  {equiposDelCliente.map((equipo) => (
+                                    <div key={equipo.id} className="equipo-card">
+                                      <div className="equipo-header">
+                                        <h5 className="equipo-name">
+                                          {equipo.nombre_equipo}
+                                        </h5>
+                                        <span className="equipo-brand">
+                                          {equipo.marca} • {equipo.modelo}
+                                        </span>
+                                      </div>
+                                      <div className="equipo-details">
+                                        <div className="detail-item">
+                                          <span className="detail-label">
+                                            N° Serie:
+                                          </span>
+                                          <span className="detail-value">
+                                            {equipo.numero_serie || "N/A"}
+                                          </span>
+                                        </div>
+                                        <div className="detail-item">
+                                          <span className="detail-label">
+                                            Fecha Entrada:
+                                          </span>
+                                          <span className="detail-value">
+                                            {equipo.fecha_entrada
+                                              ? new Date(
+                                                  equipo.fecha_entrada
+                                                ).toLocaleDateString()
+                                              : "No registrada"}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="no-equipos">
+                                  <svg viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                                  </svg>
+                                  <p>No hay equipos registrados para este cliente</p>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </>
+                  );
+                })
               ) : (
                 <tr className="no-results-row">
                   <td colSpan="1">
