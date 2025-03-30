@@ -1,0 +1,181 @@
+/* Mantenemos los mismos estilos de HistorialCalibraciones.css y añadimos: */
+
+.equipos-proceso-container {
+    padding: 2rem;
+    background-color: var(--light-gray);
+    min-height: 100vh;
+  }
+  
+  .header-section {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .search-filter {
+    flex: 1;
+    max-width: 400px;
+    min-width: 250px;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--medium-gray);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+  
+  .search-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.2);
+  }
+  
+  .board-container {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+  }
+  
+  .status-column {
+    min-width: 280px;
+    width: 280px;
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--medium-gray);
+  }
+  
+  .count-badge {
+    background-color: var(--medium-gray);
+    color: var(--dark-gray);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+  }
+  
+  .equipos-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .equipo-card {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid var(--accent-color);
+    transition: var(--transition);
+  }
+  
+  .equipo-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .equipo-header {
+    margin-bottom: 0.5rem;
+  }
+  
+  .equipo-header h4 {
+    margin: 0;
+    color: var(--secondary-color);
+  }
+  
+  .consecutivo {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--dark-gray);
+    opacity: 0.8;
+  }
+  
+  .equipo-details {
+    font-size: 0.9rem;
+    color: var(--dark-gray);
+    margin-bottom: 1rem;
+  }
+  
+  .equipo-details p {
+    margin: 0.25rem 0;
+  }
+  
+  .equipo-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  
+  .action-btn {
+    flex: 1;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--medium-gray);
+    color: var(--dark-gray);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.8rem;
+  }
+  
+  .action-btn:hover {
+    background-color: var(--accent-color);
+    color: var(--white);
+  }
+  
+  /* Colores para cada estado */
+  .status-column:nth-child(1) { border-top: 3px solid #ff9500; } /* Ingreso */
+  .status-column:nth-child(2) { border-top: 3px solid #a5a5a5; } /* En espera */
+  .status-column:nth-child(3) { border-top: 3px solid #4fc3f7; } /* Calibrando */
+  .status-column:nth-child(4) { border-top: 3px solid #4a6fa5; } /* Calibrado */
+  .status-column:nth-child(5) { border-top: 3px solid #16a085; } /* Etiquetado */
+  .status-column:nth-child(6) { border-top: 3px solid #27ae60; } /* Certificado emitido */
+  .status-column:nth-child(7) { border-top: 3px solid #2ecc71; } /* Listo para entrega */
+  .status-column:nth-child(8) { border-top: 3px solid #16a085; } /* Entregado */
+  
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .board-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .board-container {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .board-container {
+      grid-template-columns: 1fr;
+    }
+    
+    .status-column {
+      width: 100%;
+    }
+  }

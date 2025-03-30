@@ -16,6 +16,8 @@ import HistorialCalibraciones from "./components/HistorialCalibraciones";
 import EquiposProceso from "./components/EquiposProceso";
 import ResumenMensual from "./components/ResumenMensual";
 import UltimosRegistros from "./components/UltimosRegistros";
+import DetalleEquipo from "./components/DetalleEquipo";
+
 
 const App = () => {
   const isAuthenticated = true; // Cambia esto según tu lógica de autenticación
@@ -43,6 +45,7 @@ const App = () => {
           element={<HistorialCalibraciones />}
         />
         <Route path="/equipos-proceso" element={<EquiposProceso />} />{" "}
+        <Route path="/equipos/:id" element={<DetalleEquipo />} />
         {/* Nueva ruta */}
         {/* Nueva ruta */}
         <Route path="/resumen-mensual" element={<ResumenMensual />} />{" "}

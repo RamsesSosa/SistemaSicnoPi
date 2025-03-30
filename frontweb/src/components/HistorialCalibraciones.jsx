@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./HistorialCalibraciones.css";
 
 const HistorialCalibraciones = () => {
+  const navigate = useNavigate();
   const [equiposRegistrados, setEquiposRegistrados] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [clienteSeleccionado, setClienteSeleccionado] = useState("");
@@ -67,6 +69,10 @@ const HistorialCalibraciones = () => {
 
   const handleBusquedaConsecutivoChange = (e) => {
     setBusquedaConsecutivo(e.target.value);
+  };
+
+  const handleEquipoClick = (equipoId) => {
+    navigate(`/equipos/${equipoId}`);
   };
 
   if (loading) {
@@ -138,15 +144,17 @@ const HistorialCalibraciones = () => {
             <tbody>
               {equiposFiltrados.length > 0 ? (
                 equiposFiltrados.map((equipo) => (
-                  <tr key={equipo.id}>
+                  <tr 
+                    key={equipo.id} 
+                    onClick={() => handleEquipoClick(equipo.id)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <td>{equipo.nombre_equipo}</td>
                     <td>{equipo.marca}</td>
                     <td>{equipo.consecutivo}</td>
                     <td>
                       {equipo.fecha_entrada
-                        ? new Date(equipo.fecha_entrada).toLocaleDateString(
-                            "es-ES"
-                          )
+                        ? new Date(equipo.fecha_entrada).toLocaleDateString("es-ES")
                         : "No disponible"}
                     </td>
                   </tr>

@@ -1,29 +1,32 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./ConsultarClientes.css";
 
 const ConsultarClientes = () => {
+  const navigate = useNavigate();
   const [clientes, setClientes] = useState([]);
   const [clientesFiltrados, setClientesFiltrados] = useState([]);
   const [busquedaNombre, setBusquedaNombre] = useState("");
   const [clienteExpandido, setClienteExpandido] = useState(null);
-  const [equipos, setEquipos] = useState([]); // Todos los equipos
+  const [equipos, setEquipos] = useState([]);
   const [loading, setLoading] = useState({
     clientes: true,
-    equipos: true
+    equipos: true,
   });
   const [error, setError] = useState(null);
 
-  // Cargar clientes y equipos al inicio
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Cargar clientes
-        const clientesResponse = await fetch("http://127.0.0.1:8000/api/clientes/");
+        const clientesResponse = await fetch(
+          "http://127.0.0.1:8000/api/clientes/"
+        );
         if (!clientesResponse.ok) throw new Error("Error al obtener clientes");
         const clientesData = await clientesResponse.json();
-        
-        // Cargar equipos
-        const equiposResponse = await fetch("http://127.0.0.1:8000/api/equipos/");
+
+        const equiposResponse = await fetch(
+          "http://127.0.0.1:8000/api/equipos/"
+        );
         if (!equiposResponse.ok) throw new Error("Error al obtener equipos");
         const equiposData = await equiposResponse.json();
 
@@ -41,7 +44,6 @@ const ConsultarClientes = () => {
     fetchData();
   }, []);
 
-  // Filtrar clientes por nombre
   useEffect(() => {
     if (busquedaNombre.trim() === "") {
       setClientesFiltrados(clientes);
@@ -55,9 +57,8 @@ const ConsultarClientes = () => {
     }
   }, [busquedaNombre, clientes]);
 
-  // Obtener equipos de un cliente específico
   const getEquiposCliente = (clienteId) => {
-    return equipos.filter(equipo => equipo.cliente === clienteId);
+    return equipos.filter((equipo) => equipo.cliente === clienteId);
   };
 
   const handleClienteClick = (clienteId) => {
@@ -66,6 +67,11 @@ const ConsultarClientes = () => {
 
   const handleBusquedaChange = (e) => {
     setBusquedaNombre(e.target.value);
+  };
+
+  const handleEquipoClick = (equipoId, e) => {
+    e.stopPropagation();
+    navigate(`/equipos/${equipoId}`);
   };
 
   if (loading.clientes || loading.equipos) {
@@ -138,7 +144,9 @@ const ConsultarClientes = () => {
                             </span>
                             <span
                               className={`expand-icon ${
-                                clienteExpandido === cliente.id ? "expanded" : ""
+                                clienteExpandido === cliente.id
+                                  ? "expanded"
+                                  : ""
                               }`}
                             >
                               <svg viewBox="0 0 24 24">
@@ -152,11 +160,20 @@ const ConsultarClientes = () => {
                         <tr className="equipos-row">
                           <td colSpan="1">
                             <div className="equipos-container">
-                              <h4 className="equipos-title">Equipos asociados</h4>
+                              <h4 className="equipos-title">
+                                Equipos asociados
+                              </h4>
                               {equiposDelCliente.length > 0 ? (
                                 <div className="equipos-grid">
                                   {equiposDelCliente.map((equipo) => (
-                                    <div key={equipo.id} className="equipo-card">
+                                    <div
+                                      key={equipo.id}
+                                      className="equipo-card"
+                                      onClick={(e) =>
+                                        handleEquipoClick(equipo.id, e)
+                                      }
+                                      style={{ cursor: "pointer" }}
+                                    >
                                       <div className="equipo-header">
                                         <h5 className="equipo-name">
                                           {equipo.nombre_equipo}
@@ -195,7 +212,9 @@ const ConsultarClientes = () => {
                                   <svg viewBox="0 0 24 24">
                                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
                                   </svg>
-                                  <p>No hay equipos registrados para este cliente</p>
+                                  <p>
+                                    No hay equipos registrados para este cliente
+                                  </p>
                                 </div>
                               )}
                             </div>
