@@ -13,7 +13,7 @@ const HistorialCalibracionScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = 'http://192.168.1.74:8000/api';
+  const API_URL = 'http://192.168.1.14:8000/api';
 
   // Función corregida para obtener equipos
   const fetchEquipos = async () => {
@@ -35,10 +35,10 @@ const HistorialCalibracionScreen = () => {
         fecha_entrada: equipo.fecha_entrada
       }));
       
-      console.log('Equipos cargados:', equiposFormateados);
+      
       setEquipos(equiposFormateados);
     } catch (error) {
-      console.error('Error al obtener equipos:', error);
+      
       Alert.alert('Error', 'No se pudieron cargar los equipos');
     }
   };
