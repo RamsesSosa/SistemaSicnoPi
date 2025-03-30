@@ -22,11 +22,8 @@ const ScannerScreen = ({ navigation }) => (
     </TouchableOpacity>
   </View>
 );
-const TableroScreen = () => (
-  <View style={styles.container}>
-    <Text style={styles.title}>Tablero</Text>
-  </View>
-);
+
+
 const QuickAccess = ({ navigation }) => (
   <View style={styles.container}>
     <Text style={styles.title}>Accesos Rápidos</Text>
@@ -37,6 +34,8 @@ const QuickAccess = ({ navigation }) => (
         { id: '3', name: 'Historial Calibracion', icon: 'history', screen: 'HistorialCalibracion' },
         { id: '4', name: 'Registrar equipo', icon: 'construction', screen: 'RegistroEquipo' },
         { id: '5', name: 'Generar Reporte', icon: 'assessment', screen: 'Reporte' },
+        { id: '6', name: 'Tablero Tareas', icon: 'dashboard', screen: 'Tablero' },
+    
       ]}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
@@ -62,11 +61,6 @@ const MenuScreen = () => {
       <Tab.Screen name="Menu" component={QuickAccess} options={{
         tabBarIcon: ({ color, size }) => (
           <MaterialIcons name="home" color={color} size={size} />
-        ),
-      }} />
-      <Tab.Screen name="Tablero" component={TableroScreen} options={{
-        tabBarIcon: ({ color, size }) => (
-          <MaterialIcons name="dashboard" color={color} size={size} />
         ),
       }} />
       <Tab.Screen name="Scanner" component={ScannerStack} options={{
