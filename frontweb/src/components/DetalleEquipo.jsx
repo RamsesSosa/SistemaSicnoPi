@@ -6,6 +6,8 @@ const DetalleEquipo = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [equipo, setEquipo] = useState(null);
+  const [usuarioActual, setUsuarioActual] = useState("admin@calibraciones.com");
+  const [historialEstados, setHistorialEstados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -16,6 +18,14 @@ const DetalleEquipo = () => {
         if (!response.ok) throw new Error("Error al obtener el equipo");
         const data = await response.json();
         setEquipo(data);
+        
+        const historialEjemplo = [
+          { estado: "Ingreso", usuario: "tecnico1@calibraciones.com", fecha: "2023-05-15T09:30:00" },
+          { estado: "Calibrando", usuario: "tecnico2@calibraciones.com", fecha: "2023-05-16T14:15:00" },
+          { estado: "Calibrado", usuario: usuarioActual, fecha: new Date().toISOString() }
+        ];
+        setHistorialEstados(historialEjemplo);
+        
         setLoading(false);
       } catch (error) {
         console.error("Error:", error);
@@ -25,7 +35,35 @@ const DetalleEquipo = () => {
     };
 
     fetchEquipo();
-  }, [id]);
+  }, [id, usuarioActual]);
+
+  const getEstadoNombre = (estadoId) => {
+    const estados = {
+      1: "Ingreso",
+      2: "En espera",
+      3: "Calibrando",
+      4: "Calibrado",
+      5: "Etiquetado",
+      6: "Certificado emitido",
+      7: "Listo para entrega",
+      8: "Entregado"
+    };
+    return estados[estadoId] || "Desconocido";
+  };
+
+  const getEstadoColor = (estadoId) => {
+    const colores = {
+      1: "#ff9500",
+      2: "#a5a5a5",
+      3: "#4fc3f7",
+      4: "#4a6fa5",
+      5: "#16a085",
+      6: "#27ae60",
+      7: "#2ecc71",
+      8: "#16a085"
+    };
+    return colores[estadoId] || "#cccccc";
+  };
 
   const handleVolver = () => {
     navigate("/equipos-proceso");
@@ -62,74 +100,76 @@ const DetalleEquipo = () => {
   }
 
   return (
-    <div className="detalle-equipo-container" style={{ overflowY: 'auto', height: '100vh' }}>
+    <div className="detalle-equipo-container">
       <div className="detalle-header">
-        <h1>Detalles del Equipo</h1>
-        <button className="volver-btn" onClick={handleVolver}>
-          &larr; Volver al listado
+        <h1 className="detalle-titulo">Detalles del Equipo</h1>
+        <button className="volver-btn" onClick={handleVolver} title="Volver">
+          &larr;
         </button>
       </div>
 
-      <div className="equipo-info-card">
-        <div className="equipo-info-header">
-          <h2>{equipo.nombre_equipo}</h2>
-          <span className="consecutivo">#{equipo.consecutivo}</span>
+      <div className="detalle-grid">
+        <div className="info-equipo-card">
+          <h2>Información del Equipo</h2>
+          <div className="info-row">
+            <span className="info-label">Nombre:</span>
+            <span className="info-value">{equipo.nombre_equipo || "No especificado"}</span>
+          </div>
+          <div className="info-row">
+            <span className="info-label">Consecutivo:</span>
+            <span className="info-value">{equipo.consecutivo || "No especificado"}</span>
+          </div>
+          <div className="info-row">
+            <span className="info-label">Marca:</span>
+            <span className="info-value">{equipo.marca || "No especificado"}</span>
+          </div>
+          <div className="info-row">
+            <span className="info-label">Modelo:</span>
+            <span className="info-value">{equipo.modelo || "No especificado"}</span>
+          </div>
+          <div className="info-row">
+            <span className="info-label">N° Serie:</span>
+            <span className="info-value">{equipo.numero_serie || "No especificado"}</span>
+          </div>
+          <div className="info-row">
+            <span className="info-label">Estado Actual:</span>
+            <span className="info-value">
+              <span className="estado-badge" style={{ backgroundColor: getEstadoColor(equipo.estado) }}>
+                {getEstadoNombre(equipo.estado)}
+              </span>
+            </span>
+          </div>
         </div>
 
-        <div className="equipo-info-grid">
-          <div className="info-section">
-            <h3>Información del Equipo</h3>
+        <div className="proceso-card">
+          <div className="responsable-section">
+            <h2>Responsable Actual</h2>
             <div className="info-row">
-              <span className="info-label">Marca:</span>
-              <span className="info-value">{equipo.marca || "No especificado"}</span>
+              <span className="info-label">Usuario:</span>
+              <span className="info-value">{usuarioActual}</span>
             </div>
             <div className="info-row">
-              <span className="info-label">Modelo:</span>
-              <span className="info-value">{equipo.modelo || "No especificado"}</span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">Número de serie:</span>
-              <span className="info-value">{equipo.numero_serie || "No especificado"}</span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">Accesorios:</span>
-              <span className="info-value">{equipo.accesorios || "No especificado"}</span>
-            </div>
-          </div>
-
-          <div className="info-section">
-            <h3>Datos del Cliente</h3>
-            <div className="info-row">
-              <span className="info-label">Cliente:</span>
-              <span className="info-value">{equipo.cliente_nombre || "No especificado"}</span>
-            </div>
-          </div>
-
-          <div className="info-section">
-            <h3>Fechas</h3>
-            <div className="info-row">
-              <span className="info-label">Fecha de entrada:</span>
+              <span className="info-label">Fecha/Hora:</span>
               <span className="info-value">
-                {equipo.fecha_entrada ? new Date(equipo.fecha_entrada).toLocaleDateString("es-ES") : "No disponible"}
-              </span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">Fecha de salida:</span>
-              <span className="info-value">
-                {equipo.fecha_salida ? new Date(equipo.fecha_salida).toLocaleDateString("es-ES") : "No disponible"}
+                {new Date().toLocaleString("es-ES")}
               </span>
             </div>
           </div>
 
-          <div className="info-section">
-            <h3>Otros Datos</h3>
-            <div className="info-row">
-              <span className="info-label">Consecutivo:</span>
-              <span className="info-value">{equipo.consecutivo || "No especificado"}</span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">Observaciones:</span>
-              <span className="info-value">{equipo.observaciones || "No hay observaciones"}</span>
+          <div className="historial-section">
+            <h2>Historial de Estados</h2>
+            <div className="historial-list">
+              {historialEstados.map((item, index) => (
+                <div key={index} className="historial-item">
+                  <div className="historial-estado">{item.estado}</div>
+                  <div className="historial-details">
+                    <span className="historial-usuario">{item.usuario}</span>
+                    <span className="historial-fecha">
+                      {new Date(item.fecha).toLocaleString("es-ES")}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
