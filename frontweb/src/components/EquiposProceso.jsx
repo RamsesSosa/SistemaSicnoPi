@@ -8,6 +8,7 @@ const EquiposProceso = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [usuarioActual] = useState(localStorage.getItem("currentUser") || "admin@calibraciones.com");
 
   const estados = [
     { id: 1, nombre: "Ingreso", color: "#ff9500" },
@@ -34,27 +35,88 @@ const EquiposProceso = () => {
     };
   }, [navigate]);
 
-  useEffect(() => {
-    const fetchEquipos = async () => {
-      try {
-        const response = await fetch("http://127.0.0.1:8000/api/equipos/");
-        if (!response.ok) throw new Error("Error al obtener los equipos");
-        const data = await response.json();
-        const equiposConEstado = data.map((equipo) => ({
+  const cargarEquiposConHistorial = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/equipos/");
+      if (!response.ok) throw new Error("Error al obtener los equipos");
+      const data = await response.json();
+      
+      const equiposActualizados = data.map(equipo => {
+        const historialKey = `historial_${equipo.id}`;
+        const historial = JSON.parse(localStorage.getItem(historialKey)) || [];
+        
+        const ultimoEstado = historial.length > 0 
+          ? historial[historial.length - 1].estadoId 
+          : equipo.estado || 1;
+          
+        return {
           ...equipo,
-          estado: equipo.estado || 1,
-        }));
-        setEquipos(equiposConEstado);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error:", error);
-        setError("Hubo un error al cargar los equipos");
-        setLoading(false);
-      }
+          estado: ultimoEstado
+        };
+      });
+      
+      setEquipos(equiposActualizados);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error:", error);
+      setError("Hubo un error al cargar los equipos");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    cargarEquiposConHistorial();
+  }, []);
+
+  const registrarCambioEstado = (equipoId, nuevoEstado) => {
+    const historialKey = `historial_${equipoId}`;
+    const historialActual = JSON.parse(localStorage.getItem(historialKey)) || [];
+    
+    const estadoInfo = estados.find(e => e.id === nuevoEstado) || { nombre: "Ingreso", id: 1 };
+    
+    const nuevoRegistro = {
+      estado: estadoInfo.nombre,
+      estadoId: nuevoEstado,
+      usuario: usuarioActual,
+      fecha: new Date().toISOString(),
+      accion: "cambio_estado"
     };
 
-    fetchEquipos();
-  }, []);
+    const nuevoHistorial = [...historialActual, nuevoRegistro];
+    localStorage.setItem(historialKey, JSON.stringify(nuevoHistorial));
+    
+    const equiposGuardados = JSON.parse(localStorage.getItem("equipos")) || {};
+    equiposGuardados[equipoId] = { ...equiposGuardados[equipoId], estado: nuevoEstado };
+    localStorage.setItem("equipos", JSON.stringify(equiposGuardados));
+  };
+
+  const cambiarEstado = async (equipoId, nuevoEstado) => {
+    try {
+      const updatedEquipos = equipos.map((equipo) =>
+        equipo.id === equipoId ? { ...equipo, estado: nuevoEstado } : equipo
+      );
+      setEquipos(updatedEquipos);
+      
+      registrarCambioEstado(equipoId, nuevoEstado);
+
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/equipos/${equipoId}/`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ estado: nuevoEstado }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Error al actualizar el estado");
+      
+    } catch (error) {
+      console.error("Error:", error);
+      cargarEquiposConHistorial();
+    }
+  };
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -72,30 +134,6 @@ const EquiposProceso = () => {
     ...estado,
     equipos: filteredEquipos.filter((equipo) => equipo.estado === estado.id),
   }));
-
-  const cambiarEstado = async (equipoId, nuevoEstado) => {
-    try {
-      const response = await fetch(
-        `http://127.0.0.1:8000/api/equipos/${equipoId}/`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ estado: nuevoEstado }),
-        }
-      );
-
-      if (!response.ok) throw new Error("Error al actualizar el estado");
-
-      const updatedEquipos = equipos.map((equipo) =>
-        equipo.id === equipoId ? { ...equipo, estado: nuevoEstado } : equipo
-      );
-      setEquipos(updatedEquipos);
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
 
   const handleEquipoClick = (equipoId) => {
     navigate(`/equipos/${equipoId}`);
