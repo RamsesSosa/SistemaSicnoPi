@@ -1,5 +1,10 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth import get_user_model
+from django.conf import settings
+from django.utils import timezone
+
 
 class UsuarioManager(BaseUserManager):
     def create_user(self, correo, password=None, **extra_fields):
@@ -14,6 +19,7 @@ class UsuarioManager(BaseUserManager):
     def create_superuser(self, correo, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_active', True)
 
         return self.create_user(correo, password, **extra_fields)
 
@@ -22,6 +28,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     correo = models.EmailField(max_length=100, unique=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    date_joined = models.DateTimeField(auto_now_add=True)
 
     objects = UsuarioManager()
 
@@ -30,6 +37,12 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.fullName
+
+    def get_full_name(self):
+        return self.fullName
+
+    def get_short_name(self):
+        return self.fullName    
 
 class Cliente(models.Model):
     nombre_cliente = models.CharField(max_length=255)
@@ -44,35 +57,75 @@ class Equipo(models.Model):
     marca = models.CharField(max_length=50)
     modelo = models.CharField(max_length=50)
     consecutivo = models.CharField(max_length=20, unique=True)
-<<<<<<< HEAD
-    fecha_entrada = models.DateTimeField(auto_now_add=True)
-    accesorios = models.TextField(blank=True, null=True)
-    observaciones = models.TextField(blank=True, null=True)
-=======
     accesorios = models.TextField(null=True, blank=True)
     observaciones = models.TextField(null=True, blank=True)
-    fecha_entrada = models.DateTimeField(auto_now_add=True)  # Fecha automática
->>>>>>> 29faebdf3c81ef89890164ccb62da1a59fb0eb96
-
-    def __str__(self):
-        return self.nombre_equipo
+    fecha_entrada = models.DateTimeField(auto_now_add=True)
     
-
+    @property
+    def estado_actual(self):
+        """Devuelve el último estado del equipo"""
+        ultimo_historial = self.historialequipo_set.order_by('-fecha_cambio').first()
+        return ultimo_historial.estado if ultimo_historial else None
+    
+    def cambiar_estado(self, nuevo_estado, usuario, observaciones=''):
+        """Cambia el estado del equipo y registra el historial"""
+        if self.estado_actual == nuevo_estado:
+            return False  # No hacer nada si es el mismo estado
+        
+        HistorialEquipo.objects.create(
+            equipo=self,
+            estado=nuevo_estado,
+            responsable=usuario,
+            observaciones=observaciones
+        )
+        return True
+    
+    def save(self, *args, **kwargs):
+        is_new = not self.pk  
+        super().save(*args, **kwargs)
+        
+        if is_new:
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+            
+            estado_ingreso = EstadoCalibracion.objects.get(orden=1)
+            admin_user = User.objects.filter(is_superuser=True).first()
+            
+            HistorialEquipo.objects.create(
+                equipo=self,
+                estado=estado_ingreso,
+                responsable=admin_user,
+                observaciones="Registro inicial automático"
+            )
+    
+    def __str__(self):
+        return f"{self.nombre_equipo} ({self.numero_serie})"
     
 class EstadoCalibracion(models.Model):
-    nombre_estado = models.CharField(max_length=50)
-
+    nombre_estado = models.CharField(max_length=50, unique=True)
+    orden = models.IntegerField(unique=True)
+    descripcion = models.TextField(blank=True)
+    
+    class Meta:
+        ordering = ['orden']
+    
     def __str__(self):
         return self.nombre_estado
 
 class HistorialEquipo(models.Model):
-    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)  # FK a Equipo
-    estado = models.ForeignKey(EstadoCalibracion, on_delete=models.SET_NULL, null=True)  # FK a EstadoCalibracion
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
+    estado = models.ForeignKey(EstadoCalibracion, on_delete=models.PROTECT)
+    responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     fecha_cambio = models.DateTimeField(auto_now_add=True)
-    responsable = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True)  # FK a Usuario
-
+    observaciones = models.TextField(blank=True)
+    
+    class Meta:
+        ordering = ['-fecha_cambio']
+        get_latest_by = 'fecha_cambio'
+    
     def __str__(self):
-        return f"Historial de {self.equipo.nombre_equipo}"
+        return f"{self.equipo} → {self.estado} ({self.fecha_cambio})"
+    
 class Alerta(models.Model):
     TIPOS_ALERTA = (
         ('retraso', 'Retraso en calibración'),
