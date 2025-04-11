@@ -2,7 +2,6 @@
 .DS_Store
 # Ignorar archivos de Expo
 .expo/
-
 # Ignorar archivos de Gradle
 FrontendMovil/android/.gradle/
 # Xcode
@@ -59,6 +58,12 @@ yarn-error.log
 .metro-health-check*
 # testing
 /coverage
+
+__pycache__/
+*.pyc
+*.pyo
+
+
 # Yarn
 .yarn/*
 !.yarn/patches

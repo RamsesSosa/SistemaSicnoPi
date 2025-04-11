@@ -1,23 +1,56 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome'; 
+import Icon from 'react-native-vector-icons/FontAwesome';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
 
+const api = axios.create({
+  baseURL: 'http://192.168.0.26:8000/api/', //Cambiar URL por la ip de quien lo pruebe
+  timeout: 10000,
+});
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false); 
-  const handleLogin = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Por favor, completa todos los campos.');
       return;
     }
-    console.log('Correo:', email);
-    console.log('Contraseña:', password);
-    navigation.replace('Menu');  // Cambia 'Home' por 'Menu' y usa replace en lugar de navigate
+    setIsLoading(true);
+
+    try {
+      const response = await api.post('token/', {
+        correo: email,
+        password: password,
+      });
+
+      await AsyncStorage.multiSet([
+        ['access_token', response.data.access],
+        ['refresh_token', response.data.refresh]
+      ]);
+
+      navigation.replace('Menu');
+    } catch (error) {
+      console.error('Login error:', error);
+      
+      if (error.code === 'ECONNABORTED') {
+        Alert.alert('Error', 'Tiempo de espera agotado. Verifica tu conexión.');
+      } else if (error.response?.status === 401) {
+        Alert.alert('Error', 'Credenciales incorrectas');
+      } else {
+        Alert.alert('Error', 'No se pudo conectar al servidor');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Bienvenido!!!</Text>
+      <Text style={styles.title}>Bienvenido!</Text>
       <Text style={styles.subtitle}>Inicia sesión con tu correo y contraseña.</Text>
       {/* Campo de correo electrónico */}
       <View style={styles.inputContainer}>
