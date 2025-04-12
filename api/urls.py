@@ -24,4 +24,5 @@ urlpatterns = [
     path('token/', views.CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('equipos/<int:pk>/cambiar-estado/', views.CambiarEstadoEquipoAPIView.as_view(), name='cambiar-estado-equipo'),
+    path('metricas/volumen/', views.metricas_volumen, name='metricas-volumen'),
 ]
