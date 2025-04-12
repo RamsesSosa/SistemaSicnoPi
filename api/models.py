@@ -77,12 +77,10 @@ class Equipo(models.Model):
 
     @property
     def estado_actual(self):
-        """Devuelve el último estado del equipo"""
         ultimo_historial = self.historialequipo_set.order_by('-fecha_cambio').first()
         return ultimo_historial.estado if ultimo_historial else None
 
     def cambiar_estado(self, nuevo_estado, usuario, observaciones=''):
-        """Cambia el estado del equipo y registra el historial"""
         if self.estado_actual == nuevo_estado:
             return False
         HistorialEquipo.objects.create(
@@ -119,13 +117,11 @@ class Equipo(models.Model):
         historialequipo__estado__nombre_estado='Calibrado' 
         ).distinct().count()
         
-        # Equipos en estado Entregado
         equipos_entregados = cls.objects.filter(
         filtro_fecha,
         historialequipo__estado__nombre_estado='Entregado'
     ).distinct().count()
         
-        # Equipos pendientes (En espera, Calibrando o Listo para entrega)
         equipos_pendientes = cls.objects.filter(
             filtro_fecha,
             historialequipo__estado__nombre_estado__in=['En espera', 'Calibrando', 'Listo para entrega']
@@ -153,11 +149,10 @@ class HistorialEquipo(models.Model):
     def __str__(self):
         return f"{self.equipo} → {self.estado} ({self.fecha_cambio})"
 
+    #Esto todavia no lo vamos a usar, se va a implementar si nos queda tiempo
     @classmethod
     def tiempo_promedio_calibracion(cls, mes, año):
-        """
-        Calcula el tiempo promedio desde Ingreso hasta Entregado
-        """
+        
         resultados = cls.objects.filter(
             equipo__historial_estados__estado__nombre_estado='Entregado',
             fecha_cambio__month=mes,
@@ -181,10 +176,6 @@ class HistorialEquipo(models.Model):
     
     @classmethod
     def tiempo_promedio_por_estado(cls, mes, año):
-        """
-        Calcula el tiempo promedio en cada estado
-        """
-        # Obtener todos los cambios de estado en el periodo
         cambios = cls.objects.filter(
             fecha_cambio__month=mes,
             fecha_cambio__year=año
@@ -192,14 +183,12 @@ class HistorialEquipo(models.Model):
         
         tiempos = {}
         
-        # Agrupar por equipo y calcular tiempos
         equipo_actual = None
         historial_equipo = []
         
         for cambio in cambios:
             if cambio.equipo != equipo_actual:
                 if equipo_actual and historial_equipo:
-                    # Procesar el equipo anterior
                     for i in range(len(historial_equipo)-1):
                         estado = historial_equipo[i].estado.nombre_estado
                         tiempo = historial_equipo[i+1].fecha_cambio - historial_equipo[i].fecha_cambio
@@ -212,8 +201,7 @@ class HistorialEquipo(models.Model):
                 historial_equipo = []
             
             historial_equipo.append(cambio)
-        
-        # Calcular promedios
+
         promedios = {}
         for estado, lista_tiempos in tiempos.items():
             total = sum(lista_tiempos, timedelta(0))
