@@ -151,3 +151,18 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5174",
     # Add other origins as needed
 ]
+
+
+# Configuración CORS
+CORS_ALLOW_CREDENTIALS = True
+
+
+# Configuración CSRF
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+]
+
+# Configuración de sesión
+SESSION_COOKIE_SAMESITE = 'Lax'

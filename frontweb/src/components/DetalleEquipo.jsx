@@ -6,91 +6,98 @@ const DetalleEquipo = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [equipo, setEquipo] = useState(null);
-  const [usuarioActual] = useState(
-    localStorage.getItem("currentUser") || "admin@calibraciones.com"
-  );
   const [historialEstados, setHistorialEstados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [tieneHistorial, setTieneHistorial] = useState(false);
 
-  const getEstadoNombre = (estadoId) => {
-    const estados = {
-      1: "Ingreso",
-      2: "En espera",
-      3: "Calibrando",
-      4: "Calibrado",
-      5: "Etiquetado",
-      6: "Certificado emitido",
-      7: "Listo para entrega",
-      8: "Entregado",
-    };
-    return estados[estadoId] || "Ingreso";
+  // Configuración de estados con colores
+  const estadosConfig = {
+    1: { nombre: "Ingreso", color: "#ff9500" },
+    2: { nombre: "En espera", color: "#a5a5a5" },
+    3: { nombre: "Calibrando", color: "#4fc3f7" },
+    4: { nombre: "Calibrado", color: "#4a6fa5" },
+    5: { nombre: "Etiquetado", color: "#16a085" },
+    6: { nombre: "Certificado emitido", color: "#27ae60" },
+    7: { nombre: "Listo para entrega", color: "#2ecc71" },
+    8: { nombre: "Entregado", color: "#16a085" }
   };
 
-  const getEstadoColor = (estadoId) => {
-    const colores = {
-      1: "#ff9500",
-      2: "#a5a5a5",
-      3: "#4fc3f7",
-      4: "#4a6fa5",
-      5: "#16a085",
-      6: "#27ae60",
-      7: "#2ecc71",
-      8: "#16a085",
-    };
-    return colores[estadoId] || "#cccccc";
-  };
-
+  // Cargar datos del equipo específico
   useEffect(() => {
     const cargarDatosEquipo = async () => {
       try {
-        const response = await fetch(
-          `http://127.0.0.1:8000/api/equipos/${id}/`
+        setLoading(true);
+        setError(null);
+
+        // 1. Obtener datos del equipo específico
+        const equipoResponse = await fetch(`http://127.0.0.1:8000/api/equipos/${id}/`);
+        if (!equipoResponse.ok) throw new Error("Error al obtener el equipo");
+        const equipoData = await equipoResponse.json();
+
+        // 2. Obtener historial EXCLUSIVO de este equipo
+        const historialResponse = await fetch(
+          `http://127.0.0.1:8000/api/historial-equipos/?equipo=${id}`
         );
-        if (!response.ok) throw new Error("Error al obtener el equipo");
-        const data = await response.json();
+        if (!historialResponse.ok) throw new Error("Error al obtener el historial");
+        const historialData = await historialResponse.json();
 
-        const equiposGuardados =
-          JSON.parse(localStorage.getItem("equipos")) || {};
-        const equipoLocal = equiposGuardados[id];
+        // 3. Procesar solo si hay historial para ESTE equipo
+        if (historialData.length > 0) {
+          setTieneHistorial(true);
+          
+          // Ordenar historial por fecha (más reciente primero)
+          const historialOrdenado = [...historialData].sort(
+            (a, b) => new Date(b.fecha_cambio) - new Date(a.fecha_cambio)
+          );
 
-        const equipoCombinado = equipoLocal
-          ? { ...data, estado: equipoLocal.estado || data.estado }
-          : data;
+          // Procesar datos del historial
+          const historialProcesado = await Promise.all(
+            historialOrdenado.map(async (item) => {
+              let responsable = "Sistema";
+              if (item.responsable) {
+                const usuarioResponse = await fetch(
+                  `http://127.0.0.1:8000/api/usuarios/${item.responsable}/`
+                );
+                if (usuarioResponse.ok) {
+                  const usuarioData = await usuarioResponse.json();
+                  responsable = usuarioData.nombre || "Usuario no encontrado";
+                }
+              }
 
-        setEquipo(equipoCombinado);
+              const estadoInfo = estadosConfig[item.estado] || estadosConfig[1];
 
-        const historialKey = `historial_${id}`;
-        let historial = JSON.parse(localStorage.getItem(historialKey)) || [];
+              return {
+                estado: estadoInfo.nombre,
+                estadoColor: estadoInfo.color,
+                usuario: responsable,
+                fecha: item.fecha_cambio,
+                accion: item.observaciones || "Cambio de estado"
+              };
+            })
+          );
 
-        if (historial.length === 0) {
-          const estadoInicial = equipoCombinado.estado || 1;
-          const nombreEstado = getEstadoNombre(estadoInicial);
-
-          historial = [
-            {
-              estado: nombreEstado,
-              estadoId: estadoInicial,
-              usuario: usuarioActual,
-              fecha: new Date().toISOString(),
-              accion: "estado_inicial",
-            },
-          ];
-          localStorage.setItem(historialKey, JSON.stringify(historial));
+          setHistorialEstados(historialProcesado);
+        } else {
+          setTieneHistorial(false);
         }
 
-        historial.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-        setHistorialEstados(historial);
+        setEquipo({
+          ...equipoData,
+          estado: equipoData.estado || 1
+        });
+
         setLoading(false);
+
       } catch (error) {
-        console.error("Error:", error);
-        setError("Hubo un error al cargar los detalles del equipo");
+        console.error("Error al cargar datos:", error);
+        setError(`Error al cargar datos: ${error.message}`);
         setLoading(false);
       }
     };
 
     cargarDatosEquipo();
-  }, [id, usuarioActual]);
+  }, [id]);
 
   const handleVolver = () => {
     navigate("/equipos-proceso");
@@ -125,6 +132,8 @@ const DetalleEquipo = () => {
       </div>
     );
   }
+
+  const estadoActual = estadosConfig[equipo.estado] || estadosConfig[1];
 
   return (
     <div className="detalle-equipo-container">
@@ -173,45 +182,66 @@ const DetalleEquipo = () => {
             <span className="info-value">
               <span
                 className="estado-badge"
-                style={{ backgroundColor: getEstadoColor(equipo.estado) }}
+                style={{ backgroundColor: estadoActual.color }}
               >
-                {getEstadoNombre(equipo.estado)}
+                {estadoActual.nombre}
               </span>
             </span>
           </div>
         </div>
 
         <div className="proceso-card">
-          <div className="responsable-section">
-            <h2>Responsable Actual</h2>
-            <div className="info-row">
-              <span className="info-label">Usuario:</span>
-              <span className="info-value">{usuarioActual}</span>
-            </div>
-            <div className="info-row">
-              <span className="info-label">Fecha/Hora:</span>
-              <span className="info-value">
-                {new Date().toLocaleString("es-ES")}
-              </span>
-            </div>
-          </div>
-
-          <div className="historial-section">
-            <h2>Historial de Estados</h2>
-            <div className="historial-list">
-              {historialEstados.map((item, index) => (
-                <div key={index} className="historial-item">
-                  <div className="historial-estado">{item.estado}</div>
-                  <div className="historial-details">
-                    <span className="historial-usuario">{item.usuario}</span>
-                    <span className="historial-fecha">
-                      {new Date(item.fecha).toLocaleString("es-ES")}
-                    </span>
-                  </div>
+          {/* Mostrar historial SOLO si existe para este equipo */}
+          {tieneHistorial ? (
+            <>
+              <div className="responsable-section">
+                <h2>Último Responsable</h2>
+                <div className="info-row">
+                  <span className="info-label">Usuario:</span>
+                  <span className="info-value">
+                    {historialEstados[0]?.usuario || "No asignado"}
+                  </span>
                 </div>
-              ))}
+                <div className="info-row">
+                  <span className="info-label">Fecha/Hora:</span>
+                  <span className="info-value">
+                    {historialEstados[0]?.fecha ? 
+                      new Date(historialEstados[0].fecha).toLocaleString("es-ES") : 
+                      "No disponible"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="historial-section">
+                <h2>Historial de Estados</h2>
+                <div className="historial-list">
+                  {historialEstados.map((item, index) => (
+                    <div key={index} className="historial-item">
+                      <div 
+                        className="historial-estado"
+                        style={{ backgroundColor: item.estadoColor }}
+                      >
+                        {item.estado}
+                      </div>
+                      <div className="historial-details">
+                        <span className="historial-usuario">{item.usuario}</span>
+                        <span className="historial-fecha">
+                          {new Date(item.fecha).toLocaleString("es-ES")}
+                        </span>
+                        {item.accion && (
+                          <span className="historial-accion">{item.accion}</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="sin-historial">
+              <p>Este equipo no tiene historial registrado</p>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

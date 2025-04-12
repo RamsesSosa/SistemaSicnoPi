@@ -6,6 +6,9 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import viewsets
+
+
 
 
 from .models import (
@@ -75,6 +78,15 @@ class EstadoCalibracionViewSet(viewsets.ModelViewSet):
 class HistorialEquipoViewSet(viewsets.ModelViewSet):
     queryset = HistorialEquipo.objects.all()
     serializer_class = HistorialEquipoSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        equipo_id = self.request.query_params.get('equipo')
+        if equipo_id:
+            queryset = queryset.filter(equipo_id=equipo_id)
+        return queryset
+
+    
 
 class AlertaViewSet(viewsets.ModelViewSet):
     queryset = Alerta.objects.all()
