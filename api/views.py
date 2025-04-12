@@ -45,7 +45,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             'correo': attrs.get('correo'),
             'password': attrs.get('password')
         }
-        return super().validate(credentials)
+        user_model = get_user_model()
+        try:
+            user = user_model.objects.get(correo=credentials['correo'])
+            if not user.check_password(credentials['password']):
+                raise Exception("Contraseña incorrecta")
+        except user_model.DoesNotExist:
+            raise Exception("Usuario no encontrado")
+        return super().validate(attrs)
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
