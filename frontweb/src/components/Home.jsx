@@ -31,7 +31,6 @@ const Home = () => {
             </a>
             {accesosRapidosAbierto && (
               <ul>
-              
                 <li>
                   <Link to="/consultar-clientes">
                     <i className="fas fa-users"></i> Consultar clientes
@@ -65,7 +64,6 @@ const Home = () => {
                     <i className="fas fa-chart-bar"></i> Resumen mensual
                   </Link>
                 </li>
-              
               </ul>
             )}
           </li>
@@ -77,9 +75,11 @@ const Home = () => {
             </Link>
           </li>
 
-          {/* Clientes */}
+          {/* Impresiones */}
           <li>
-           
+            <Link to="/impresiones">
+              <i className="fas fa-print"></i> Impresiones
+            </Link>
           </li>
 
           {/* Historial de Calibraciones */}

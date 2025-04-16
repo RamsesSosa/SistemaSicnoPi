@@ -17,7 +17,8 @@ import EquiposProceso from "./components/EquiposProceso";
 import ResumenMensual from "./components/ResumenMensual";
 import UltimosRegistros from "./components/UltimosRegistros";
 import DetalleEquipo from "./components/DetalleEquipo";
-
+import Impresiones from "./components/Impresiones";
+import VistaImpresion from "./components/VistaImpresion";
 
 const App = () => {
   const isAuthenticated = true; // Cambia esto según tu lógica de autenticación
@@ -44,13 +45,13 @@ const App = () => {
           path="/historial-calibraciones"
           element={<HistorialCalibraciones />}
         />
-        <Route path="/equipos-proceso" element={<EquiposProceso />} />{" "}
+        <Route path="/equipos-proceso" element={<EquiposProceso />} />
         <Route path="/equipos/:id" element={<DetalleEquipo />} />
-        {/* Nueva ruta */}
-        {/* Nueva ruta */}
-        <Route path="/resumen-mensual" element={<ResumenMensual />} />{" "}
-        {/* Nueva ruta */}
-        {/* Nueva ruta */}
+        <Route path="/resumen-mensual" element={<ResumenMensual />} />
+        <Route path="/estadisticas" element={<GraficosMetricasClave />} />
+        <Route path="/impresiones" element={<Impresiones />} />
+        <Route path="/vista-impresion" element={<VistaImpresion />} />
+
         <Route path="/" element={<Navigate to="/login" />} />
       </Routes>
     </Router>
