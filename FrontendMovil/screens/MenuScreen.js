@@ -6,7 +6,6 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 
 const Tab = createBottomTabNavigator();
 
-// Pantalla de Accesos Rápidos (Home)
 const QuickAccessScreen = ({ navigation }) => (
   <View style={styles.container}>
     <Text style={styles.title}>Accesos Rápidos</Text>
@@ -32,7 +31,7 @@ const QuickAccessScreen = ({ navigation }) => (
   </View>
 );
 
-// Pantalla de Escáner QR (directamente con la cámara)
+
 const QRScannerScreen = ({ navigation }) => {
   const [facing, setFacing] = useState('back');
   const [permission, requestPermission] = useCameraPermissions();
@@ -111,7 +110,6 @@ const QRScannerScreen = ({ navigation }) => {
   );
 };
 
-// Pantalla de Contenido (para mostrar resultados)
 const ContenidoScreen = ({ route }) => {
   const { qrData } = route.params || {};
   
@@ -123,7 +121,6 @@ const ContenidoScreen = ({ route }) => {
   );
 };
 
-// Navegador principal con pestañas
 const MainTabNavigator = () => {
   return (
     <Tab.Navigator>
@@ -151,7 +148,6 @@ const MainTabNavigator = () => {
   );
 };
 
-// Estilos (los mismos que tenías)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
