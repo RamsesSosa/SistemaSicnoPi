@@ -59,7 +59,7 @@ const RegistroEquipoScreen = () => {
 
     try {
       setLoading(true);
-      const response = await fetch('http://192.168.0.114:8000/api/equipos/', {
+      const response = await fetch('http://192.168.0.114:8000/api/equipos/', {//Cambiar URL por la ip de quien lo pruebe
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
