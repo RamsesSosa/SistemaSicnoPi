@@ -37,8 +37,8 @@ const TableroScreen = () => {
     try {
       // Cargar equipos y clientes en paralelo
       const [equiposRes, clientesRes] = await Promise.all([
-        fetch("http://192.168.1.74:8000/api/equipos/"),
-        fetch("http://192.168.1.74:8000/api/clientes/")
+        fetch("http://192.168.0.114:8000/api/equipos/"),
+        fetch("http://192.168.0.114:8000/api/clientes/")
       ]);
 
       if (!equiposRes.ok || !clientesRes.ok) throw new Error("Error al obtener datos");
@@ -148,7 +148,7 @@ const TableroScreen = () => {
       await registrarCambioEstado(equipoId, nuevoEstado);
 
       const response = await fetch(
-        `http://192.168.1.74:8000/api/equipos/${equipoId}/`,
+        `http://192.168.0.114:8000/api/equipos/${equipoId}/`,
         {
           method: "PATCH",
           headers: {
