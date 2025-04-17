@@ -20,7 +20,7 @@ const EquiposProceso = () => {
     direction: null
   });
 
-  // Configuración inicial del componente
+  // Bloquea el botón de atrás
   useEffect(() => {
     const handleBackButton = (e) => {
       e.preventDefault();
@@ -35,7 +35,6 @@ const EquiposProceso = () => {
     };
   }, [navigate]);
 
-  // Orden fijo de estados
   const ordenEstados = [
     "Ingreso",
     "En espera",
@@ -47,38 +46,27 @@ const EquiposProceso = () => {
     "Entregado"
   ];
 
-  // Función para obtener el token CSRF
   const getCSRFToken = () => {
-    const cookieValue = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('csrftoken='))
-      ?.split('=')[1];
-    return cookieValue || '';
+    return document.cookie
+      .split("; ")
+      .find(row => row.startsWith("csrftoken="))
+      ?.split("=")[1] || "";
   };
 
-  // Función mejorada para cargar datos
   const fetchData = async (url) => {
-    try {
-      const response = await fetch(url, {
-        credentials: 'include'
-      });
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Error ${response.status}: ${errorText}`);
-      }
-      return await response.json();
-    } catch (error) {
-      console.error(`Error al cargar ${url}:`, error);
-      throw error;
+    const response = await fetch(url, { credentials: "include" });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error ${response.status}: ${errorText}`);
     }
+    return response.json();
   };
 
-  // Cargar todos los datos necesarios
   useEffect(() => {
     const loadAllData = async () => {
       setLoading(true);
       setError(null);
-      
+
       try {
         const [estadosData, usuariosData, clientesData, equiposData, historialData] = await Promise.all([
           fetchData("http://127.0.0.1:8000/api/estados-calibracion/"),
@@ -88,7 +76,6 @@ const EquiposProceso = () => {
           fetchData("http://127.0.0.1:8000/api/historial-equipos/")
         ]);
 
-        // Procesar estados en el orden específico
         const processedEstados = ordenEstados
           .map(nombre => estadosData.find(e => e.nombre_estado === nombre))
           .filter(Boolean)
@@ -98,40 +85,30 @@ const EquiposProceso = () => {
             orden: estado.orden
           }));
 
-        // Procesar historial
         const historialPorEquipo = historialData.reduce((acc, item) => {
           acc[item.equipo_id] = acc[item.equipo_id] || [];
           acc[item.equipo_id].push(item);
           return acc;
         }, {});
 
-        // Procesar equipos con información de cliente y responsable
-        const processedEquipos = equiposData.map(equipo => {
+        const processedEquipos = equiposData.map((equipo) => {
           const historialEquipo = (historialPorEquipo[equipo.id] || [])
             .sort((a, b) => new Date(b.fecha_cambio) - new Date(a.fecha_cambio));
 
-          const estadoActual = historialEquipo.length > 0 
-            ? historialEquipo[0].estado_id 
-            : processedEstados.find(e => e.nombre === "Ingreso")?.id || 1;
+          const clienteId = equipo.cliente_id || equipo.cliente;
+          const cliente = clienteId ? clientesData.find(c => c.id === clienteId) : null;
 
-          // Buscar responsable en usuariosData
-          const responsable = historialEquipo.length > 0
-            ? usuariosData.find(u => u.id === historialEquipo[0].responsable_id) || { fullName: "No asignado" }
-            : { fullName: "No asignado" };
-
-          // Buscar cliente en clientesData
-          const cliente = clientesData.find(c => c.id === equipo.cliente_id) || { nombre: "Cliente no encontrado" };
+          const ultimoHistorial = historialEquipo[0] || {};
+          const responsableObj = usuariosData.find(u => u.id === ultimoHistorial.responsable_id) || usuariosData[0];
 
           return {
             ...equipo,
-            estado: estadoActual,
-            responsable: responsable.fullName,
-            cliente_nombre: cliente.nombre,
+            cliente_id: clienteId,
+            cliente_nombre: cliente?.nombre_cliente || `Cliente ID: ${clienteId || 'N/A'}`,
+            responsable: responsableObj?.fullName || "Responsable por asignar",
+            estado: ultimoHistorial.estado_id || processedEstados.find(e => e.nombre === "Ingreso")?.id || 1,
             fecha_entrada: new Date(equipo.fecha_entrada).toLocaleDateString(),
-            historial: historialEquipo.map(item => ({
-              ...item,
-              responsable_nombre: usuariosData.find(u => u.id === item.responsable_id)?.fullName || "Sistema"
-            }))
+            historial: historialEquipo
           };
         });
 
@@ -140,10 +117,8 @@ const EquiposProceso = () => {
         setClientes(clientesData);
         setEquipos(processedEquipos);
         setLoading(false);
-        
-      } catch (error) {
-        console.error("Error al cargar datos:", error);
-        setError(`Error al cargar datos: ${error.message}`);
+      } catch (err) {
+        setError(`Error al cargar datos: ${err.message}`);
         setLoading(false);
       }
     };
@@ -151,49 +126,35 @@ const EquiposProceso = () => {
     loadAllData();
   }, []);
 
-  // Función para manejar el cambio de estado con observaciones
   const handleEstadoChange = (equipoId, nuevoEstadoId, direction) => {
-    setPendingChange({
-      equipoId,
-      nuevoEstadoId,
-      direction
-    });
+    if (!nuevoEstadoId) return;
+    setPendingChange({ equipoId, nuevoEstadoId, direction });
     setShowObservationModal(true);
   };
 
-  // Función para confirmar el cambio de estado con observaciones
   const confirmEstadoChange = async () => {
     try {
       const { equipoId, nuevoEstadoId, direction } = pendingChange;
-      
-      if (!equipoId || !nuevoEstadoId) {
-        throw new Error("Faltan datos requeridos para cambiar el estado");
-      }
-
       const estadoExistente = estados.find(e => e.id === nuevoEstadoId);
-      if (!estadoExistente) {
-        throw new Error(`Estado con ID ${nuevoEstadoId} no encontrado`);
-      }
+      if (!estadoExistente) throw new Error("Estado no encontrado.");
 
-      const usuario = usuarios.length > 0 
-        ? usuarios[0] 
-        : { 
-            id: 1, 
-            fullName: "Sistema Automático",
-            correo: "sistema@calibraciones.com"
-          };
+      const usuario = usuarios[0] || {
+        id: 1,
+        fullName: "Sistema Automático",
+        correo: "sistema@calibraciones.com"
+      };
 
       const payload = {
         equipo: equipoId,
         estado: nuevoEstadoId,
         responsable: usuario.id,
         fecha_cambio: new Date().toISOString(),
-        observaciones: currentObservation || `Cambio de estado ${direction === 'next' ? 'siguiente' : 'anterior'}`
+        observaciones: currentObservation || (direction === 'next' ? 'Cambio siguiente' : 'Cambio anterior')
       };
 
       const response = await fetch("http://127.0.0.1:8000/api/historial-equipos/", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "X-CSRFToken": getCSRFToken(),
           "X-Requested-With": "XMLHttpRequest"
@@ -204,83 +165,50 @@ const EquiposProceso = () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Error ${response.status}: ${response.statusText}`);
+        throw new Error(errorData.detail || `Error ${response.status}`);
       }
 
       const responseData = await response.json();
 
-      // Actualizar el estado local
-      setEquipos(prev => prev.map(equipo => {
-        if (equipo.id === equipoId) {
-          const nuevoHistorial = [
-            {
-              ...responseData,
-              responsable_nombre: usuario.fullName
-            },
-            ...equipo.historial
-          ];
+      setEquipos(prev =>
+        prev.map(e =>
+          e.id === equipoId
+            ? {
+                ...e,
+                estado: nuevoEstadoId,
+                responsable: usuario.fullName,
+                historial: [{ ...responseData, responsable_nombre: usuario.fullName }, ...e.historial]
+              }
+            : e
+        )
+      );
 
-          return {
-            ...equipo,
-            estado: nuevoEstadoId,
-            responsable: usuario.fullName,
-            historial: nuevoHistorial
-          };
-        }
-        return equipo;
-      }));
-
-      setNotification({
-        show: true,
-        message: `Estado cambiado a ${estadoExistente.nombre} correctamente`,
-        type: "success"
-      });
-      
-      // Limpiar el modal
+      setNotification({ show: true, message: `Estado cambiado a ${estadoExistente.nombre} correctamente`, type: "success" });
       setShowObservationModal(false);
       setCurrentObservation("");
-      setPendingChange({
-        equipoId: null,
-        nuevoEstadoId: null,
-        direction: null
-      });
+      setPendingChange({ equipoId: null, nuevoEstadoId: null, direction: null });
 
       setTimeout(() => setNotification({ show: false, message: "", type: "" }), 3000);
-
-    } catch (error) {
-      console.error("Error al cambiar estado:", error);
-      setNotification({
-        show: true,
-        message: `Error al cambiar estado: ${error.message}`,
-        type: "error"
-      });
+    } catch (err) {
+      setNotification({ show: true, message: `Error al cambiar estado: ${err.message}`, type: "error" });
       setTimeout(() => setNotification({ show: false, message: "", type: "" }), 5000);
     }
   };
 
-  // Renderizado condicional
-  if (loading) {
-    return <div className="loading-overlay">Cargando datos...</div>;
-  }
+  if (loading) return <div className="loading-overlay">Cargando datos...</div>;
 
-  if (error) {
+  if (error)
     return (
       <div className="error-overlay">
         <p>{error}</p>
         <button onClick={() => window.location.reload()}>Recargar</button>
       </div>
     );
-  }
 
   return (
     <div className="equipos-proceso-container">
-      {notification.show && (
-        <div className={`notification ${notification.type}`}>
-          {notification.message}
-        </div>
-      )}
+      {notification.show && <div className={`notification ${notification.type}`}>{notification.message}</div>}
 
-      {/* Modal de Observaciones */}
       {showObservationModal && (
         <div className="modal-overlay">
           <div className="observation-modal">
@@ -291,19 +219,10 @@ const EquiposProceso = () => {
               placeholder="Ingrese observaciones sobre el cambio de estado..."
             />
             <div className="modal-actions">
-              <button 
-                className="cancel-button"
-                onClick={() => {
-                  setShowObservationModal(false);
-                  setCurrentObservation("");
-                }}
-              >
+              <button className="cancel-button" onClick={() => { setShowObservationModal(false); setCurrentObservation(""); }}>
                 Cancelar
               </button>
-              <button 
-                className="confirm-button"
-                onClick={confirmEstadoChange}
-              >
+              <button className="confirm-button" onClick={confirmEstadoChange}>
                 Confirmar Cambio
               </button>
             </div>
@@ -328,7 +247,7 @@ const EquiposProceso = () => {
         {estados.map((estado, index) => {
           const equiposEnEstado = equipos
             .filter(e => e.estado === estado.id)
-            .filter(e => 
+            .filter(e =>
               e.nombre_equipo.toLowerCase().includes(searchTerm.toLowerCase()) ||
               e.consecutivo.toString().includes(searchTerm) ||
               e.cliente_nombre.toLowerCase().includes(searchTerm.toLowerCase())
@@ -342,13 +261,8 @@ const EquiposProceso = () => {
               </div>
               <div className="equipos-list">
                 {equiposEnEstado.map(equipo => {
-                  const estadoIndex = estados.findIndex(e => e.id === estado.id);
                   return (
-                    <div 
-                      key={equipo.id} 
-                      className="equipo-card" 
-                      onClick={() => navigate(`/equipos/${equipo.id}`)}
-                    >
+                    <div key={equipo.id} className="equipo-card" onClick={() => navigate(`/equipos/${equipo.id}`)}>
                       <div className="equipo-header">
                         <h4>{equipo.nombre_equipo}</h4>
                         <p className="consecutivo">#{equipo.consecutivo}</p>
@@ -361,29 +275,15 @@ const EquiposProceso = () => {
                       <div className="equipo-actions">
                         <button
                           className="action-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEstadoChange(
-                              equipo.id, 
-                              estados[estadoIndex - 1]?.id, 
-                              'prev'
-                            );
-                          }}
-                          disabled={estadoIndex <= 0}
+                          onClick={(e) => { e.stopPropagation(); handleEstadoChange(equipo.id, estados[index - 1]?.id, 'prev'); }}
+                          disabled={index <= 0}
                         >
                           ◄ Anterior
                         </button>
                         <button
                           className="action-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEstadoChange(
-                              equipo.id, 
-                              estados[estadoIndex + 1]?.id, 
-                              'next'
-                            );
-                          }}
-                          disabled={estadoIndex >= estados.length - 1}
+                          onClick={(e) => { e.stopPropagation(); handleEstadoChange(equipo.id, estados[index + 1]?.id, 'next'); }}
+                          disabled={index >= estados.length - 1}
                         >
                           Siguiente ►
                         </button>

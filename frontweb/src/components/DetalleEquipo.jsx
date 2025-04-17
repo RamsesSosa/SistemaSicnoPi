@@ -55,13 +55,23 @@ const DetalleEquipo = () => {
           const historialProcesado = await Promise.all(
             historialOrdenado.map(async (item) => {
               let responsable = "Sistema";
+              
+              // SOLUCIÓN: Manejo mejorado del responsable
               if (item.responsable) {
-                const usuarioResponse = await fetch(
-                  `http://127.0.0.1:8000/api/usuarios/${item.responsable}/`
-                );
-                if (usuarioResponse.ok) {
-                  const usuarioData = await usuarioResponse.json();
-                  responsable = usuarioData.nombre || "Usuario no encontrado";
+                try {
+                  const usuarioResponse = await fetch(
+                    `http://127.0.0.1:8000/api/usuarios/${item.responsable}/`
+                  );
+                  if (usuarioResponse.ok) {
+                    const usuarioData = await usuarioResponse.json();
+                    // Usamos fullName o username como fallback
+                    responsable = usuarioData.fullName || 
+                                 usuarioData.username || 
+                                 `Usuario ${item.responsable}`;
+                  }
+                } catch (error) {
+                  console.error("Error al cargar usuario:", error);
+                  responsable = `Usuario ${item.responsable}`;
                 }
               }
 
