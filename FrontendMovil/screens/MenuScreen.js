@@ -1,30 +1,13 @@
+import React, { useState, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
 
-const ContenidoScreen = () => (
-  <View style={styles.container}>
-    <Text style={styles.title}>Contenido Screen</Text>
-  </View>
-);
-const ScannerScreen = ({ navigation }) => (
-  <View style={styles.container}>
-    <Text style={styles.title}>Scanner</Text>
-    <TouchableOpacity 
-      style={styles.button} 
-      onPress={() => navigation.navigate('Contenido')}
-    >
-      <Text style={styles.buttonText}>Ir a Contenido</Text>
-    </TouchableOpacity>
-  </View>
-);
-
-
-const QuickAccess = ({ navigation }) => (
+// Pantalla de Accesos Rápidos (Home)
+const QuickAccessScreen = ({ navigation }) => (
   <View style={styles.container}>
     <Text style={styles.title}>Accesos Rápidos</Text>
     <FlatList
@@ -35,7 +18,6 @@ const QuickAccess = ({ navigation }) => (
         { id: '4', name: 'Registrar equipo', icon: 'construction', screen: 'RegistroEquipo' },
         { id: '5', name: 'Generar Reporte', icon: 'assessment', screen: 'Reporte' },
         { id: '6', name: 'Tablero Tareas', icon: 'dashboard', screen: 'Tablero' },
-    
       ]}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
@@ -49,28 +31,127 @@ const QuickAccess = ({ navigation }) => (
     />
   </View>
 );
-const ScannerStack = () => (
-  <Stack.Navigator>
-    <Stack.Screen name="Scanner" component={ScannerScreen} />
-    <Stack.Screen name="Contenido" component={ContenidoScreen} />
-  </Stack.Navigator>
-);
-const MenuScreen = () => {
+
+// Pantalla de Escáner QR (directamente con la cámara)
+const QRScannerScreen = ({ navigation }) => {
+  const [facing, setFacing] = useState('back');
+  const [permission, requestPermission] = useCameraPermissions();
+  const [scanned, setScanned] = useState(false);
+
+  useEffect(() => {
+    if (!permission) {
+      requestPermission();
+    }
+  }, [permission]);
+
+  if (!permission) {
+    return <View />;
+  }
+
+  if (!permission.granted) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Necesitamos permiso para usar la cámara</Text>
+        <TouchableOpacity style={styles.button} onPress={requestPermission}>
+          <Text style={styles.buttonText}>Conceder permiso</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const handleBarCodeScanned = ({ type, data }) => {
+    setScanned(true);
+    Alert.alert(
+      'Código QR escaneado',
+      data,
+      [
+        {
+          text: 'OK',
+          onPress: () => setScanned(false),
+        },
+        {
+          text: 'Ver detalles',
+          onPress: () => navigation.navigate('ScannerContent', { qrData: data }),
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+  const toggleCameraFacing = () => {
+    setFacing(current => (current === 'back' ? 'front' : 'back'));
+  };
+
+  return (
+    <View style={styles.container}>
+      <CameraView
+        style={styles.camera}
+        facing={facing}
+        barcodeScannerSettings={{
+          barcodeTypes: ['qr'],
+        }}
+        onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+      >
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
+            <MaterialIcons name="flip-camera-android" size={30} color="white" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.overlay}>
+          <View style={styles.unfocusedContainer} />
+          <View style={styles.middleContainer}>
+            <View style={styles.unfocusedContainer} />
+            <View style={styles.focusedContainer} />
+            <View style={styles.unfocusedContainer} />
+          </View>
+          <View style={styles.unfocusedContainer} />
+        </View>
+      </CameraView>
+    </View>
+  );
+};
+
+// Pantalla de Contenido (para mostrar resultados)
+const ContenidoScreen = ({ route }) => {
+  const { qrData } = route.params || {};
+  
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Contenido del QR</Text>
+      <Text style={styles.scannedData}>{qrData || 'No hay datos escaneados'}</Text>
+    </View>
+  );
+};
+
+// Navegador principal con pestañas
+const MainTabNavigator = () => {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Menu" component={QuickAccess} options={{
-        tabBarIcon: ({ color, size }) => (
-          <MaterialIcons name="home" color={color} size={size} />
-        ),
-      }} />
-      <Tab.Screen name="Scanner" component={ScannerStack} options={{
-        tabBarIcon: ({ color, size }) => (
-          <MaterialIcons name="qr-code-scanner" color={color} size={size} />
-        ),
-      }} />
+      <Tab.Screen 
+        name="Home" 
+        component={QuickAccessScreen} 
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="home" color={color} size={size} />
+          ),
+          tabBarLabel: 'Inicio'
+        }} 
+      />
+      <Tab.Screen 
+        name="QRScanner" 
+        component={QRScannerScreen} 
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="qr-code-scanner" color={color} size={size} />
+          ),
+          tabBarLabel: 'Escaner'
+        }} 
+      />
     </Tab.Navigator>
   );
 };
+
+// Estilos (los mismos que tenías)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -104,5 +185,47 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 18,
   },
+  camera: {
+    flex: 1,
+    width: '100%',
+  },
+  buttonContainer: {
+    position: 'absolute',
+    right: 20,
+    top: 20,
+    zIndex: 1,
+  },
+  flipButton: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 10,
+    borderRadius: 50,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    flexDirection: 'column',
+  },
+  unfocusedContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  middleContainer: {
+    flexDirection: 'row',
+    flex: 1.5,
+  },
+  focusedContainer: {
+    flex: 6,
+    borderColor: 'rgba(255,143,0,0.5)',
+    borderWidth: 2,
+    borderRadius: 10,
+  },
+  scannedData: {
+    fontSize: 16,
+    backgroundColor: '#f0f0f0',
+    padding: 15,
+    borderRadius: 5,
+    marginBottom: 20,
+  },
 });
-export default MenuScreen;
+
+export default MainTabNavigator;

@@ -13,7 +13,7 @@ const HistorialCalibracionScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = 'http://192.168.1.74:8000/api';
+  const API_URL = 'http://192.168.0.114:8000/api';
 
   // Función corregida para obtener equipos
   const fetchEquipos = async () => {
