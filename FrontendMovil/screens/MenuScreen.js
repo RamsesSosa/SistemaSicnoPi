@@ -31,7 +31,6 @@ const QuickAccessScreen = ({ navigation }) => (
   </View>
 );
 
-
 const QRScannerScreen = ({ navigation }) => {
   const [facing, setFacing] = useState('back');
   const [permission, requestPermission] = useCameraPermissions();
@@ -60,9 +59,25 @@ const QRScannerScreen = ({ navigation }) => {
 
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
+    
+    let equipoId = null;
+    try {
+      const url = new URL(data);
+      const pathParts = url.pathname.split('/').filter(part => part !== '');
+      if (pathParts[0] === 'equipos' && pathParts[1]) {
+        equipoId = pathParts[1];
+      }
+    } catch (e) {
+      console.log("No es una URL válida o no sigue el formato esperado");
+    }
+
+    const mensaje = equipoId 
+      ? `ID del equipo: ${equipoId}\nURL: ${data}`
+      : `Código escaneado: ${data}`;
+
     Alert.alert(
       'Código QR escaneado',
-      data,
+      mensaje,
       [
         {
           text: 'OK',
@@ -70,7 +85,10 @@ const QRScannerScreen = ({ navigation }) => {
         },
         {
           text: 'Ver detalles',
-          onPress: () => navigation.navigate('ScannerContent', { qrData: data }),
+          onPress: () => navigation.navigate('ScannerContent', { 
+            qrData: data,
+            equipoId: equipoId 
+          }),
         },
       ],
       { cancelable: false }
@@ -111,19 +129,136 @@ const QRScannerScreen = ({ navigation }) => {
 };
 
 const ContenidoScreen = ({ route }) => {
-  const { qrData } = route.params || {};
-  
+  const { qrData, equipoId } = route.params || {};
+  const [equipo, setEquipo] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Datos de ejemplo (en producción deberías hacer una llamada a la API)
+  useEffect(() => {
+    if (equipoId) {
+      // Simulamos una llamada a la API con un timeout
+      setTimeout(() => {
+        setEquipo({
+          nombre_equipo: "Analizador de Red",
+          consecutivo: "EQ-2023-045",
+          marca: "Keysight",
+          modelo: "PNA-L N5232C",
+          numero_serie: "US12345678",
+          estado: "operativo"
+        });
+        setLoading(false);
+      }, 1000);
+    } else {
+      setLoading(false);
+    }
+  }, [equipoId]);
+
+  // Mapeo de estados a colores
+  const estados = {
+    operativo: { nombre: "Operativo", color: "#4CAF50" },
+    mantenimiento: { nombre: "En Mantenimiento", color: "#FFC107" },
+    baja: { nombre: "De Baja", color: "#F44336" },
+    calibracion: { nombre: "En Calibración", color: "#2196F3" }
+  };
+
+  const estadoActual = equipo?.estado ? estados[equipo.estado] || { nombre: "Desconocido", color: "#9E9E9E" } : null;
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>Cargando información del equipo...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Contenido del QR</Text>
-      <Text style={styles.scannedData}>{qrData || 'No hay datos escaneados'}</Text>
+      <Text style={styles.title}>Detalles del Equipo</Text>
+      
+      {equipoId ? (
+        <>
+          {/* Nueva sección con el diseño de tarjeta */}
+          {equipo && (
+            <View style={styles.gridContainer}>
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Información del Equipo</Text>
+                
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Nombre:</Text>
+                  <Text style={styles.infoValue}>
+                    {equipo?.nombre_equipo || "No especificado"}
+                  </Text>
+                </View>
+                
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Consecutivo:</Text>
+                  <Text style={styles.infoValue}>
+                    {equipo?.consecutivo || "No especificado"}
+                  </Text>
+                </View>
+                
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Marca:</Text>
+                  <Text style={styles.infoValue}>
+                    {equipo?.marca || "No especificado"}
+                  </Text>
+                </View>
+                
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>Modelo:</Text>
+                  <Text style={styles.infoValue}>
+                    {equipo?.modelo || "No especificado"}
+                  </Text>
+                </View>
+                
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>N° Serie:</Text>
+                  <Text style={styles.infoValue}>
+                    {equipo?.numero_serie || "No especificado"}
+                  </Text>
+                </View>
+                
+                {estadoActual && (
+                  <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Estado Actual:</Text>
+                    <View style={[styles.estadoBadge, { backgroundColor: estadoActual.color }]}>
+                      <Text style={styles.estadoBadgeText}>{estadoActual.nombre}</Text>
+                    </View>
+                  </View>
+                )}
+              </View>
+            </View>
+          )}
+
+          {/* Sección original con los detalles del QR */}
+          <View style={styles.detailContainer}>
+            <Text style={styles.label}>ID del Equipo:</Text>
+            <Text style={styles.detailText}>{equipoId}</Text>
+          </View>
+          
+          <View style={styles.detailContainer}>
+            <Text style={styles.label}>URL completa:</Text>
+            <Text style={styles.detailText}>{qrData}</Text>
+          </View>
+        </>
+      ) : (
+        <View style={styles.detailContainer}>
+          <Text style={styles.label}>Datos escaneados:</Text>
+          <Text style={styles.detailText}>{qrData || 'No hay datos válidos'}</Text>
+        </View>
+      )}
     </View>
   );
 };
 
-const MainTabNavigator = () => {
+const MenuScreen = () => {
   return (
-    <Tab.Navigator>
+    <Tab.Navigator
+      screenOptions={{
+        tabBarActiveTintColor: '#FF8F00',
+        tabBarInactiveTintColor: 'gray',
+      }}
+    >
       <Tab.Screen 
         name="Home" 
         component={QuickAccessScreen} 
@@ -141,8 +276,15 @@ const MainTabNavigator = () => {
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="qr-code-scanner" color={color} size={size} />
           ),
-          tabBarLabel: 'Escaner'
+          tabBarLabel: 'Escáner QR'
         }} 
+      />
+      <Tab.Screen 
+        name="ScannerContent" 
+        component={ContenidoScreen} 
+        options={{
+          tabBarButton: () => null,
+        }}
       />
     </Tab.Navigator>
   );
@@ -151,35 +293,43 @@ const MainTabNavigator = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
+    padding: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: '#333',
   },
   button: {
     backgroundColor: '#FF8F00',
-    padding: 10,
+    padding: 15,
     borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 20,
   },
   buttonText: {
     color: '#fff',
     fontSize: 18,
+    fontWeight: 'bold',
   },
   quickAccessItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
+    padding: 15,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
+    borderColor: '#ddd',
+    borderRadius: 8,
     marginBottom: 10,
+    width: 300,
+    backgroundColor: '#f9f9f9',
   },
   quickAccessText: {
-    marginLeft: 10,
+    marginLeft: 15,
     fontSize: 18,
+    color: '#333',
   },
   camera: {
     flex: 1,
@@ -211,17 +361,77 @@ const styles = StyleSheet.create({
   },
   focusedContainer: {
     flex: 6,
-    borderColor: 'rgba(255,143,0,0.5)',
+    borderColor: 'rgba(255,143,0,0.8)',
     borderWidth: 2,
     borderRadius: 10,
   },
-  scannedData: {
+  detailContainer: {
+    marginBottom: 20,
+    width: '100%',
+  },
+  label: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#FF8F00',
+  },
+  detailText: {
     fontSize: 16,
     backgroundColor: '#f0f0f0',
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 8,
+    color: '#333',
+  },
+  // Nuevos estilos para la tarjeta
+  gridContainer: {
+    width: '100%',
+    padding: 15,
     marginBottom: 20,
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#333',
+    textAlign: 'center',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  infoLabel: {
+    fontWeight: 'bold',
+    color: '#555',
+    fontSize: 16,
+  },
+  infoValue: {
+    color: '#333',
+    fontSize: 16,
+  },
+  estadoBadge: {
+    borderRadius: 15,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  estadoBadgeText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });
 
-export default MainTabNavigator;
+export default MenuScreen;
