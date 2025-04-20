@@ -1,5 +1,7 @@
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from django.conf import settings
+from django.utils import timezone
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
 class UsuarioManager(BaseUserManager):
     def create_user(self, correo, password=None, **extra_fields):
@@ -14,14 +16,16 @@ class UsuarioManager(BaseUserManager):
     def create_superuser(self, correo, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-
+        extra_fields.setdefault('is_active', True)
         return self.create_user(correo, password, **extra_fields)
+
 
 class Usuario(AbstractBaseUser, PermissionsMixin):
     fullName = models.CharField(max_length=100)
     correo = models.EmailField(max_length=100, unique=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    date_joined = models.DateTimeField(auto_now_add=True)
 
     objects = UsuarioManager()
 
@@ -31,17 +35,33 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.fullName
 
+    def get_full_name(self):
+        return self.fullName
 
+    def get_short_name(self):
+        return self.fullName
 
 class Cliente(models.Model):
     nombre_cliente = models.CharField(max_length=255)
-    
+
     def __str__(self):
         return self.nombre_cliente
 
 
+class EstadoCalibracion(models.Model):
+    nombre_estado = models.CharField(max_length=50, unique=True)
+    orden = models.IntegerField(unique=True)
+    descripcion = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['orden']
+
+    def __str__(self):
+        return self.nombre_estado
+
 
 class Equipo(models.Model):
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     nombre_equipo = models.CharField(max_length=50)
     numero_serie = models.CharField(max_length=50, unique=True)
     marca = models.CharField(max_length=50)
@@ -49,49 +69,58 @@ class Equipo(models.Model):
     consecutivo = models.CharField(max_length=20, unique=True)
     accesorios = models.TextField(null=True, blank=True)
     observaciones = models.TextField(null=True, blank=True)
-    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
-    fecha_entrada = models.DateTimeField(auto_now_add=True)  # Fecha automática
+    fecha_entrada = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.nombre_equipo
-    
+        return f"{self.nombre_equipo} ({self.numero_serie})"
 
+    @property
+    def estado_actual(self):
+        # Esto nos devuelve el ultimo estado del equipo
+        ultimo_historial = self.historialequipo_set.order_by('-fecha_cambio').first()
+        return ultimo_historial.estado if ultimo_historial else None
 
+    def cambiar_estado(self, nuevo_estado, usuario, observaciones=''):
+        #Aqui cambia el estado del equipo y registra el historial
+        if self.estado_actual == nuevo_estado:
+            return False
+        HistorialEquipo.objects.create(
+            equipo=self,
+            estado=nuevo_estado,
+            responsable=usuario,
+            observaciones=observaciones
+        )
+        return True
 
-class EstadoCalibracion(models.Model):
-    nombre_estado = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.nombre_estado
-
-
+    def save(self, *args, **kwargs):
+        is_new = not self.pk
+        super().save(*args, **kwargs)
+        if is_new:
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+            estado_ingreso = EstadoCalibracion.objects.get(orden=1)
+            admin_user = User.objects.filter(is_superuser=True).first()
+            HistorialEquipo.objects.create(
+                equipo=self,
+                estado=estado_ingreso,
+                responsable=admin_user,
+                observaciones="Registro inicial automático"
+            )
 
 
 class HistorialEquipo(models.Model):
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
+    estado = models.ForeignKey(EstadoCalibracion, on_delete=models.PROTECT)
+    responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     fecha_cambio = models.DateTimeField(auto_now_add=True)
-    equipo = models.ForeignKey(
-        'Equipo', 
-        on_delete=models.CASCADE,
-        db_column='equipo_id'  # Esto es CRUCIAL porque coincide con tu DB
-    )
-    estado = models.ForeignKey(
-        'EstadoCalibracion', 
-        on_delete=models.PROTECT,
-        db_column='estado_id'
-    )
-    responsable = models.ForeignKey(
-        'Usuario',
-        on_delete=models.PROTECT,
-        db_column='responsable_id'
-    )
-    observaciones = models.TextField()
+    observaciones = models.TextField(blank=True)
 
     class Meta:
-        db_table = 'api_historialequipo'  # Nombre exacto de tu tabla
+        ordering = ['-fecha_cambio']
+        get_latest_by = 'fecha_cambio'
 
-
-
-
+    def __str__(self):
+        return f"{self.equipo} → {self.estado} ({self.fecha_cambio})"
 
 class Alerta(models.Model):
     TIPOS_ALERTA = (
@@ -101,10 +130,11 @@ class Alerta(models.Model):
     tipo_alerta = models.CharField(max_length=20, choices=TIPOS_ALERTA)
     descripcion = models.TextField()
     fecha_generada = models.DateTimeField(auto_now_add=True)
-    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)  # FK a Equipo
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"Alerta: {self.tipo_alerta}"
+
 
 class Reporte(models.Model):
     TIPOS_REPORTE = (
@@ -118,8 +148,9 @@ class Reporte(models.Model):
     def __str__(self):
         return f"Reporte: {self.tipo_reporte}"
 
+
 class EntregaRecoleccion(models.Model):
-    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)  # FK a Equipo
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
     fecha_hora = models.DateTimeField(auto_now_add=True)
     responsable_entrega = models.CharField(max_length=100)
 

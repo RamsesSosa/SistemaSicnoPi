@@ -1,25 +1,24 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import status
-from rest_framework import viewsets
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from django.contrib.auth import get_user_model
+from django.db.models import Max, F
+from rest_framework import status, viewsets, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import viewsets
+from rest_framework.decorators import action
 
-
-
+# JWT Auth 
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import (
-    Usuario, 
-    Cliente, 
-    Equipo, 
-    EstadoCalibracion, 
-    HistorialEquipo, 
-    Alerta, 
-    Reporte, 
-    EntregaRecoleccion)
+    Usuario,
+    Cliente,
+    Equipo,
+    EstadoCalibracion,
+    HistorialEquipo,
+    Alerta,
+    Reporte,
+    EntregaRecoleccion,
+)
 
 from .serializer import (
     UsuarioSerializer,
@@ -32,7 +31,7 @@ from .serializer import (
     EntregaRecoleccionSerializer,
 )
 
-# ViewSet para cada modelo
+# Authentication
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -51,42 +50,89 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
+# ViewSets
+
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
 
-
-# vista para manejar la creación de clientes
 class ClienteViewSet(viewsets.ModelViewSet):
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
 
-
-
-
+    def create(self, request, *args, **kwargs):
+        print("Datos recibidos:", request.data)
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                serializer.save()
+                print("Cliente creado:", serializer.data)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                print("Error después de guardar:", str(e))
+                return Response({'status': 'error', 'message': 'Error interno del servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            print("Error al crear cliente:", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class EquipoViewSet(viewsets.ModelViewSet):
     queryset = Equipo.objects.all()
     serializer_class = EquipoSerializer
 
-    
+    @action(detail=True, methods=['post'])
+    def cambiar_estado(self, request, pk=None):
+        equipo = self.get_object()
+        estado_id = request.data.get('estado_id')
+        observaciones = request.data.get('observaciones', '')
+
+        try:
+            nuevo_estado = EstadoCalibracion.objects.get(pk=estado_id)
+        except EstadoCalibracion.DoesNotExist:
+            return Response({'error': 'Estado no válido'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if equipo.cambiar_estado(nuevo_estado, request.user, observaciones):
+            return Response({'status': 'Estado actualizado'})
+        return Response({'status': 'El equipo ya está en este estado'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False)
+    def por_estado(self, request):
+        estados = EstadoCalibracion.objects.all().order_by('orden')
+        data = []
+
+        for estado in estados:
+            equipos = Equipo.objects.filter(
+                historialequipo__estado=estado
+            ).annotate(
+                ultima_fecha=Max('historialequipo__fecha_cambio')
+            ).filter(
+                historialequipo__fecha_cambio=F('ultima_fecha')
+            ).distinct()
+
+            serializer = self.get_serializer(equipos, many=True)
+            data.append({
+                'estado': EstadoCalibracionSerializer(estado).data,
+                'equipos': serializer.data,
+                'total': equipos.count()
+            })
+
+        return Response(data)
 
 class EstadoCalibracionViewSet(viewsets.ModelViewSet):
-    queryset = EstadoCalibracion.objects.all()
+    queryset = EstadoCalibracion.objects.all().order_by('orden')
     serializer_class = EstadoCalibracionSerializer
 
 class HistorialEquipoViewSet(viewsets.ModelViewSet):
-    queryset = HistorialEquipo.objects.all()
     serializer_class = HistorialEquipoSerializer
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        equipo_id = self.request.query_params.get('equipo')
+        queryset = HistorialEquipo.objects.all()
+        equipo_id = self.request.query_params.get('equipo_id')
         if equipo_id:
             queryset = queryset.filter(equipo_id=equipo_id)
-        return queryset
+        return queryset.order_by('-fecha_cambio')
 
-    
+    def perform_create(self, serializer):
+        serializer.save(responsable=self.request.user)
 
 class AlertaViewSet(viewsets.ModelViewSet):
     queryset = Alerta.objects.all()
@@ -99,3 +145,63 @@ class ReporteViewSet(viewsets.ModelViewSet):
 class EntregaRecoleccionViewSet(viewsets.ModelViewSet):
     queryset = EntregaRecoleccion.objects.all()
     serializer_class = EntregaRecoleccionSerializer
+
+# APIviews
+
+class EquiposPorEstadoView(APIView):
+    def get(self, request):
+        estados = EstadoCalibracion.objects.all().order_by('orden')
+        resultado = []
+
+        for estado in estados:
+            equipos = Equipo.objects.filter(
+                historialequipo__estado=estado
+            ).annotate(
+                ultima_fecha=Max('historialequipo__fecha_cambio')
+            ).filter(
+                historialequipo__fecha_cambio=F('ultima_fecha')
+            ).distinct()
+
+            serializer = EquipoSerializer(equipos, many=True)
+            resultado.append({
+                'estado': EstadoCalibracionSerializer(estado).data,
+                'equipos': serializer.data,
+                'total': equipos.count()
+            })
+
+        return Response(resultado)
+
+class CambiarEstadoEquipoAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        equipo = get_object_or_404(Equipo, pk=pk)
+        nuevo_estado_id = request.data.get("estado_id")
+        observaciones = request.data.get("observaciones", "")
+
+        if not nuevo_estado_id:
+            return Response({"error": "Debe proporcionar un 'estado_id'"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            nuevo_estado = EstadoCalibracion.objects.get(pk=nuevo_estado_id)
+        except EstadoCalibracion.DoesNotExist:
+            return Response({"error": "El estado proporcionado no existe"}, status=status.HTTP_404_NOT_FOUND)
+
+        estado_actual = equipo.estado_actual
+        if estado_actual:
+            if abs(nuevo_estado.orden - estado_actual.orden) > 1:
+                return Response({"error": "No se puede saltar estados. Solo avanzar o retroceder uno a la vez."}, status=status.HTTP_400_BAD_REQUEST)
+            if nuevo_estado == estado_actual:
+                return Response({"error": "El equipo ya está en ese estado."}, status=status.HTTP_400_BAD_REQUEST)
+
+        HistorialEquipo.objects.create(
+            equipo=equipo,
+            estado=nuevo_estado,
+            responsable=request.user,
+            observaciones=observaciones
+        )
+
+        return Response({
+            "mensaje": "Estado actualizado correctamente",
+            "nuevo_estado": nuevo_estado.nombre_estado
+        }, status=status.HTTP_201_CREATED)
