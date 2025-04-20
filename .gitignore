@@ -68,3 +68,7 @@ __pycache__/
 *.pyd
 # Ignorar la carpeta venv/
 venv/
+# Ignorar caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
