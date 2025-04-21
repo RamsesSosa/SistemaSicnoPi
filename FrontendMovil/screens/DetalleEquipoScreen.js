@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
-const RegistroEquipoScreen = () => {
+const DetalleEquipoScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { id } = route.params || {};
@@ -386,4 +386,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RegistroEquipoScreen;
+export default DetalleEquipoScreen;
