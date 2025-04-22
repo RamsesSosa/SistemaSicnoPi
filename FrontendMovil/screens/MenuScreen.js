@@ -143,7 +143,7 @@ const ContenidoScreen = ({ route }) => {
       // Simulamos una llamada a la API con un timeout
       setTimeout(() => {
         setEquipo({
-          nombre_equipo: "Analizador de Red",
+          nombre_equipo: "Nuevo equipoS",
           consecutivo: "EQ-2023-045",
           marca: "Keysight",
           modelo: "PNA-L N5232C",

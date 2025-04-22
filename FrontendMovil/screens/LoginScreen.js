@@ -8,8 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Logo from '../screens/logo.jpeg';
 
 const api = axios.create({
-  baseURL: 'http://192.168.1.74:8000/api/', //Cambiar URL por la ip de quien lo pruebe
-
+  baseURL: 'http://192.168.0.26:8000/api/', //Cambiar URL por la ip de quien lo pruebe
   timeout: 10000,
 });
 
