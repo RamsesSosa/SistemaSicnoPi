@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 
+// Asegúrate de que esta ruta sea correcta según tu estructura de carpetas
+import Logo from '../screens/logo.jpeg';
+
 const api = axios.create({
-  baseURL: 'http://192.168.0.114:8000/api/', //Cambiar URL por la ip de quien lo pruebe
+  baseURL: 'http://192.168.0.26:8000/api/', //Cambiar URL por la ip de quien lo pruebe
   timeout: 10000,
 });
+
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -50,8 +54,10 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <Image source={Logo} style={styles.logo} />
       <Text style={styles.title}>Bienvenido!</Text>
       <Text style={styles.subtitle}>Inicia sesión con tu correo y contraseña.</Text>
+
       {/* Campo de correo electrónico */}
       <View style={styles.inputContainer}>
         <Icon name="envelope" size={20} color="#999" style={styles.icon} />
@@ -65,6 +71,7 @@ const LoginScreen = ({ navigation }) => {
           autoCapitalize="none"
         />
       </View>
+
       {/* Campo de contraseña */}
       <View style={styles.inputContainer}>
         <Icon name="lock" size={20} color="#999" style={styles.icon} />
@@ -74,20 +81,23 @@ const LoginScreen = ({ navigation }) => {
           placeholderTextColor="#999"
           value={password}
           onChangeText={setPassword}
-          secureTextEntry={!showPassword} // Alternar visibilidad
+          secureTextEntry={!showPassword}
         />
         <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
           <Icon name={showPassword ? 'eye-slash' : 'eye'} size={20} color="#999" />
         </TouchableOpacity>
       </View>
+
       {/* Botón de inicio de sesión personalizado */}
       <TouchableOpacity style={styles.customButton} onPress={handleLogin}>
         <Text style={styles.customButtonText}>Iniciar Sesión</Text>
       </TouchableOpacity>
+
       {/* Enlace para registrarse */}
       <TouchableOpacity onPress={() => navigation.navigate('Register')}>
         <Text style={styles.link}>Registrarse</Text>
       </TouchableOpacity>
+
       {/* Enlace para recuperar contraseña */}
       <TouchableOpacity>
         <Text style={styles.link}>¿Olvidaste tu contraseña?</Text>
@@ -95,6 +105,7 @@ const LoginScreen = ({ navigation }) => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -102,6 +113,14 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#f5f5f5',
   },
+  logo: {
+    width: 150,
+    height: 150,
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    marginBottom: 10,
+    marginTop: -40, // Esto la sube un poco
+  },  
   title: {
     fontSize: 24,
     marginBottom: 16,
@@ -150,4 +169,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
 export default LoginScreen;

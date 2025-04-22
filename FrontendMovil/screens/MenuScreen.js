@@ -19,17 +19,21 @@ const QuickAccessScreen = ({ navigation }) => (
         { id: '6', name: 'Tablero Tareas', icon: 'dashboard', screen: 'Tablero' },
       ]}
       keyExtractor={(item) => item.id}
+      numColumns={2}
+      columnWrapperStyle={{ justifyContent: 'space-between' }}
       renderItem={({ item }) => (
-        <TouchableOpacity onPress={() => navigation.navigate(item.screen)}>
-          <View style={styles.quickAccessItem}>
-            <MaterialIcons name={item.icon} size={30} color="#FF8F00" />
-            <Text style={styles.quickAccessText}>{item.name}</Text>
-          </View>
+        <TouchableOpacity 
+          style={styles.cardAccess} 
+          onPress={() => navigation.navigate(item.screen)}
+        >
+          <MaterialIcons name={item.icon} size={40} color="#FF8F00" />
+          <Text style={styles.cardText}>{item.name}</Text>
         </TouchableOpacity>
       )}
     />
   </View>
 );
+
 
 const QRScannerScreen = ({ navigation }) => {
   const [facing, setFacing] = useState('back');
@@ -316,20 +320,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   quickAccessItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    marginBottom: 10,
-    width: 300,
-    backgroundColor: '#f9f9f9',
+    display: 'none' // eliminado porque ya no se usa
   },
   quickAccessText: {
-    marginLeft: 15,
-    fontSize: 18,
-    color: '#333',
+    display: 'none' // eliminado porque ya no se usa
   },
   camera: {
     flex: 1,
@@ -388,20 +382,25 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 20,
   },
-  card: {
+  cardAccess: {
     backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
+    borderRadius: 12,
+    paddingVertical: 25,
+    paddingHorizontal: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '48%',
+    marginBottom: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 3,
   },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
+  cardText: {
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: '600',
     color: '#333',
     textAlign: 'center',
   },
