@@ -6,6 +6,7 @@ const EquiposProceso = () => {
   const navigate = useNavigate();
   const [equipos, setEquipos] = useState([]);
   const [estados, setEstados] = useState([]);
+  const [clientes, setClientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,24 +42,36 @@ const EquiposProceso = () => {
     };
   }, [navigate]);
 
+  // Función para obtener el token CSRF
+  const getCSRFToken = () => {
+    return document.cookie
+      .split("; ")
+      .find(row => row.startsWith("csrftoken="))
+      ?.split("=")[1] || "";
+  };
+
   // Función optimizada para obtener datos
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const [equiposRes, estadosRes] = await Promise.all([
+      const [equiposRes, estadosRes, clientesRes, historialRes] = await Promise.all([
         fetch("http://127.0.0.1:8000/api/equipos/"),
-        fetch("http://127.0.0.1:8000/api/estados-calibracion/")
+        fetch("http://127.0.0.1:8000/api/estados-calibracion/"),
+        fetch("http://127.0.0.1:8000/api/clientes/"),
+        fetch("http://127.0.0.1:8000/api/historial-equipos/")
       ]);
 
-      if (!equiposRes.ok || !estadosRes.ok) {
+      if (!equiposRes.ok || !estadosRes.ok || !clientesRes.ok || !historialRes.ok) {
         throw new Error("Error al cargar datos");
       }
 
-      const [equiposData, estadosData] = await Promise.all([
+      const [equiposData, estadosData, clientesData, historialData] = await Promise.all([
         equiposRes.json(),
-        estadosRes.json()
+        estadosRes.json(),
+        clientesRes.json(),
+        historialRes.json()
       ]);
 
       // Procesar estados manteniendo el orden definido
@@ -66,20 +79,33 @@ const EquiposProceso = () => {
         .map(nombre => estadosData.find(e => e.nombre_estado === nombre))
         .filter(Boolean);
 
-      // Procesar equipos con su estado actual
+      // Organizar historial por equipo
+      const historialPorEquipo = historialData.reduce((acc, item) => {
+        acc[item.equipo] = acc[item.equipo] || [];
+        acc[item.equipo].push(item);
+        return acc;
+      }, {});
+
+      // Procesar equipos con su estado actual y cliente
       const processedEquipos = equiposData.map(equipo => {
-        const estadoActual = equipo.estado_actual?.id || null;
-        const fechaEntrada = new Date(equipo.fecha_entrada).toLocaleDateString();
-      
+        const historialEquipo = (historialPorEquipo[equipo.id] || [])
+          .sort((a, b) => new Date(b.fecha_cambio) - new Date(a.fecha_cambio));
+        
+        const estadoActual = historialEquipo[0]?.estado || equipo.estado_actual?.id || processedEstados[0]?.id;
+        const cliente = clientesData.find(c => c.id === equipo.cliente) || null;
+
         return {
           ...equipo,
           estado_actual: estadoActual,
-          fecha_entrada: fechaEntrada,
-          estado: estadoActual
+          estado: estadoActual, // Mantener compatibilidad
+          cliente_nombre: cliente?.nombre_cliente || "Cliente no asignado",
+          fecha_entrada: new Date(equipo.fecha_entrada).toLocaleDateString(),
+          historial: historialEquipo
         };
       });
 
       setEstados(processedEstados);
+      setClientes(clientesData);
       setEquipos(processedEquipos);
     } catch (err) {
       setError(`Error al cargar datos: ${err.message}`);
@@ -95,36 +121,43 @@ const EquiposProceso = () => {
   const cambiarEstado = async (equipoId, nuevoEstadoId, direction) => {
     try {
       const token = localStorage.getItem('access_token');
+      const user = JSON.parse(localStorage.getItem('user'));
       
-      const response = await fetch(`http://127.0.0.1:8000/api/equipos/${equipoId}/cambiar_estado/`, {
+      const response = await fetch(`http://127.0.0.1:8000/api/historial-equipos/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
-          "X-CSRFToken": document.cookie.match(/csrftoken=([^;]+)/)?.[1] || "",
+          "X-CSRFToken": getCSRFToken(),
         },
         body: JSON.stringify({
-          estado_id: nuevoEstadoId,
-          observaciones: currentObservation || `Cambio ${direction}`
+          equipo: equipoId,
+          estado: nuevoEstadoId,
+          responsable: user?.id || 1,
+          observaciones: currentObservation || `Cambio ${direction}`,
+          fecha_cambio: new Date().toISOString()
         })
       });
   
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Error al cambiar estado");
+        throw new Error(errorData.detail || errorData.error || "Error al cambiar estado");
       }
 
-      // Actualizar el estado local usando el estado actual de la API
-      const updatedEquipoRes = await fetch(`http://127.0.0.1:8000/api/equipos/${equipoId}/`);
-      const updatedEquipo = await updatedEquipoRes.json();
+      // Actualizar el estado local
+      const updatedHistorial = await response.json();
       
-      setEquipos(prev => prev.map(e => 
-        e.id === equipoId ? { 
-          ...e, 
-          estado_actual: updatedEquipo.estado_actual?.id,
-          estado: updatedEquipo.estado_actual?.id // Mantener compatibilidad
-        } : e
-      ));
+      setEquipos(prev => prev.map(e => {
+        if (e.id === equipoId) {
+          return {
+            ...e,
+            estado_actual: nuevoEstadoId,
+            estado: nuevoEstadoId,
+            historial: [updatedHistorial, ...e.historial]
+          };
+        }
+        return e;
+      }));
   
       setNotification({
         show: true,
@@ -181,7 +214,7 @@ const EquiposProceso = () => {
       .filter(e =>
         e.nombre_equipo.toLowerCase().includes(searchTerm.toLowerCase()) ||
         e.consecutivo.toString().includes(searchTerm) ||
-        (e.cliente?.nombre_cliente || "").toLowerCase().includes(searchTerm.toLowerCase())
+        e.cliente_nombre.toLowerCase().includes(searchTerm.toLowerCase())
       );
   };
 
@@ -269,8 +302,13 @@ const EquiposProceso = () => {
                       <p className="consecutivo">#{equipo.consecutivo}</p>
                     </div>
                     <div className="equipo-details">
-                      <p><strong>Cliente:</strong> {equipo.cliente?.nombre_cliente || "N/A"}</p>
+                      <p><strong>Cliente:</strong> {equipo.cliente_nombre}</p>
                       <p><strong>Entrada:</strong> {equipo.fecha_entrada}</p>
+                      {equipo.historial[0]?.observaciones && (
+                        <p className="last-observation">
+                          <strong>Última observación:</strong> {equipo.historial[0].observaciones}
+                        </p>
+                      )}
                     </div>
                     <div className="equipo-actions">
                       <button

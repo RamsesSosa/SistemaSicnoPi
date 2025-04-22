@@ -27,26 +27,35 @@ const DetalleEquipo = () => {
       try {
         setLoading(true);
         setError(null);
-
-        // Obtener datos del equipo y su historial en paralelo
-        const [equipoResponse, historialResponse] = await Promise.all([
+  
+        // Obtener datos del equipo, su historial y usuarios en paralelo
+        const [equipoResponse, historialResponse, usuariosResponse] = await Promise.all([
           fetch(`http://127.0.0.1:8000/api/equipos/${id}/`),
-          fetch(`http://127.0.0.1:8000/api/historial-equipos/?equipo_id=${id}`)
+          fetch(`http://127.0.0.1:8000/api/historial-equipos/?equipo_id=${id}`),
+          fetch(`http://127.0.0.1:8000/api/usuarios/`) // Asume que tienes un endpoint para usuarios
         ]);
-
+  
         if (!equipoResponse.ok) throw new Error("Error al cargar el equipo");
         if (!historialResponse.ok) throw new Error("Error al cargar el historial");
-
+        if (!usuariosResponse.ok) throw new Error("Error al cargar los usuarios");
+  
         const equipoData = await equipoResponse.json();
         const historialData = await historialResponse.json();
-
+        const usuariosData = await usuariosResponse.json();
+  
+        // Crear un mapa de usuarios para búsqueda rápida
+        const usuariosMap = usuariosData.reduce((map, usuario) => {
+          map[usuario.id] = usuario.fullName || `${usuario.firstName} ${usuario.lastName}`;
+          return map;
+        }, {});
+  
         // Procesar datos del equipo
         const estadoActualId = equipoData.estado_actual?.id || 1;
         setEquipo({
           ...equipoData,
           estado: estadoActualId
         });
-
+  
         // Procesar historial
         const historialProcesado = historialData
           .sort((a, b) => new Date(b.fecha_cambio) - new Date(a.fecha_cambio))
@@ -54,11 +63,11 @@ const DetalleEquipo = () => {
             id: item.id,
             estado: estadosConfig[item.estado]?.nombre || "Desconocido",
             color: estadosConfig[item.estado]?.color || "#000000",
-            usuario: item.responsable || "Sistema",
+            usuario: usuariosMap[item.responsable] || "Sistema",
             fecha: new Date(item.fecha_cambio).toLocaleString("es-ES"),
             observaciones: item.observaciones || "Cambio de estado"
           }));
-
+  
         setHistorial(historialProcesado);
       } catch (err) {
         setError(`Error: ${err.message}`);
@@ -67,7 +76,7 @@ const DetalleEquipo = () => {
         setLoading(false);
       }
     };
-
+  
     fetchData();
   }, [id]);
 
