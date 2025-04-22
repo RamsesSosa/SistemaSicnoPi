@@ -24,7 +24,7 @@ const RegistroEquipoScreen = () => {
     const fetchClientes = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://192.168.0.114:8000/api/clientes/');
+        const response = await fetch('http://192.168.1.74:8000/api/clientes/');
         const data = await response.json();
         if (response.ok) {
           setClientes(data);
@@ -59,7 +59,7 @@ const RegistroEquipoScreen = () => {
 
     try {
       setLoading(true);
-      const response = await fetch('http://192.168.0.114:8000/api/equipos/', {//Cambiar URL por la ip de quien lo pruebe
+      const response = await fetch('http://192.168.1.74:8000/api/equipos/', {//Cambiar URL por la ip de quien lo pruebe
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

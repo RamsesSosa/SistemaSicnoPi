@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  View, Text, TextInput, Button, Alert, ScrollView, 
-  StyleSheet, Modal, TouchableOpacity, FlatList, ActivityIndicator 
+  View, Text, ScrollView, StyleSheet, 
+  ActivityIndicator, Button, TouchableOpacity 
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
@@ -10,10 +10,9 @@ const DetalleEquipoScreen = () => {
   const route = useRoute();
   const { id } = route.params || {};
   const [equipo, setEquipo] = useState(null);
-  const [historialEstados, setHistorialEstados] = useState([]);
+  const [historial, setHistorial] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [tieneHistorial, setTieneHistorial] = useState(false);
 
   // Configuración de estados con colores
   const estadosConfig = {
@@ -27,89 +26,67 @@ const DetalleEquipoScreen = () => {
     8: { nombre: "Entregado", color: "#16a085" }
   };
 
-  // Cargar datos del equipo específico
   useEffect(() => {
-    const cargarDatosEquipo = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
-
-        // 1. Obtener datos del equipo específico
-        const equipoResponse = await fetch(`http://192.168.0.26:8000/api/equipos/${id}/`);
-        if (!equipoResponse.ok) throw new Error("Error al obtener el equipo");
+  
+        // Obtener datos del equipo, su historial y usuarios en paralelo
+        const [equipoResponse, historialResponse, usuariosResponse] = await Promise.all([
+          fetch(`http://192.168.1.74:8000/api/equipos/${id}/`),
+          fetch(`http://192.168.1.74:8000/api/historial-equipos/?equipo_id=${id}`),
+          fetch(`http://192.168.1.74:8000/api/usuarios/`)
+        ]);
+  
+        if (!equipoResponse.ok) throw new Error("Error al cargar el equipo");
+        if (!historialResponse.ok) throw new Error("Error al cargar el historial");
+        if (!usuariosResponse.ok) throw new Error("Error al cargar los usuarios");
+  
         const equipoData = await equipoResponse.json();
-
-        // 2. Obtener historial EXCLUSIVO de este equipo
-        const historialResponse = await fetch(
-          `http://192.168.0.26:8000/api/historial-equipos/?equipo=${id}`
-        );
-        if (!historialResponse.ok) throw new Error("Error al obtener el historial");
         const historialData = await historialResponse.json();
-
-        // 3. Procesar solo si hay historial para ESTE equipo
-        if (historialData.length > 0) {
-          setTieneHistorial(true);
-          
-          // Ordenar historial por fecha (más reciente primero)
-          const historialOrdenado = [...historialData].sort(
-            (a, b) => new Date(b.fecha_cambio) - new Date(a.fecha_cambio)
-          );
-
-          // Procesar datos del historial
-          const historialProcesado = await Promise.all(
-            historialOrdenado.map(async (item) => {
-              let responsable = "Sistema";
-              if (item.responsable) {
-                const usuarioResponse = await fetch(
-                  `http://192.168.0.26:8000/api/usuarios/${item.responsable}/`
-                );
-                if (usuarioResponse.ok) {
-                  const usuarioData = await usuarioResponse.json();
-                  responsable = usuarioData.nombre || "Usuario no encontrado";
-                }
-              }
-
-              const estadoInfo = estadosConfig[item.estado] || estadosConfig[1];
-
-              return {
-                estado: estadoInfo.nombre,
-                estadoColor: estadoInfo.color,
-                usuario: responsable,
-                fecha: item.fecha_cambio,
-                accion: item.observaciones || "Cambio de estado"
-              };
-            })
-          );
-
-          setHistorialEstados(historialProcesado);
-        } else {
-          setTieneHistorial(false);
-        }
-
+        const usuariosData = await usuariosResponse.json();
+  
+        // Crear un mapa de usuarios para búsqueda rápida
+        const usuariosMap = usuariosData.reduce((map, usuario) => {
+          map[usuario.id] = usuario.fullName || `${usuario.firstName} ${usuario.lastName}`;
+          return map;
+        }, {});
+  
+        // Procesar datos del equipo
+        const estadoActualId = equipoData.estado_actual?.id || 1;
         setEquipo({
           ...equipoData,
-          estado: equipoData.estado || 1
+          estado: estadoActualId
         });
-
-        setLoading(false);
-
-      } catch (error) {
-        console.error("Error al cargar datos:", error);
-        setError(`Error al cargar datos: ${error.message}`);
+  
+        // Procesar historial
+        const historialProcesado = historialData
+          .sort((a, b) => new Date(b.fecha_cambio) - new Date(a.fecha_cambio))
+          .map(item => ({
+            id: item.id,
+            estado: estadosConfig[item.estado]?.nombre || "Desconocido",
+            color: estadosConfig[item.estado]?.color || "#000000",
+            usuario: usuariosMap[item.responsable] || "Sistema",
+            fecha: new Date(item.fecha_cambio).toLocaleString("es-ES"),
+            observaciones: item.observaciones || "Cambio de estado"
+          }));
+  
+        setHistorial(historialProcesado);
+      } catch (err) {
+        setError(`Error: ${err.message}`);
+        console.error("Error fetching data:", err);
+      } finally {
         setLoading(false);
       }
     };
-
+  
     if (id) {
-      cargarDatosEquipo();
-    } else {
-      setLoading(false);
+      fetchData();
     }
   }, [id]);
 
-  const handleVolver = () => {
-    navigation.goBack();
-  };
+  const handleVolver = () => navigation.goBack();
 
   if (loading) {
     return (
@@ -132,7 +109,7 @@ const DetalleEquipoScreen = () => {
     );
   }
 
-  if (!equipo && id) {
+  if (!equipo) {
     return (
       <View style={styles.noEquipoContainer}>
         <Text>No se encontró el equipo solicitado</Text>
@@ -141,52 +118,45 @@ const DetalleEquipoScreen = () => {
     );
   }
 
-  const estadoActual = estadosConfig[equipo?.estado] || estadosConfig[1];
+  const estadoActual = estadosConfig[equipo.estado] || estadosConfig[1];
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Detalles del Equipo</Text>
-        <Button title="←" onPress={handleVolver} />
+        <TouchableOpacity onPress={handleVolver}>
+          <Text style={styles.backButton}>←</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.gridContainer}>
+        {/* Información del equipo */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Información del Equipo</Text>
           
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Nombre:</Text>
-            <Text style={styles.infoValue}>
-              {equipo?.nombre_equipo || "No especificado"}
-            </Text>
+            <Text style={styles.infoValue}>{equipo.nombre_equipo || "No especificado"}</Text>
           </View>
           
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Consecutivo:</Text>
-            <Text style={styles.infoValue}>
-              {equipo?.consecutivo || "No especificado"}
-            </Text>
+            <Text style={styles.infoValue}>{equipo.consecutivo || "No especificado"}</Text>
           </View>
           
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Marca:</Text>
-            <Text style={styles.infoValue}>
-              {equipo?.marca || "No especificado"}
-            </Text>
+            <Text style={styles.infoValue}>{equipo.marca || "No especificado"}</Text>
           </View>
           
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Modelo:</Text>
-            <Text style={styles.infoValue}>
-              {equipo?.modelo || "No especificado"}
-            </Text>
+            <Text style={styles.infoValue}>{equipo.modelo || "No especificado"}</Text>
           </View>
           
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>N° Serie:</Text>
-            <Text style={styles.infoValue}>
-              {equipo?.numero_serie || "No especificado"}
-            </Text>
+            <Text style={styles.infoValue}>{equipo.numero_serie || "No especificado"}</Text>
           </View>
           
           <View style={styles.infoRow}>
@@ -197,45 +167,37 @@ const DetalleEquipoScreen = () => {
           </View>
         </View>
 
+        {/* Historial del equipo */}
         <View style={styles.card}>
-          {/* Mostrar historial SOLO si existe para este equipo */}
-          {tieneHistorial ? (
+          <Text style={styles.cardTitle}>Historial de Estados</Text>
+          
+          {historial.length > 0 ? (
             <>
               <View style={styles.responsableSection}>
-                <Text style={styles.cardTitle}>Último Responsable</Text>
+                <Text style={styles.sectionTitle}>Último Responsable</Text>
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Usuario:</Text>
-                  <Text style={styles.infoValue}>
-                    {historialEstados[0]?.usuario || "No asignado"}
-                  </Text>
+                  <Text style={styles.infoValue}>{historial[0]?.usuario || "No asignado"}</Text>
                 </View>
                 <View style={styles.infoRow}>
                   <Text style={styles.infoLabel}>Fecha/Hora:</Text>
-                  <Text style={styles.infoValue}>
-                    {historialEstados[0]?.fecha ? 
-                      new Date(historialEstados[0].fecha).toLocaleString("es-ES") : 
-                      "No disponible"}
-                  </Text>
+                  <Text style={styles.infoValue}>{historial[0]?.fecha}</Text>
                 </View>
               </View>
 
               <View style={styles.historialSection}>
-                <Text style={styles.cardTitle}>Historial de Estados</Text>
+                <Text style={styles.sectionTitle}>Registro Completo</Text>
                 <View style={styles.historialList}>
-                  {historialEstados.map((item, index) => (
-                    <View key={index} style={styles.historialItem}>
-                      <View 
-                        style={[styles.historialEstado, { backgroundColor: item.estadoColor }]}
-                      >
+                  {historial.map((item) => (
+                    <View key={item.id} style={styles.historialItem}>
+                      <View style={[styles.historialEstado, { backgroundColor: item.color }]}>
                         <Text style={styles.historialEstadoText}>{item.estado}</Text>
                       </View>
                       <View style={styles.historialDetails}>
                         <Text style={styles.historialUsuario}>{item.usuario}</Text>
-                        <Text style={styles.historialFecha}>
-                          {new Date(item.fecha).toLocaleString("es-ES")}
-                        </Text>
-                        {item.accion && (
-                          <Text style={styles.historialAccion}>{item.accion}</Text>
+                        <Text style={styles.historialFecha}>{item.fecha}</Text>
+                        {item.observaciones && (
+                          <Text style={styles.historialAccion}>{item.observaciones}</Text>
                         )}
                       </View>
                     </View>
@@ -294,6 +256,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
   },
+  backButton: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
   gridContainer: {
     flexDirection: 'column',
     gap: 20,
@@ -313,6 +279,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 15,
     color: '#333',
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 10,
+    color: '#444',
   },
   infoRow: {
     flexDirection: 'row',
