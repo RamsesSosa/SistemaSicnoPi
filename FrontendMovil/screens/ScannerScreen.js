@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
-const ScannerScreen = ({ navigation }) => {
+const ScannerScreen = () => {
   const [facing, setFacing] = useState('back');
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
-  const [scannedData, setScannedData] = useState(null);
+  const navigation = useNavigation();
 
   useEffect(() => {
     if (!permission) {
@@ -30,24 +31,22 @@ const ScannerScreen = ({ navigation }) => {
     );
   }
 
-  const handleBarCodeScanned = ({ type, data }) => {
+  const handleBarCodeScanned = ({ data }) => {
     setScanned(true);
-    setScannedData(data);
-    Alert.alert(
-      'Código QR escaneado',
-      data,
-      [
-        {
-          text: 'OK',
-          onPress: () => setScanned(false),
-        },
-        {
-          text: 'Ver detalles',
-          onPress: () => navigation.navigate('Contenido', { qrData: data }),
-        },
-      ],
-      { cancelable: false }
-    );
+    
+    // Extrae el ID del equipo de la URL (ej: "http://localhost:5173/equipos/19" → "19")
+    const urlParts = data.split('/');
+    const equipoId = urlParts[urlParts.length - 1];
+
+    if (!isNaN(equipoId)) { // Verifica si es un número
+      navigation.navigate('DetalleEquipo', { equipoId: parseInt(equipoId) });
+    } else {
+      Alert.alert(
+        'QR no válido',
+        'Este código QR no pertenece a un equipo registrado.',
+        [{ text: 'OK', onPress: () => setScanned(false) }]
+      );
+    }
   };
 
   const toggleCameraFacing = () => {
@@ -56,42 +55,27 @@ const ScannerScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {!scanned ? (
-        <CameraView
-          style={styles.camera}
-          facing={facing}
-          barcodeScannerSettings={{
-            barcodeTypes: ['qr'],
-          }}
-          onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-        >
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
-              <MaterialIcons name="flip-camera-android" size={30} color="white" />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.overlay}>
-            <View style={styles.unfocusedContainer} />
-            <View style={styles.middleContainer}>
-              <View style={styles.unfocusedContainer} />
-              <View style={styles.focusedContainer} />
-              <View style={styles.unfocusedContainer} />
-            </View>
-            <View style={styles.unfocusedContainer} />
-          </View>
-        </CameraView>
-      ) : (
-        <View style={styles.scannedContainer}>
-          <Text style={styles.title}>Datos escaneados:</Text>
-          <Text style={styles.scannedData}>{scannedData}</Text>
-          <TouchableOpacity 
-            style={styles.button} 
-            onPress={() => setScanned(false)}
-          >
-            <Text style={styles.buttonText}>Escanear otro código</Text>
+      <CameraView
+        style={styles.camera}
+        facing={facing}
+        barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+        onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+      >
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
+            <MaterialIcons name="flip-camera-android" size={30} color="white" />
           </TouchableOpacity>
         </View>
-      )}
+        <View style={styles.overlay}>
+          <View style={styles.unfocusedContainer} />
+          <View style={styles.middleContainer}>
+            <View style={styles.unfocusedContainer} />
+            <View style={styles.focusedContainer} />
+            <View style={styles.unfocusedContainer} />
+          </View>
+          <View style={styles.unfocusedContainer} />
+        </View>
+      </CameraView>
     </View>
   );
 };

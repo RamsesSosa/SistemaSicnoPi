@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { useIsFocused } from '@react-navigation/native';
 
 const Tab = createBottomTabNavigator();
 
@@ -39,6 +40,13 @@ const QRScannerScreen = ({ navigation }) => {
   const [facing, setFacing] = useState('back');
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
+  const isFocused = useIsFocused(); // Para manejar el foco de la pantalla
+
+  useEffect(() => {
+    if (isFocused) {
+      setScanned(false); // Reinicia el estado cuando la pantalla está enfocada
+    }
+  }, [isFocused]);
 
   useEffect(() => {
     if (!permission) {
@@ -61,7 +69,7 @@ const QRScannerScreen = ({ navigation }) => {
     );
   }
 
-  const handleBarCodeScanned = ({ type, data }) => {
+  const handleBarCodeScanned = ({ data }) => {
     setScanned(true);
     
     let equipoId = null;
@@ -72,32 +80,22 @@ const QRScannerScreen = ({ navigation }) => {
         equipoId = pathParts[1];
       }
     } catch (e) {
-      console.log("No es una URL válida o no sigue el formato esperado");
+      console.log("No es una URL válida");
     }
 
-    const mensaje = equipoId 
-      ? `ID del equipo: ${equipoId}\nURL: ${data}`
-      : `Código escaneado: ${data}`;
-
-    Alert.alert(
-      'Código QR escaneado',
-      mensaje,
-      [
-        {
-          text: 'OK',
-          onPress: () => setScanned(false),
-        },
-        {
-          text: 'Ver detalles',
-          onPress: () => navigation.navigate('ScannerContent', { 
-            qrData: data,
-            equipoId: equipoId 
-          }),
-        },
-      ],
-      { cancelable: false }
-    );
+    if (equipoId) {
+      navigation.navigate('DetalleEquipo', { 
+        id: parseInt(equipoId) // Cambiado a 'id' para que coincida con tu pantalla de detalles
+      });
+    } else {
+      Alert.alert(
+        'QR no válido',
+        'Este código no corresponde a un equipo registrado',
+        [{ text: 'OK', onPress: () => setScanned(false) }]
+      );
+    }
   };
+
 
   const toggleCameraFacing = () => {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
