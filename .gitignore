@@ -68,3 +68,4 @@ __pycache__/
 *.pyd
 # Ignorar la carpeta venv/
 venv/
+package-lock.json
