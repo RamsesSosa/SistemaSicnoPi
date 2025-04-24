@@ -5,32 +5,57 @@ import "./VistaImpresion.css";
 const VistaImpresion = () => {
   const location = useLocation();
   const equipos = location.state?.equipos || [];
-
   const baseUrl = window.location.origin;
-  const anioActual = new Date().getFullYear();
+  const ITEMS_POR_PAGINA = 12; // 12 códigos por página
 
-  const generarCodigo = (id) => {
-    const idFormateado = String(id).padStart(3, "0");
-    return `CI-${id}-${anioActual}-${idFormateado}`;
-  };
+  // Calcular número de páginas necesarias
+  const totalPaginas = Math.ceil(equipos.length / ITEMS_POR_PAGINA);
+
+  // Dividir los equipos en páginas
+  const paginas = Array.from({ length: totalPaginas }, (_, i) =>
+    equipos.slice(i * ITEMS_POR_PAGINA, (i + 1) * ITEMS_POR_PAGINA)
+  );
 
   return (
-    <div className="pagina-impresion">
-      {equipos.map((equipo) => {
-        const codigo = generarCodigo(equipo.id);
-        return (
-          <div key={equipo.id} className="qr-item">
-            <QRCodeCanvas 
-              value={`${baseUrl}/equipos/${equipo.id}`} 
-              size={128} 
-            />
-            <p className="qr-text">{codigo}</p>
+    <div className="vista-impresion">
+      <div className="contenedor-paginas">
+        {paginas.map((pagina, indexPagina) => (
+          <div key={`pagina-${indexPagina}`} className="pagina-qr">
+            <div className="encabezado">
+              <h2>Control de Equipos</h2>
+              <p>Página {indexPagina + 1} de {totalPaginas}</p>
+            </div>
+
+            <div className="grid-qrs">
+              {pagina.map((equipo) => (
+                <div key={`qr-${equipo.id}`} className="item-qr">
+                  <QRCodeCanvas
+                    value={`${baseUrl}/equipos/${equipo.id}`}
+                    size={140}
+                    level="H"
+                    includeMargin={true}
+                  />
+                  <p className="consecutivo">{equipo.consecutivo}</p>
+                </div>
+              ))}
+              
+              {/* Rellenar con espacios vacíos si la página no está completa */}
+              {pagina.length < ITEMS_POR_PAGINA &&
+                Array.from({ length: ITEMS_POR_PAGINA - pagina.length }).map((_, i) => (
+                  <div key={`empty-${i}`} className="item-qr empty"></div>
+                ))}
+            </div>
+
+            <div className="pie-pagina">
+              <p>Impreso el {new Date().toLocaleDateString()}</p>
+            </div>
           </div>
-        );
-      })}
-      <div className="print-footer">
+        ))}
+      </div>
+
+      <div className="boton-impresion">
         <button onClick={() => window.print()} className="btn-imprimir">
-          Imprimir
+          <i className="fas fa-print"></i> Imprimir {totalPaginas} página{totalPaginas !== 1 ? 's' : ''}
         </button>
       </div>
     </div>

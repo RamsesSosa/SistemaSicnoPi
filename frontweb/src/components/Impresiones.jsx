@@ -64,6 +64,15 @@ const Impresiones = () => {
     });
   };
 
+  const handleSeleccionarTodos = () => {
+    if (equiposSeleccionados.length === equiposFiltrados.length) {
+      setEquiposSeleccionados([]);
+    } else {
+      const todosLosIds = equiposFiltrados.map(equipo => equipo.id);
+      setEquiposSeleccionados(todosLosIds);
+    }
+  };
+
   const handleImprimirSeleccionados = () => {
     const equiposParaImprimir = equiposRegistrados.filter((equipo) =>
       equiposSeleccionados.includes(equipo.id)
@@ -148,14 +157,22 @@ const Impresiones = () => {
           </div>
         </div>
 
-        <button
-          className="imprimir-btn"
-          onClick={handleImprimirSeleccionados}
-          disabled={equiposSeleccionados.length === 0}
-        >
-          <i className="fas fa-print"></i> Imprimir Seleccionados (
-          {equiposSeleccionados.length})
-        </button>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button
+            className="imprimir-btn"
+            onClick={handleImprimirSeleccionados}
+            disabled={equiposSeleccionados.length === 0}
+          >
+            <i className="fas fa-print"></i> Imprimir Seleccionados (
+            {equiposSeleccionados.length})
+          </button>
+          <button
+            className="imprimir-btn"
+            onClick={handleSeleccionarTodos}
+          >
+            <i className="fas fa-check-square"></i> {equiposSeleccionados.length === equiposFiltrados.length ? "Deseleccionar Todos" : "Seleccionar Todos"}
+          </button>
+        </div>
       </div>
 
       <div className="table-container">

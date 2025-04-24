@@ -5,6 +5,7 @@ const UltimosRegistros = () => {
   const [ultimosRegistros, setUltimosRegistros] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sortOrder, setSortOrder] = useState("desc");
 
   useEffect(() => {
     const fetchUltimosRegistros = async () => {
@@ -14,7 +15,11 @@ const UltimosRegistros = () => {
         const data = await response.json();
 
         const registrosOrdenados = data
-          .sort((a, b) => new Date(b.fecha_entrada) - new Date(a.fecha_entrada))
+          .sort((a, b) => {
+            const dateA = new Date(a.fecha_entrada);
+            const dateB = new Date(b.fecha_entrada);
+            return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
+          })
           .slice(0, 10);
 
         setUltimosRegistros(registrosOrdenados);
@@ -27,7 +32,11 @@ const UltimosRegistros = () => {
     };
 
     fetchUltimosRegistros();
-  }, []);
+  }, [sortOrder]);
+
+  const toggleSortOrder = () => {
+    setSortOrder(sortOrder === "desc" ? "asc" : "desc");
+  };
 
   if (loading) {
     return (
@@ -63,7 +72,18 @@ const UltimosRegistros = () => {
                 <th>Equipo</th>
                 <th>Marca</th>
                 <th>Consecutivo</th>
-                <th>Fecha de Entrada</th>
+                <th 
+                  className="sortable-header" 
+                  onClick={toggleSortOrder}
+                  aria-label={`Ordenar ${sortOrder === 'desc' ? 'más reciente primero' : 'más antiguo primero'}`}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    Fecha de Entrada
+                    <span className="sort-indicator" style={{ marginLeft: '10px' }}>
+                      {sortOrder === "desc" ? "↓" : "↑"}
+                    </span>
+                  </div>
+                </th>
               </tr>
             </thead>
             <tbody>

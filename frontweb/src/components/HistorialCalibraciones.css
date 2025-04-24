@@ -3,7 +3,7 @@
     --primary-light: #6b8fc7;
     --secondary-color: #166088;
     --accent-color: #4fc3f7;
-    --light-gray: #f8f9fa;
+    --light-gray: hsl(210, 17%, 98%);
     --medium-gray: #e9ecef;
     --dark-gray: #495057;
     --white: #ffffff;
@@ -218,3 +218,33 @@
       font-size: 0.9rem;
     }
   }
+
+  /* Estilos para el ordenamiento */
+/* Estilos para el ordenamiento - Flecha grande */
+/* Estilos para el ordenamiento - Flecha XXL */
+.sortable-header {
+  position: relative;
+  cursor: pointer;
+  padding-right: 40px !important; /* Espacio generoso para la flecha */
+}
+
+.sort-indicator {
+  position: absolute;
+  right: 5px;
+  font-size: 28px; /* Tamaño XXL - muy visible */
+  color: var(--white);
+  font-weight: bolder;
+  line-height: 0.8;
+  transition: all 0.2s ease;
+  top: 50%;
+  transform: translateY(-50%);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.sortable-header:hover .sort-indicator {
+  font-size: 30px; /* Aún más grande en hover */
+  right: 3px;
+  text-shadow: 0 3px 6px rgba(0,0,0,0.3);
+}
+
+/* Asegurar que el encabezado tenga suficiente altura */

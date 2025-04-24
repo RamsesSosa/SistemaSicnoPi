@@ -225,3 +225,4 @@
   overflow-y: auto; /* Permite el desplazamiento vertical */
   max-height: calc(100vh - 40px); /* Ajusta la altura máxima para que no exceda la ventana */
 }
+

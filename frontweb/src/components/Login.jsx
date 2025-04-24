@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import axios from 'axios';
+import LogoSicno from '../assets/images/LogoSicno.png';
+import './Login.css'; // Importamos el archivo CSS separado
 
 // Esquema de validación con Yup
 const schema = yup.object().shape({
@@ -32,7 +34,7 @@ const Login = () => {
       });
       localStorage.setItem('access_token', response.data.access);
       localStorage.setItem('refresh_token', response.data.refresh);
-      navigate('/home');  // Redirect to Home page after successful login
+      navigate('/home');
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
     }
@@ -41,15 +43,26 @@ const Login = () => {
   return (
     <div className="login-page">
       <div className="login-container">
-        <h1>Iniciar Sesión</h1>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        {/* Logo implementado */}
+        <div className="logo-container">
+          <img 
+            src={LogoSicno} 
+            alt="SICNO Laboratorio de Calibración" 
+            className="logo" 
+          />
+        </div>
+        
+        <h1 className="login-title">Iniciar Sesión</h1>
+        
+        <form onSubmit={handleSubmit(onSubmit)} className="login-form">
           <div className="input-group">
             <input
               type="email"
               placeholder="Correo electrónico"
+              className="login-input"
               {...register('email')}
             />
-            <span className="icon">✉️</span>
+            <span className="input-icon">✉️</span>
           </div>
           {errors.email && <p className="error-message">{errors.email.message}</p>}
 
@@ -57,20 +70,23 @@ const Login = () => {
             <input
               type={showPassword ? 'text' : 'password'}
               placeholder="Contraseña"
+              className="login-input"
               {...register('password')}
             />
-            <span className="icon" onClick={() => setShowPassword(!showPassword)}>
+            <span 
+              className="input-icon password-toggle" 
+              onClick={() => setShowPassword(!showPassword)}
+            >
               {showPassword ? '👁️' : '🔒'}
             </span>
           </div>
           {errors.password && <p className="error-message">{errors.password.message}</p>}
 
-          <button type="submit">Iniciar Sesión</button>
+          <button type="submit" className="submit-button">Iniciar Sesión</button>
         </form>
-        <Link to="/forgot-password">¿Olvidaste tu contraseña?</Link>
-        <p>
-          ¿No tienes una cuenta? <Link to="/register">Registrarse</Link>
-        </p>
+        
+        <Link to="/forgot-password" className="forgot-link">
+        </Link>
       </div>
     </div>
   );

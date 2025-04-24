@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./HistorialCalibraciones.css";
 
@@ -11,6 +11,16 @@ const HistorialCalibraciones = () => {
   const [busquedaConsecutivo, setBusquedaConsecutivo] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sortOrder, setSortOrder] = useState("desc");
+
+  // Memoizamos la función de ordenamiento
+  const ordenarEquipos = useCallback((equipos, order) => {
+    return [...equipos].sort((a, b) => {
+      const dateA = new Date(a.fecha_entrada);
+      const dateB = new Date(b.fecha_entrada);
+      return order === "desc" ? dateB - dateA : dateA - dateB;
+    });
+  }, []);
 
   useEffect(() => {
     const fetchEquipos = async () => {
@@ -18,8 +28,9 @@ const HistorialCalibraciones = () => {
         const response = await fetch("http://127.0.0.1:8000/api/equipos/");
         if (!response.ok) throw new Error("Error al obtener los equipos");
         const data = await response.json();
-        setEquiposRegistrados(data);
-        setEquiposFiltrados(data);
+        const equiposOrdenados = ordenarEquipos(data, sortOrder);
+        setEquiposRegistrados(equiposOrdenados);
+        setEquiposFiltrados(equiposOrdenados);
         setLoading(false);
       } catch (error) {
         console.error("Error:", error);
@@ -41,9 +52,11 @@ const HistorialCalibraciones = () => {
 
     fetchEquipos();
     fetchClientes();
-  }, []);
+  }, [ordenarEquipos, sortOrder]);
 
   useEffect(() => {
+    if (equiposRegistrados.length === 0) return;
+
     let filtrados = equiposRegistrados;
 
     if (clienteSeleccionado) {
@@ -69,6 +82,14 @@ const HistorialCalibraciones = () => {
 
   const handleBusquedaConsecutivoChange = (e) => {
     setBusquedaConsecutivo(e.target.value);
+  };
+
+  const toggleSortOrder = () => {
+    // Ordenamos los datos existentes inmediatamente
+    const nuevosOrdenados = ordenarEquipos(equiposRegistrados, sortOrder === "desc" ? "asc" : "desc");
+    setEquiposRegistrados(nuevosOrdenados);
+    setEquiposFiltrados(ordenarEquipos(equiposFiltrados, sortOrder === "desc" ? "asc" : "desc"));
+    setSortOrder(prev => prev === "desc" ? "asc" : "desc");
   };
 
   const handleEquipoClick = (equipoId) => {
@@ -138,7 +159,15 @@ const HistorialCalibraciones = () => {
                 <th>Equipo</th>
                 <th>Marca</th>
                 <th>Consecutivo</th>
-                <th>Fecha de Entrada</th>
+                <th 
+                  className="sortable-header" 
+                  onClick={toggleSortOrder}
+                >
+                  Fecha de Entrada
+                  <span className="sort-indicator">
+                    {sortOrder === "desc" ? "↓" : "↑"}
+                  </span>
+                </th>
               </tr>
             </thead>
             <tbody>
