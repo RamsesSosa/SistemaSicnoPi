@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, Text, TextInput, Button, Alert, ScrollView, 
-  StyleSheet, Modal, TouchableOpacity, FlatList, ActivityIndicator 
+import {
+  View, Text, TextInput, Alert, ScrollView,
+  StyleSheet, Modal, TouchableOpacity, FlatList, ActivityIndicator
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { KeyboardAvoidingView, Platform } from 'react-native';
 
 const RegistroEquipoScreen = () => {
   const navigation = useNavigation();
@@ -19,12 +20,11 @@ const RegistroEquipoScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Obtener lista de clientes
   useEffect(() => {
     const fetchClientes = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://192.168.1.74:8000/api/clientes/');
+        const response = await fetch('http://192.168.0.26:8000/api/clientes/');
         const data = await response.json();
         if (response.ok) {
           setClientes(data);
@@ -59,7 +59,7 @@ const RegistroEquipoScreen = () => {
 
     try {
       setLoading(true);
-      const response = await fetch('http://192.168.1.74:8000/api/equipos/', {//Cambiar URL por la ip de quien lo pruebe
+      const response = await fetch('http://192.168.0.26:8000/api/equipos/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -87,152 +87,153 @@ const RegistroEquipoScreen = () => {
   if (loading && clientes.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#4CAF50" />
       </View>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Registro de Equipo</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={100}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Registro de Equipo</Text>
 
-      {/* Selector de Cliente */}
-      <Text style={styles.label}>Cliente*</Text>
-      <TouchableOpacity 
-        style={styles.selector} 
-        onPress={() => setModalVisible(true)}
-      >
-        <Text>{clienteSeleccionado?.nombre_cliente || 'Seleccione un cliente'}</Text>
-      </TouchableOpacity>
+        <Text style={styles.label}>Cliente*</Text>
+        <TouchableOpacity
+          style={styles.selector}
+          onPress={() => setModalVisible(true)}
+        >
+          <Text style={{ color: clienteSeleccionado ? '#000' : '#999' }}>
+            {clienteSeleccionado?.nombre_cliente || 'Seleccione un cliente'}
+          </Text>
+        </TouchableOpacity>
 
-      <Modal visible={modalVisible} animationType="slide">
-        <View style={styles.modalContainer}>
-          <FlatList
-            data={clientes}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.item}
-                onPress={() => {
-                  setClienteSeleccionado(item);
-                  setModalVisible(false);
-                }}
-              >
-                <Text>{item.nombre_cliente}</Text>
-              </TouchableOpacity>
-            )}
-          />
-          <Button title="Cerrar" onPress={() => setModalVisible(false)} />
-        </View>
-      </Modal>
+        <Modal visible={modalVisible} animationType="slide">
+          <View style={styles.modalContainer}>
+            <FlatList
+              data={clientes}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.item}
+                  onPress={() => {
+                    setClienteSeleccionado(item);
+                    setModalVisible(false);
+                  }}
+                >
+                  <Text>{item.nombre_cliente}</Text>
+                </TouchableOpacity>
+              )}
+            />
+            <TouchableOpacity
+              style={[styles.button, styles.cancelButton]}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.buttonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
 
-      {/* Campos del formulario */}
-      <Text style={styles.label}>Nombre del Equipo*</Text>
-      <TextInput
-        value={nombreEquipo}
-        onChangeText={setNombreEquipo}
-        style={styles.input}
-        placeholder="Ej: Bomba centrífuga"
-      />
+        {[
+          { label: 'Nombre del Equipo*', value: nombreEquipo, onChange: setNombreEquipo, placeholder: 'Ej: Bomba centrífuga' },
+          { label: 'Número de Serie*', value: numeroSerie, onChange: setNumeroSerie, placeholder: 'Ej: SN12345678' },
+          { label: 'Marca*', value: marca, onChange: setMarca, placeholder: 'Ej: Siemens' },
+          { label: 'Modelo*', value: modelo, onChange: setModelo, placeholder: 'Ej: Model X2000' },
+          { label: 'Consecutivo*', value: consecutivo, onChange: setConsecutivo, placeholder: 'Ej: C-001-2023' },
+          { label: 'Accesorios', value: accesorios, onChange: setAccesorios, placeholder: 'Lista de accesorios incluidos' },
+          { label: 'Observaciones', value: observaciones, onChange: setObservaciones, placeholder: 'Detalles adicionales del equipo', multiline: true, height: 100 },
+        ].map(({ label, ...inputProps }, index) => (
+          <View key={index}>
+            <Text style={styles.label}>{label}</Text>
+            <TextInput
+              style={[styles.input, inputProps.multiline && { height: inputProps.height }]}
+              placeholder={inputProps.placeholder}
+              value={inputProps.value}
+              onChangeText={inputProps.onChange}
+              multiline={!!inputProps.multiline}
+            />
+          </View>
+        ))}
 
-      <Text style={styles.label}>Número de Serie*</Text>
-      <TextInput
-        value={numeroSerie}
-        onChangeText={setNumeroSerie}
-        style={styles.input}
-        placeholder="Ej: SN12345678"
-      />
-
-      <Text style={styles.label}>Marca*</Text>
-      <TextInput
-        value={marca}
-        onChangeText={setMarca}
-        style={styles.input}
-        placeholder="Ej: Siemens"
-      />
-
-      <Text style={styles.label}>Modelo*</Text>
-      <TextInput
-        value={modelo}
-        onChangeText={setModelo}
-        style={styles.input}
-        placeholder="Ej: Model X2000"
-      />
-
-      <Text style={styles.label}>Consecutivo*</Text>
-      <TextInput
-        value={consecutivo}
-        onChangeText={setConsecutivo}
-        style={styles.input}
-        placeholder="Ej: C-001-2023"
-      />
-
-      <Text style={styles.label}>Accesorios</Text>
-      <TextInput
-        value={accesorios}
-        onChangeText={setAccesorios}
-        style={styles.input}
-        placeholder="Lista de accesorios incluidos"
-      />
-
-      <Text style={styles.label}>Observaciones</Text>
-      <TextInput
-        value={observaciones}
-        onChangeText={setObservaciones}
-        style={[styles.input, { height: 100 }]}
-        multiline
-        placeholder="Detalles adicionales del equipo"
-      />
-
-      <Button 
-        title="Registrar Equipo" 
-        onPress={handleSubmit} 
-        disabled={loading}
-      />
-    </ScrollView>
+        <TouchableOpacity
+          style={[styles.button, loading && styles.disabledButton]}
+          onPress={handleSubmit}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>{loading ? 'Registrando...' : 'Registrar Equipo'}</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     padding: 20,
+    backgroundColor: '#F9FAFB',
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    fontSize: 26,
+    fontWeight: '700',
+    marginBottom: 30,
     textAlign: 'center',
+    color: '#333',
   },
   label: {
-    fontWeight: '600',
-    marginBottom: 5,
+    fontSize: 16,
+    marginBottom: 6,
+    fontWeight: '500',
+    color: '#555',
   },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 15,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 20,
     backgroundColor: '#fff',
+    fontSize: 16,
   },
   selector: {
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 15,
-    marginBottom: 15,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 20,
     backgroundColor: '#fff',
   },
   modalContainer: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F9FAFB',
   },
   item: {
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
     backgroundColor: '#fff',
+  },
+  button: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  cancelButton: {
+    backgroundColor: '#D32F2F',
+    marginTop: 20,
+  },
+  disabledButton: {
+    opacity: 0.7,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   loadingContainer: {
     flex: 1,

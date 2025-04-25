@@ -12,12 +12,12 @@ const QuickAccessScreen = ({ navigation }) => (
     <Text style={styles.title}>Accesos Rápidos</Text>
     <FlatList
       data={[
-        { id: '1', name: 'Registrar Cliente', icon: 'person-add', screen: 'RegistroClientes' },
-        { id: '2', name: 'Consultar Equipo', icon: 'engineering', screen: 'ConsultaEquipo' },
-        { id: '3', name: 'Historial Calibracion', icon: 'history', screen: 'HistorialCalibracion' },
-        { id: '4', name: 'Registrar equipo', icon: 'construction', screen: 'RegistroEquipo' },
-        { id: '5', name: 'Generar Reporte', icon: 'assessment', screen: 'Reporte' },
-        { id: '6', name: 'Tablero Tareas', icon: 'dashboard', screen: 'Tablero' },
+        { id: '1', name: 'Registrar Cliente', icon: 'person-add', screen: 'RegistroClientes', color: '#007BFF' },
+        { id: '2', name: 'Registrar equipo', icon: 'construction', screen: 'RegistroEquipo', color: '#43A047' },
+        { id: '3', name: 'Historial Calibracion', icon: 'history', screen: 'HistorialCalibracion', color: '#6A1B9A' },
+        { id: '6', name: 'Tablero Tareas', icon: 'dashboard', screen: 'Tablero', color: '#F9A825' },
+        { id: '5', name: 'Generar Reporte', icon: 'assessment', screen: 'Reporte', color: '#D32F2F' },
+        
       ]}
       keyExtractor={(item) => item.id}
       numColumns={2}
@@ -27,13 +27,14 @@ const QuickAccessScreen = ({ navigation }) => (
           style={styles.cardAccess} 
           onPress={() => navigation.navigate(item.screen)}
         >
-          <MaterialIcons name={item.icon} size={40} color="#FF8F00" />
+          <MaterialIcons name={item.icon} size={40} color={item.color} />
           <Text style={styles.cardText}>{item.name}</Text>
         </TouchableOpacity>
       )}
     />
   </View>
 );
+
 
 
 const QRScannerScreen = ({ navigation }) => {
@@ -265,22 +266,31 @@ const MenuScreen = () => {
         name="Home" 
         component={QuickAccessScreen} 
         options={{
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="home" color={color} size={size} />
           ),
           tabBarLabel: 'Inicio'
         }} 
-      />
+    />
+
       <Tab.Screen 
         name="QRScanner" 
         component={QRScannerScreen} 
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="qr-code-scanner" color={color} size={size} />
-          ),
-          tabBarLabel: 'Escáner QR'
+            headerShown: false,
+            tabBarIcon: ({ focused, size }) => (
+              <MaterialIcons 
+                name="qr-code-scanner" 
+                size={size} 
+                color={focused ? '#000' : 'gray'}
+              />
+            ),
+            tabBarLabel: 'Escáner QR'
         }} 
       />
+
+
       <Tab.Screen 
         name="ScannerContent" 
         component={ContenidoScreen} 

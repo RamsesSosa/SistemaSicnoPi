@@ -49,22 +49,22 @@ const TableroScreen = () => {
       const token = await AsyncStorage.getItem('access_token');
       
       const [equiposRes, estadosRes, clientesRes, historialRes] = await Promise.all([
-        fetch("http://192.168.1.74:8000/api/equipos/", {
+        fetch("http://192.168.0.26:8000/api/equipos/", {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         }),
-        fetch("http://192.168.1.74:8000/api/estados-calibracion/", {
+        fetch("http://192.168.0.26:8000/api/estados-calibracion/", {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         }),
-        fetch("http://192.168.1.74:8000/api/clientes/", {
+        fetch("http://192.168.0.26:8000/api/clientes/", {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         }),
-        fetch("http://192.168.1.74:8000/api/historial-equipos/", {
+        fetch("http://192.168.0.26:8000/api/historial-equipos/", {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -143,7 +143,7 @@ const TableroScreen = () => {
       const userString = await AsyncStorage.getItem('user');
       const user = userString ? JSON.parse(userString) : null;
       
-      const response = await fetch(`http://192.168.1.74:8000/api/historial-equipos/`, {
+      const response = await fetch(`http://192.168.0.26:8000/api/historial-equipos/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

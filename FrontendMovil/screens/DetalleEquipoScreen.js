@@ -34,9 +34,9 @@ const DetalleEquipoScreen = () => {
   
         // Obtener datos del equipo, su historial y usuarios en paralelo
         const [equipoResponse, historialResponse, usuariosResponse] = await Promise.all([
-          fetch(`http://192.168.1.74:8000/api/equipos/${id}/`),
-          fetch(`http://192.168.1.74:8000/api/historial-equipos/?equipo_id=${id}`),
-          fetch(`http://192.168.1.74:8000/api/usuarios/`)
+          fetch(`http://192.168.0.26:8000/api/equipos/${id}/`),
+          fetch(`http://192.168.0.26:8000/api/historial-equipos/?equipo_id=${id}`),
+          fetch(`http://192.168.0.26:8000/api/usuarios/`)
         ]);
   
         if (!equipoResponse.ok) throw new Error("Error al cargar el equipo");
