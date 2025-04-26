@@ -17,20 +17,29 @@ const Home = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+
         // Obtener últimos registros
-        const registrosResponse = await fetch("http://127.0.0.1:8000/api/equipos/");
-        if (!registrosResponse.ok) throw new Error("Error al obtener registros");
+        const registrosResponse = await fetch(
+          "http://127.0.0.1:8000/api/equipos/"
+        );
+        if (!registrosResponse.ok)
+          throw new Error("Error al obtener registros");
         const registrosData = await registrosResponse.json();
 
         // Obtener conteos de equipos
-        const conteosResponse = await fetch("http://127.0.0.1:8000/api/equipos-count/");
-        const conteosData = conteosResponse.ok ? await conteosResponse.json() : {};
+        const conteosResponse = await fetch(
+          "http://127.0.0.1:8000/api/equipos-count/"
+        );
+        const conteosData = conteosResponse.ok
+          ? await conteosResponse.json()
+          : {};
 
         // Procesar datos
         setUltimosRegistros(
           registrosData
-            .sort((a, b) => new Date(b.fecha_entrada) - new Date(a.fecha_entrada))
+            .sort(
+              (a, b) => new Date(b.fecha_entrada) - new Date(a.fecha_entrada)
+            )
             .slice(0, 5)
         );
 
@@ -70,12 +79,23 @@ const Home = () => {
           <li className={accesosRapidosAbierto ? "active" : ""}>
             <a href="#" onClick={toggleAccesosRapidos}>
               <i className="fas fa-bolt"></i> Accesos Rápidos
-              <i className={`fas fa-angle-right menu-arrow ${accesosRapidosAbierto ? "active" : ""}`}></i>
+              <i
+                className={`fas fa-angle-right menu-arrow ${
+                  accesosRapidosAbierto ? "active" : ""
+                }`}
+              ></i>
             </a>
             {accesosRapidosAbierto && (
               <ul>
                 <li>
-                  <Link to="/consultar-clientes" className={location.pathname === "/consultar-clientes" ? "active" : ""}>
+                  <Link
+                    to="/consultar-clientes"
+                    className={
+                      location.pathname === "/consultar-clientes"
+                        ? "active"
+                        : ""
+                    }
+                  >
                     <i className="fas fa-users"></i> Consultar clientes
                   </Link>
                 </li>
@@ -87,17 +107,31 @@ const Home = () => {
           <li className={equiposAbierto ? "active" : ""}>
             <a href="#" onClick={toggleEquipos}>
               <i className="fas fa-tools"></i> Equipos
-              <i className={`fas fa-angle-right menu-arrow ${equiposAbierto ? "active" : ""}`}></i>
+              <i
+                className={`fas fa-angle-right menu-arrow ${
+                  equiposAbierto ? "active" : ""
+                }`}
+              ></i>
             </a>
             {equiposAbierto && (
               <ul>
                 <li>
-                  <Link to="/equipos-proceso" className={location.pathname === "/equipos-proceso" ? "active" : ""}>
+                  <Link
+                    to="/equipos-proceso"
+                    className={
+                      location.pathname === "/equipos-proceso" ? "active" : ""
+                    }
+                  >
                     <i className="fas fa-wrench"></i> Equipos en proceso
                   </Link>
                 </li>
                 <li>
-                  <Link to="/resumen-mensual" className={location.pathname === "/resumen-mensual" ? "active" : ""}>
+                  <Link
+                    to="/resumen-mensual"
+                    className={
+                      location.pathname === "/resumen-mensual" ? "active" : ""
+                    }
+                  >
                     <i className="fas fa-chart-bar"></i> Resumen mensual
                   </Link>
                 </li>
@@ -108,11 +142,13 @@ const Home = () => {
           <div className="sidebar-divider"></div>
 
           {/* Últimos Registros */}
-          
 
           {/* Impresiones */}
           <li>
-            <Link to="/impresiones" className={location.pathname === "/impresiones" ? "active" : ""}>
+            <Link
+              to="/impresiones"
+              className={location.pathname === "/impresiones" ? "active" : ""}
+            >
               <i className="fas fa-print"></i> Imprimir QR
             </Link>
           </li>
@@ -121,14 +157,22 @@ const Home = () => {
 
           {/* Historial de Calibraciones */}
           <li>
-            <Link to="/historial-calibraciones" className={location.pathname === "/historial-calibraciones" ? "active" : ""}>
+            <Link
+              to="/historial-calibraciones"
+              className={
+                location.pathname === "/historial-calibraciones" ? "active" : ""
+              }
+            >
               <i className="fas fa-history"></i> Historial
             </Link>
           </li>
 
           {/* Estadísticas */}
           <li>
-            <Link to="/estadisticas" className={location.pathname === "/estadisticas" ? "active" : ""}>
+            <Link
+              to="/estadisticas"
+              className={location.pathname === "/estadisticas" ? "active" : ""}
+            >
               <i className="fas fa-chart-pie"></i> Estadísticas
             </Link>
           </li>
@@ -176,7 +220,11 @@ const Home = () => {
             <h4>Equipos en Calibración</h4>
             <p>
               <Link to="/equipos-proceso" className="status-link">
-                {loading ? <i className="fas fa-spinner fa-spin"></i> : equiposCalibrando}
+                {loading ? (
+                  <i className="fas fa-spinner fa-spin"></i>
+                ) : (
+                  equiposCalibrando
+                )}
               </Link>
             </p>
           </div>
@@ -184,7 +232,11 @@ const Home = () => {
             <h4>Pendientes de Entrega</h4>
             <p>
               <Link to="/equipos-proceso" className="status-link">
-                {loading ? <i className="fas fa-spinner fa-spin"></i> : equiposPendientes}
+                {loading ? (
+                  <i className="fas fa-spinner fa-spin"></i>
+                ) : (
+                  equiposPendientes
+                )}
               </Link>
             </p>
           </div>
@@ -198,7 +250,7 @@ const Home = () => {
               Ver todos <i className="fas fa-arrow-right"></i>
             </Link>
           </div>
-          
+
           {loading ? (
             <div className="loading-table">
               <i className="fas fa-spinner fa-spin"></i> Cargando registros...
@@ -227,7 +279,9 @@ const Home = () => {
                         <td>{registro.consecutivo}</td>
                         <td>
                           {registro.fecha_entrada
-                            ? new Date(registro.fecha_entrada).toLocaleDateString("es-MX", {
+                            ? new Date(
+                                registro.fecha_entrada
+                              ).toLocaleDateString("es-MX", {
                                 day: "2-digit",
                                 month: "2-digit",
                                 year: "numeric",

@@ -1,5 +1,9 @@
 # OSX
 .DS_Store
+# Ignorar archivos de Expo
+.expo/
+# Ignorar archivos de Gradle
+FrontendMovil/android/.gradle/
 # Xcode
 build/
 *.pbxuser
@@ -54,6 +58,12 @@ yarn-error.log
 .metro-health-check*
 # testing
 /coverage
+
+__pycache__/
+*.pyc
+*.pyo
+
+
 # Yarn
 .yarn/*
 !.yarn/patches
@@ -66,6 +76,8 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+api/__pycache__/
+principal/__pycache__/
 # Ignorar la carpeta venv/
 venv/
 # Ignorar caché de Python
