@@ -3,9 +3,7 @@ from django.db.models import Max, F
 from rest_framework import status, viewsets, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import action, api_view
-from django.contrib.auth import get_user_model
-from datetime import datetime
+from rest_framework.decorators import action
 
 # JWT Auth 
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -47,14 +45,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             'correo': attrs.get('correo'),
             'password': attrs.get('password')
         }
-        user_model = get_user_model()
-        try:
-            user = user_model.objects.get(correo=credentials['correo'])
-            if not user.check_password(credentials['password']):
-                raise Exception("Contraseña incorrecta")
-        except user_model.DoesNotExist:
-            raise Exception("Usuario no encontrado")
-        return super().validate(attrs)
+        
+        return super().validate(credentials)
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -214,29 +206,3 @@ class CambiarEstadoEquipoAPIView(APIView):
             "mensaje": "Estado actualizado correctamente",
             "nuevo_estado": nuevo_estado.nombre_estado
         }, status=status.HTTP_201_CREATED)
-    
-@api_view(['GET'])
-def metricas_volumen(request):
-    hoy = datetime.now()
-    mes = request.query_params.get('mes', hoy.month)
-    año = request.query_params.get('año', hoy.year)
-    
-    try:
-        volumen = Equipo.volumen_trabajo_mes(int(mes), int(año))
-        
-        # Respuesta exitosa
-        return Response({
-            'volumen_trabajo': volumen,
-            'status': 'success',
-            'mes': mes,
-            'año': año
-        })
-        
-    except Exception as e:
-        # Respuesta de error
-        return Response({
-            'status': 'error',
-            'message': str(e),
-            'mes': mes,
-            'año': año
-        }, status=400)

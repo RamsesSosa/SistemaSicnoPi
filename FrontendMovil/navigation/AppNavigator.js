@@ -10,8 +10,8 @@
   import ConsultaEquipoScreen from '../screens/ConsultaEquipoScreen';
   import HistorialCalibracionScreen from '../screens/HistorialCalibracionScreen';
   import ReporteScreen from '../screens/ReporteScreen';
-  import ScannerScreen from '../screens/ScannerScreen';
   import TableroScreen from '../screens/TableroScreen';
+  import DetalleEquipoScreen from '../screens/DetalleEquipoScreen';
 
   const Stack = createStackNavigator();
 
@@ -27,8 +27,9 @@
           <Stack.Screen name="ConsultaEquipo" component={ConsultaEquipoScreen} />
           <Stack.Screen name="HistorialCalibracion" component={HistorialCalibracionScreen} />
           <Stack.Screen name="Reporte" component={ReporteScreen} />
-          <Stack.Screen name="Scanner" component={ScannerScreen} />
           <Stack.Screen name="Tablero" component={TableroScreen} />
+          <Stack.Screen name="DetalleEquipo" component={DetalleEquipoScreen} />
+          
 
         </Stack.Navigator>
       </NavigationContainer>
