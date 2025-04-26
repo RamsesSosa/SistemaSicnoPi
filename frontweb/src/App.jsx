@@ -19,8 +19,12 @@ import ResumenMensual from "./components/ResumenMensual";
 import BusquedaEquipo from "./components/BusquedaEquipo";
 import UltimosRegistros from "./components/UltimosRegistros";
 
+const ProtectedRoute = ({ isAuthenticated, children }) => {
+  return isAuthenticated ? children : <Navigate to="/login" />;
+};
+
 const App = () => {
-  const isAuthenticated = true; // Cambia esto según tu lógica de autenticación
+  const isAuthenticated = !!localStorage.getItem('access_token'); // Verifica si hay un token de acceso
 
   return (
     <Router>
@@ -29,30 +33,108 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route
           path="/home"
-          element={isAuthenticated ? <Home /> : <Navigate to="/login" />}
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <Home />
+            </ProtectedRoute>
+          }
         />
-        <Route path="/ultimos-registros" element={<UltimosRegistros />} />
+        <Route
+          path="/ultimos-registros"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <UltimosRegistros />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/GraficosMetricasClave"
-          element={<GraficosMetricasClave />}
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <GraficosMetricasClave />
+            </ProtectedRoute>
+          }
         />
-        <Route path="/notificaciones" element={<Notificaciones />} />
-        <Route path="/registrar-equipo" element={<RegistrarEquipo />} />
-        <Route path="/registrar-cliente" element={<RegistrarCliente />} />
-        <Route path="/consultar-equipos" element={<ConsultarEquipos />} />
-        <Route path="/consultar-clientes" element={<ConsultarClientes />} />
+        <Route
+          path="/notificaciones"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <Notificaciones />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/registrar-equipo"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RegistrarEquipo />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/registrar-cliente"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RegistrarCliente />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/consultar-equipos"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <ConsultarEquipos />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/consultar-clientes"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <ConsultarClientes />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/historial-calibraciones"
-          element={<HistorialCalibraciones />}
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <HistorialCalibraciones />
+            </ProtectedRoute>
+          }
         />
-        <Route path="/equipos-calibracion" element={<EquiposCalibracion />} />{" "}
-        {/* Nueva ruta */}
-        
-        {/* Nueva ruta */}
-        <Route path="/resumen-mensual" element={<ResumenMensual />} />{" "}
-        {/* Nueva ruta */}
-        <Route path="/busqueda-equipo" element={<BusquedaEquipo />} />{" "}
-        {/* Nueva ruta */}
+        <Route
+          path="/equipos-calibracion"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <EquiposCalibracion />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/resumen-mensual"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <ResumenMensual />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/busqueda-equipo"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <BusquedaEquipo />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/test"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <div>Ruta protegida de prueba</div>
+            </ProtectedRoute>
+          }
+        />
         <Route path="/" element={<Navigate to="/login" />} />
       </Routes>
     </Router>

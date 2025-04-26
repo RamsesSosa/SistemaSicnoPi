@@ -35,6 +35,7 @@ const Login = () => {
       navigate('/home');  // Redirect to Home page after successful login
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
+      alert('Credenciales incorrectas. Por favor, inténtalo de nuevo.');
     }
   };
 

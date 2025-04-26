@@ -24,7 +24,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'coreapi',  
-    'api'
+    'api.apps.ApiConfig' 
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -36,9 +36,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
 DEBUG = True
-
 
 CORS_ALLOW_ALL_ORIGINS = True
 

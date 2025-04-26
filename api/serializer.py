@@ -51,6 +51,14 @@ class EquipoSerializer(serializers.ModelSerializer):
         model = Equipo
         fields = '__all__'
 
+class EquipoSerializer(serializers.ModelSerializer):
+    estado_actual = serializers.SerializerMethodField()
+    historial = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Equipo
+        fields = '__all__'
+
     def get_estado_actual(self, obj):
         if obj.estado_actual:
             return {

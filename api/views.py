@@ -45,6 +45,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             'correo': attrs.get('correo'),
             'password': attrs.get('password')
         }
+        
         return super().validate(credentials)
 
 class CustomTokenObtainPairView(TokenObtainPairView):
