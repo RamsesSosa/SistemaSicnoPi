@@ -10,7 +10,6 @@ const DetalleEquipo = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Configuración de estados con colores
   const estadosConfig = {
     1: { nombre: "Ingreso", color: "#ff9500" },
     2: { nombre: "En espera", color: "#a5a5a5" },
@@ -28,11 +27,10 @@ const DetalleEquipo = () => {
         setLoading(true);
         setError(null);
   
-        // Obtener datos del equipo, su historial y usuarios en paralelo
         const [equipoResponse, historialResponse, usuariosResponse] = await Promise.all([
           fetch(`http://127.0.0.1:8000/api/equipos/${id}/`),
           fetch(`http://127.0.0.1:8000/api/historial-equipos/?equipo_id=${id}`),
-          fetch(`http://127.0.0.1:8000/api/usuarios/`) // Asume que tienes un endpoint para usuarios
+          fetch(`http://127.0.0.1:8000/api/usuarios/`)
         ]);
   
         if (!equipoResponse.ok) throw new Error("Error al cargar el equipo");
@@ -43,20 +41,17 @@ const DetalleEquipo = () => {
         const historialData = await historialResponse.json();
         const usuariosData = await usuariosResponse.json();
   
-        // Crear un mapa de usuarios para búsqueda rápida
         const usuariosMap = usuariosData.reduce((map, usuario) => {
           map[usuario.id] = usuario.fullName || `${usuario.firstName} ${usuario.lastName}`;
           return map;
         }, {});
   
-        // Procesar datos del equipo
         const estadoActualId = equipoData.estado_actual?.id || 1;
         setEquipo({
           ...equipoData,
           estado: estadoActualId
         });
   
-        // Procesar historial
         const historialProcesado = historialData
           .sort((a, b) => new Date(b.fecha_cambio) - new Date(a.fecha_cambio))
           .map(item => ({
@@ -116,90 +111,90 @@ const DetalleEquipo = () => {
 
   return (
     <div className="detalle-equipo-container">
-      <div className="detalle-header">
-        <h1 className="detalle-titulo">Detalles del Equipo</h1>
-        <button className="volver-btn" onClick={handleVolver} title="Volver">
-          &larr;
-        </button>
-      </div>
-
-      <div className="detalle-grid">
-        {/* Información del equipo */}
-        <div className="info-equipo-card">
-          <h2>Información del Equipo</h2>
-          <div className="info-row">
-            <span className="info-label">Nombre:</span>
-            <span className="info-value">{equipo.nombre_equipo || "No especificado"}</span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">Consecutivo:</span>
-            <span className="info-value">{equipo.consecutivo || "No especificado"}</span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">Marca:</span>
-            <span className="info-value">{equipo.marca || "No especificado"}</span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">Modelo:</span>
-            <span className="info-value">{equipo.modelo || "No especificado"}</span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">N° Serie:</span>
-            <span className="info-value">{equipo.numero_serie || "No especificado"}</span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">Estado Actual:</span>
-            <span className="info-value">
-              <span className="estado-badge" style={{ backgroundColor: estadoActual.color }}>
-                {estadoActual.nombre}
-              </span>
-            </span>
-          </div>
+      <div className="detalle-wrapper">
+        <div className="detalle-header">
+          <h1 className="detalle-titulo">Detalles del Equipo</h1>
+          <button className="volver-btn" onClick={handleVolver} title="Volver">
+            &larr;
+          </button>
         </div>
 
-        {/* Historial del equipo */}
-        <div className="proceso-card">
-          <h2>Historial de Estados</h2>
-          
-          {historial.length > 0 ? (
-            <>
-              <div className="responsable-section">
-                <h3>Último Responsable</h3>
-                <div className="info-row">
-                  <span className="info-label">Usuario:</span>
-                  <span className="info-value">{historial[0]?.usuario || "No asignado"}</span>
-                </div>
-                <div className="info-row">
-                  <span className="info-label">Fecha/Hora:</span>
-                  <span className="info-value">{historial[0]?.fecha}</span>
-                </div>
-              </div>
-
-              <div className="historial-section">
-                <h3>Registro Completo</h3>
-                <div className="historial-list">
-                  {historial.map((item) => (
-                    <div key={item.id} className="historial-item">
-                      <div className="historial-estado" style={{ backgroundColor: item.color }}>
-                        {item.estado}
-                      </div>
-                      <div className="historial-details">
-                        <span className="historial-usuario">{item.usuario}</span>
-                        <span className="historial-fecha">{item.fecha}</span>
-                        {item.observaciones && (
-                          <span className="historial-accion">{item.observaciones}</span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="sin-historial">
-              <p>Este equipo no tiene historial registrado</p>
+        <div className="detalle-grid">
+          <div className="info-equipo-card">
+            <h2>Información del Equipo</h2>
+            <div className="info-row">
+              <span className="info-label">Nombre:</span>
+              <span className="info-value">{equipo.nombre_equipo || "No especificado"}</span>
             </div>
-          )}
+            <div className="info-row">
+              <span className="info-label">Consecutivo:</span>
+              <span className="info-value">{equipo.consecutivo || "No especificado"}</span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">Marca:</span>
+              <span className="info-value">{equipo.marca || "No especificado"}</span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">Modelo:</span>
+              <span className="info-value">{equipo.modelo || "No especificado"}</span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">N° Serie:</span>
+              <span className="info-value">{equipo.numero_serie || "No especificado"}</span>
+            </div>
+            <div className="info-row">
+              <span className="info-label">Estado Actual:</span>
+              <span className="info-value">
+                <span className="estado-badge" style={{ backgroundColor: estadoActual.color }}>
+                  {estadoActual.nombre}
+                </span>
+              </span>
+            </div>
+          </div>
+
+          <div className="proceso-card">
+            <h2>Historial de Estados</h2>
+            
+            {historial.length > 0 ? (
+              <>
+                <div className="responsable-section">
+                  <h3>Último Responsable</h3>
+                  <div className="info-row">
+                    <span className="info-label">Usuario:</span>
+                    <span className="info-value">{historial[0]?.usuario || "No asignado"}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Fecha/Hora:</span>
+                    <span className="info-value">{historial[0]?.fecha}</span>
+                  </div>
+                </div>
+
+                <div className="historial-section">
+                  <h3>Registro Completo</h3>
+                  <div className="historial-list">
+                    {historial.map((item) => (
+                      <div key={item.id} className="historial-item">
+                        <div className="historial-estado" style={{ backgroundColor: item.color }}>
+                          {item.estado}
+                        </div>
+                        <div className="historial-details">
+                          <span className="historial-usuario">{item.usuario}</span>
+                          <span className="historial-fecha">{item.fecha}</span>
+                          {item.observaciones && (
+                            <span className="historial-accion">{item.observaciones}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="sin-historial">
+                <p>Este equipo no tiene historial registrado</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

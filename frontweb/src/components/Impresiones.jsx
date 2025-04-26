@@ -11,6 +11,7 @@ const Impresiones = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [equiposSeleccionados, setEquiposSeleccionados] = useState([]);
+  const MAX_EQUIPOS_SELECCION = 16;
 
   useEffect(() => {
     const fetchEquipos = async () => {
@@ -18,7 +19,11 @@ const Impresiones = () => {
         const response = await fetch("http://127.0.0.1:8000/api/equipos/");
         if (!response.ok) throw new Error("Error al obtener los equipos");
         const data = await response.json();
-        setEquiposRegistrados(data);
+        // Ordenar equipos por fecha de entrada (más recientes primero)
+        const equiposOrdenados = data.sort((a, b) => {
+          return new Date(b.fecha_entrada) - new Date(a.fecha_entrada);
+        });
+        setEquiposRegistrados(equiposOrdenados);
         setLoading(false);
       } catch (error) {
         console.error("Error:", error);
@@ -58,18 +63,22 @@ const Impresiones = () => {
     setEquiposSeleccionados((prev) => {
       if (prev.includes(equipoId)) {
         return prev.filter((id) => id !== equipoId);
-      } else {
+      } else if (prev.length < MAX_EQUIPOS_SELECCION) {
         return [...prev, equipoId];
       }
+      return prev;
     });
   };
 
-  const handleSeleccionarTodos = () => {
-    if (equiposSeleccionados.length === equiposFiltrados.length) {
+  const toggleSeleccionRecientes = () => {
+    if (equiposSeleccionados.length > 0) {
+      // Si hay elementos seleccionados, deseleccionar todos
       setEquiposSeleccionados([]);
     } else {
-      const todosLosIds = equiposFiltrados.map(equipo => equipo.id);
-      setEquiposSeleccionados(todosLosIds);
+      // Si no hay elementos seleccionados, seleccionar los 16 más recientes
+      const equiposRecientes = equiposFiltrados.slice(0, MAX_EQUIPOS_SELECCION);
+      const idsRecientes = equiposRecientes.map(equipo => equipo.id);
+      setEquiposSeleccionados(idsRecientes);
     }
   };
 
@@ -126,7 +135,7 @@ const Impresiones = () => {
     <div className="impresiones-container">
       <div className="impresiones-header">
         <h1>Impresiones</h1>
-        <p>Seleccione los equipos que desea imprimir</p>
+        <p>Seleccione los equipos que desea imprimir (máximo {MAX_EQUIPOS_SELECCION})</p>
 
         <div className="filters-container">
           <div className="filter-group">
@@ -157,21 +166,27 @@ const Impresiones = () => {
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           <button
             className="imprimir-btn"
             onClick={handleImprimirSeleccionados}
             disabled={equiposSeleccionados.length === 0}
           >
             <i className="fas fa-print"></i> Imprimir Seleccionados (
-            {equiposSeleccionados.length})
+            {equiposSeleccionados.length}/{MAX_EQUIPOS_SELECCION})
           </button>
           <button
             className="imprimir-btn"
-            onClick={handleSeleccionarTodos}
+            onClick={toggleSeleccionRecientes}
           >
-            <i className="fas fa-check-square"></i> {equiposSeleccionados.length === equiposFiltrados.length ? "Deseleccionar Todos" : "Seleccionar Todos"}
+            <i className="fas fa-check-square"></i> 
+            {equiposSeleccionados.length > 0 ? "Deseleccionar Todos" : "Seleccionar Recientes"}
           </button>
+          {equiposSeleccionados.length >= MAX_EQUIPOS_SELECCION && (
+            <span style={{ color: "#d9534f", marginLeft: "10px" }}>
+              Límite de {MAX_EQUIPOS_SELECCION} equipos alcanzado
+            </span>
+          )}
         </div>
       </div>
 
@@ -198,6 +213,10 @@ const Impresiones = () => {
                         type="checkbox"
                         checked={equiposSeleccionados.includes(equipo.id)}
                         onChange={() => toggleSeleccionEquipo(equipo.id)}
+                        disabled={
+                          !equiposSeleccionados.includes(equipo.id) && 
+                          equiposSeleccionados.length >= MAX_EQUIPOS_SELECCION
+                        }
                       />
                     </td>
                     <td

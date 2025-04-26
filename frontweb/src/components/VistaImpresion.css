@@ -1,7 +1,7 @@
 /* Configuración de página para impresión */
 @page {
   size: A4 portrait;
-  margin: 15mm;
+  margin: 10mm;
 }
 
 /* Estilos generales */
@@ -10,53 +10,67 @@ body {
   padding: 0;
   font-family: 'Arial', sans-serif;
   background-color: #f5f5f5;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 .vista-impresion {
   max-width: 210mm;
   margin: 0 auto;
-  padding: 20px;
+  padding: 10px;
 }
 
 /* Contenedor de páginas */
 .contenedor-paginas {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 0;
 }
 
 /* Estilo de cada página */
 .pagina-qr {
   background: white;
-  padding: 20mm;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  padding: 10mm 15mm;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
   page-break-after: always;
   break-after: page;
+  height: 297mm;
   min-height: 297mm;
   box-sizing: border-box;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .encabezado {
   text-align: center;
-  margin-bottom: 30px;
-  padding-bottom: 15px;
+  margin-bottom: 10px;
+  padding-bottom: 5px;
   border-bottom: 1px solid #eee;
+  flex-shrink: 0;
 }
 
 .encabezado h2 {
   margin: 0;
   color: #333;
-  font-size: 24px;
+  font-size: 20px;
 }
 
-/* Grid de códigos QR (3x4) */
+.encabezado p {
+  margin: 5px 0 0;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Grid de códigos QR (4x4) */
 .grid-qrs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 20px;
-  height: calc(100% - 120px);
+  gap: 8px;
+  flex-grow: 1;
+  margin: 10px 0;
+  align-content: center;
 }
 
 .item-qr {
@@ -65,7 +79,8 @@ body {
   align-items: center;
   justify-content: center;
   break-inside: avoid;
-  padding: 10px;
+  padding: 5px;
+  page-break-inside: avoid;
 }
 
 .item-qr.empty {
@@ -74,25 +89,24 @@ body {
 }
 
 .consecutivo {
-  margin-top: 10px;
+  margin-top: 6px;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 10px;
   color: #333;
   text-align: center;
   word-break: break-word;
-  max-width: 140px;
+  max-width: 100px;
+  line-height: 1.2;
 }
 
 .pie-pagina {
-  position: absolute;
-  bottom: 20mm;
-  left: 0;
-  width: 100%;
   text-align: center;
   color: #777;
-  font-size: 12px;
-  padding-top: 15px;
+  font-size: 10px;
+  padding-top: 8px;
   border-top: 1px solid #eee;
+  flex-shrink: 0;
+  margin-top: auto;
 }
 
 /* Botón de impresión */
@@ -131,24 +145,16 @@ body {
 @media print {
   body {
     background: white;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
   }
 
   .vista-impresion {
     padding: 0;
   }
 
-  .contenedor-paginas {
-    gap: 0;
-  }
-
   .pagina-qr {
     box-shadow: none;
     margin: 0;
-    padding: 15mm;
-    height: 297mm;
-    min-height: 297mm;
+    padding: 10mm 15mm;
   }
 
   .item-qr.empty {
@@ -158,5 +164,18 @@ body {
 
   .boton-impresion {
     display: none;
+  }
+
+  .scroll-container {
+    overflow: visible;
+    height: auto;
+  }
+}
+
+@media screen {
+  .scroll-container {
+    max-height: 100vh;
+    overflow-y: auto;
+    padding-right: 10px;
   }
 }
