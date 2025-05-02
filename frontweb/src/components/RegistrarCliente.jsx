@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2"; // Importar SweetAlert2
 
 const RegistrarCliente = () => {
   const navigate = useNavigate();
@@ -25,10 +26,26 @@ const RegistrarCliente = () => {
       clientesRegistrados.push(cliente);
       localStorage.setItem("clientes", JSON.stringify(clientesRegistrados));
 
+      // Mostrar mensaje de éxito con SweetAlert2
+      Swal.fire({
+        title: "¡Éxito!",
+        text: "Se ha guardado el cliente exitosamente",
+        icon: "success",
+        confirmButtonText: "Aceptar",
+        customClass: {
+          popup: "sweet-alert-popup", // Clase personalizada para el diseño
+        },
+      });
+
       navigate("/home");
     } catch (error) {
       console.error("Error:", error);
-      alert("Hubo un error al guardar el cliente");
+      Swal.fire({
+        title: "Error",
+        text: "Hubo un error al guardar el cliente",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
     }
   };
 

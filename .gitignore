@@ -80,3 +80,7 @@ api/__pycache__/
 principal/__pycache__/
 # Ignorar la carpeta venv/
 venv/
+# Ignorar caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
