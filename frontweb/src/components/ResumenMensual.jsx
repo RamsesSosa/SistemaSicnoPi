@@ -41,79 +41,7 @@ const mockData = {
       "Entregado": 28,
       "Rechazado": 2
     }
-  },
-  detalle: [
-    {
-      id: 1,
-      nombre_equipo: "Multímetro Digital",
-      cliente_nombre: "Laboratorio Central",
-      estado_actual: "Entregado",
-      fecha_entrada: "2023-05-01"
-    },
-    {
-      id: 2,
-      nombre_equipo: "Fuente de Poder",
-      cliente_nombre: "Taller Electrónico",
-      estado_actual: "En calibración",
-      fecha_entrada: "2023-05-03"
-    },
-    {
-      id: 3,
-      nombre_equipo: "Osciloscopio",
-      cliente_nombre: "Universidad Técnica",
-      estado_actual: "Calibrado",
-      fecha_entrada: "2023-05-05"
-    },
-    {
-      id: 4,
-      nombre_equipo: "Generador de Señales",
-      cliente_nombre: "Instituto de Investigación",
-      estado_actual: "En revisión",
-      fecha_entrada: "2023-05-07"
-    },
-    {
-      id: 5,
-      nombre_equipo: "Analizador de Espectro",
-      cliente_nombre: "Empresa Telecom",
-      estado_actual: "Rechazado",
-      fecha_entrada: "2023-05-10"
-    },
-    {
-      id: 6,
-      nombre_equipo: "Termómetro Digital",
-      cliente_nombre: "Hospital General",
-      estado_actual: "Entregado",
-      fecha_entrada: "2023-05-12"
-    },
-    {
-      id: 7,
-      nombre_equipo: "Medidor de pH",
-      cliente_nombre: "Laboratorio Químico",
-      estado_actual: "Calibrado",
-      fecha_entrada: "2023-05-15"
-    },
-    {
-      id: 8,
-      nombre_equipo: "Báscula Industrial",
-      cliente_nombre: "Fábrica de Alimentos",
-      estado_actual: "En calibración",
-      fecha_entrada: "2023-05-18"
-    },
-    {
-      id: 9,
-      nombre_equipo: "Cámara Termográfica",
-      cliente_nombre: "Empresa Energética",
-      estado_actual: "En revisión",
-      fecha_entrada: "2023-05-20"
-    },
-    {
-      id: 10,
-      nombre_equipo: "Analizador de Redes",
-      cliente_nombre: "Compañía Telecom",
-      estado_actual: "Entregado",
-      fecha_entrada: "2023-05-22"
-    }
-  ]
+  }
 };
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
@@ -154,7 +82,6 @@ const ResumenMensual = () => {
       updateState({ loading: true, error: null });
       await new Promise(resolve => setTimeout(resolve, 500));
       updateState({
-        data: mockData.detalle,
         stats: mockData.resumen,
         loading: false
       });
@@ -307,34 +234,6 @@ const ResumenMensual = () => {
             </div>
           </>
         )}
-
-        <div className="detailed-list">
-          <h2>Detalle de Equipos</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Equipo</th>
-                <th>Cliente</th>
-                <th>Estado</th>
-                <th>Fecha de Entrada</th>
-              </tr>
-            </thead>
-            <tbody>
-              {state.data.map(equipo => (
-                <tr key={equipo.id}>
-                  <td>{equipo.nombre_equipo}</td>
-                  <td>{equipo.cliente_nombre}</td>
-                  <td>
-                    <span className={`status-badge status-${equipo.estado_actual.toLowerCase().replace(/\s+/g, '-')}`}>
-                      {equipo.estado_actual}
-                    </span>
-                  </td>
-                  <td>{new Date(equipo.fecha_entrada).toLocaleDateString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
   );
