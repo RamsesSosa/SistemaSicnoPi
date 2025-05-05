@@ -1,6 +1,6 @@
 <h1>Sistema de automatización de Sicno</h1>
 
--Estado del proyecto: 90% del sistema
+-Estado del proyecto: 90% del sistema, faltan pruebas de optimizacion.
 
 <h1>Estándar de Ramas</h1>
 - Para trabajar en una nueva funcionalidad, usaremos el prefijo "feature/la-funcionalidad" seguido de una descripción corta.
