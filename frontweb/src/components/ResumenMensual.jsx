@@ -14,6 +14,10 @@ import {
 } from 'recharts';
 import './ResumenMensual.css';
 
+// Configuración de la API - Modifica esto según tus necesidades
+const API_BASE_URL = 'http://127.0.0.1:8000';
+const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutos de caché
+
 const LoadingSpinner = () => (
   <div className="loading-spinner-container">
     <div className="loading-spinner"></div>
@@ -28,33 +32,29 @@ const ErrorMessage = ({ error, onRetry }) => (
   </div>
 );
 
-const mockData = {
-  resumen: {
-    recibidos: 45,
-    calibrados: 32,
-    entregados: 28,
-    pendientes: 17,
-    por_estado: {
-      "En revisión": 8,
-      "En calibración": 12,
-      "Calibrado": 15,
-      "Entregado": 28,
-      "Rechazado": 2
-    }
-  }
-};
+const ORDER_ESTADOS = [
+  "Ingreso",
+  "En espera",
+  "Calibrando",
+  "Calibrado",
+  "Etiquetado",
+  "Certificado emitido",
+  "Listo para entrega",
+  "Entregado"
+];
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#FF6384', '#36A2EB', '#FFCE56'];
 
 const ResumenMensual = () => {
   const [state, setState] = useState({
-    data: [],
     loading: false,
     error: null,
     selectedMonth: new Date().getMonth() + 1,
     selectedYear: new Date().getFullYear(),
     stats: null
   });
+  
+  const [apiCache, setApiCache] = useState({});
 
   const MONTHS = [
     { value: 1, label: 'Enero' },
@@ -73,24 +73,76 @@ const ResumenMensual = () => {
 
   const YEARS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
 
-  const updateState = (newState) => {
-    setState(prev => ({ ...prev, ...newState }));
-  };
-
   const fetchData = async () => {
+    const cacheKey = `${state.selectedMonth}-${state.selectedYear}`;
+    
+    // Verificar caché primero
+    if (apiCache[cacheKey] && (Date.now() - apiCache[cacheKey].timestamp < CACHE_EXPIRY_TIME)) {
+      setState(prev => ({ ...prev, stats: apiCache[cacheKey].data, loading: false }));
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
+
     try {
-      updateState({ loading: true, error: null });
-      await new Promise(resolve => setTimeout(resolve, 500));
-      updateState({
-        stats: mockData.resumen,
+      setState(prev => ({ ...prev, loading: true, error: null }));
+      
+      const response = await fetch(
+        `${API_BASE_URL}/api/metricas/volumen/?mes=${state.selectedMonth}&año=${state.selectedYear}`,
+        { signal: controller.signal }
+      );
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+      
+      const apiData = await response.json();
+      
+      if (apiData.status !== "success") {
+        throw new Error(apiData.message || "La API no devolvió un estado exitoso");
+      }
+      
+      // Transformar los datos de la API al formato que necesita el frontend
+      const transformedData = {
+        recibidos: apiData.volumen_trabajo.equipos_recibidos || 0,
+        calibrados: apiData.volumen_trabajo.equipos_calibrados || 0,
+        entregados: apiData.volumen_trabajo.equipos_entregados || 0,
+        pendientes: apiData.volumen_trabajo.equipos_pendientes || 0,
+        por_estado: ORDER_ESTADOS.reduce((acc, estado) => {
+          acc[estado] = apiData.estados[estado] || 0;
+          return acc;
+        }, {})
+      };
+      
+      // Actualizar caché
+      setApiCache(prev => ({
+        ...prev,
+        [cacheKey]: {
+          data: transformedData,
+          timestamp: Date.now()
+        }
+      }));
+      
+      // Actualizar estado
+      setState(prev => ({
+        ...prev,
+        stats: transformedData,
         loading: false
-      });
+      }));
     } catch (error) {
-      console.error('Error al obtener datos:', error);
-      updateState({ 
-        error: error.message || 'Error desconocido al cargar los datos',
-        loading: false 
-      });
+      clearTimeout(timeoutId);
+      const errorMsg = error.name === 'AbortError' 
+        ? 'La solicitud tardó demasiado. Por favor intente nuevamente.'
+        : error.message || 'Error desconocido al cargar los datos';
+      
+      setState(prev => ({
+        ...prev,
+        error: errorMsg,
+        loading: false
+      }));
     }
   };
 
@@ -99,35 +151,35 @@ const ResumenMensual = () => {
   }, [state.selectedMonth, state.selectedYear]);
 
   const handleMonthChange = (e) => {
-    updateState({ selectedMonth: parseInt(e.target.value) });
+    setState(prev => ({ ...prev, selectedMonth: parseInt(e.target.value) }));
   };
 
   const handleYearChange = (e) => {
-    updateState({ selectedYear: parseInt(e.target.value) });
+    setState(prev => ({ ...prev, selectedYear: parseInt(e.target.value) }));
   };
 
   const prepareChartData = () => {
     if (!state.stats) return [];
     
-    return [
-      {
-        name: 'Resumen',
-        Recibidos: state.stats.recibidos || 0,
-        Calibrados: state.stats.calibrados || 0,
-        Entregados: state.stats.entregados || 0,
-        Pendientes: state.stats.pendientes || 0
-      }
-    ];
+    return [{
+      name: 'Resumen',
+      Recibidos: state.stats.recibidos,
+      Calibrados: state.stats.calibrados,
+      Entregados: state.stats.entregados,
+      Pendientes: state.stats.pendientes
+    }];
   };
 
   const prepareStatusData = () => {
-    if (!state.stats || !state.stats.por_estado) return [];
+    if (!state.stats?.por_estado) return [];
     
-    return Object.entries(state.stats.por_estado).map(([name, value]) => ({
-      name,
-      value
-    }));
+    return Object.entries(state.stats.por_estado)
+      .filter(([_, value]) => value > 0)
+      .map(([name, value]) => ({ name, value }));
   };
+
+  if (state.loading) return <LoadingSpinner />;
+  if (state.error) return <ErrorMessage error={state.error} onRetry={fetchData} />;
 
   return (
     <div className="resumen-mensual-container">
@@ -208,7 +260,7 @@ const ResumenMensual = () => {
               </div>
 
               <div className="chart">
-                <h2>Distribución por Estado</h2>
+                <h2>Distribución por Estado Actual</h2>
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
@@ -226,7 +278,7 @@ const ResumenMensual = () => {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip formatter={(value) => [`${value} equipos`, 'Cantidad']} />
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>
