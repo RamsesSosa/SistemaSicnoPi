@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from django.db.models import Q, Max, F, Prefetch, Count, Subquery, OuterRef
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
 class UsuarioManager(BaseUserManager):
@@ -76,12 +77,10 @@ class Equipo(models.Model):
 
     @property
     def estado_actual(self):
-        # Esto nos devuelve el ultimo estado del equipo
         ultimo_historial = self.historialequipo_set.order_by('-fecha_cambio').first()
         return ultimo_historial.estado if ultimo_historial else None
 
     def cambiar_estado(self, nuevo_estado, usuario, observaciones=''):
-        #Aqui cambia el estado del equipo y registra el historial
         if self.estado_actual == nuevo_estado:
             return False
         HistorialEquipo.objects.create(
@@ -107,6 +106,66 @@ class Equipo(models.Model):
                 observaciones="Registro inicial automático"
             )
 
+    @classmethod
+    def volumen_trabajo_mes(cls, mes, año):
+        filtro_fecha = Q(fecha_entrada__month=mes, fecha_entrada__year=año)
+        equipos_mes = cls.objects.filter(filtro_fecha)
+        
+        # Prefetch los últimos estados para optimizar
+        equipos_mes = equipos_mes.prefetch_related(
+            Prefetch(
+                'historialequipo_set',
+                queryset=HistorialEquipo.objects.order_by('-fecha_cambio'),
+                to_attr='ultimos_estados'
+            )
+        )
+        
+        # Contadores
+        recibidos = equipos_mes.count()
+        calibrados = 0
+        entregados = 0
+        pendientes = 0
+        
+        estados_pendientes = ['En espera', 'Calibrando', 'Listo para entrega']
+        
+        for equipo in equipos_mes:
+            if not hasattr(equipo, 'ultimos_estados') or not equipo.ultimos_estados:
+                continue
+                
+            estado_actual = equipo.ultimos_estados[0].estado.nombre_estado
+            
+            if estado_actual == 'Calibrado':
+                calibrados += 1
+            elif estado_actual == 'Entregado':
+                entregados += 1
+            elif estado_actual in estados_pendientes:
+                pendientes += 1
+        
+        return {
+            'equipos_recibidos': recibidos,
+            'equipos_calibrados': calibrados,
+            'equipos_entregados': entregados,
+            'equipos_pendientes': pendientes
+        }
+
+    @classmethod
+    def contar_equipos_por_estado(cls):
+        conteo = {}
+        estados = EstadoCalibracion.objects.all().order_by('orden')
+        
+        for estado in estados:
+            equipos = cls.objects.filter(
+                historialequipo__estado=estado
+            ).annotate(
+                ultima_fecha=Max('historialequipo__fecha_cambio')
+            ).filter(
+                historialequipo__fecha_cambio=F('ultima_fecha')
+            ).distinct()
+            
+            conteo[estado.nombre_estado] = equipos.count()
+        
+        return conteo
+
 
 class HistorialEquipo(models.Model):
     equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
@@ -121,6 +180,66 @@ class HistorialEquipo(models.Model):
 
     def __str__(self):
         return f"{self.equipo} → {self.estado} ({self.fecha_cambio})"
+
+    #Esto todavia no lo vamos a usar, se va a implementar si nos queda tiempo
+    @classmethod
+    def tiempo_promedio_calibracion(cls, mes, año):
+        
+        resultados = cls.objects.filter(
+            equipo__historial_estados__estado__nombre_estado='Entregado',
+            fecha_cambio__month=mes,
+            fecha_cambio__year=año
+        ).annotate(
+            fecha_ingreso=models.Subquery(
+                HistorialEstado.objects.filter(
+                    equipo=models.OuterRef('equipo'),
+                    estado__nombre_estado='Ingreso'
+                ).order_by('fecha_cambio').values('fecha_cambio')[:1]
+            ),
+            tiempo_total=ExpressionWrapper(
+                models.F('fecha_cambio') - models.F('fecha_ingreso'),
+                output_field=DurationField()
+            )
+        ).aggregate(
+            promedio=Avg('tiempo_total')
+        )
+        
+        return resultados['promedio'] or timedelta(0)
+    
+    @classmethod
+    def tiempo_promedio_por_estado(cls, mes, año):
+        cambios = cls.objects.filter(
+            fecha_cambio__month=mes,
+            fecha_cambio__year=año
+        ).order_by('equipo', 'fecha_cambio')
+        
+        tiempos = {}
+        
+        equipo_actual = None
+        historial_equipo = []
+        
+        for cambio in cambios:
+            if cambio.equipo != equipo_actual:
+                if equipo_actual and historial_equipo:
+                    for i in range(len(historial_equipo)-1):
+                        estado = historial_equipo[i].estado.nombre_estado
+                        tiempo = historial_equipo[i+1].fecha_cambio - historial_equipo[i].fecha_cambio
+                        
+                        if estado not in tiempos:
+                            tiempos[estado] = []
+                        tiempos[estado].append(tiempo)
+                
+                equipo_actual = cambio.equipo
+                historial_equipo = []
+            
+            historial_equipo.append(cambio)
+
+        promedios = {}
+        for estado, lista_tiempos in tiempos.items():
+            total = sum(lista_tiempos, timedelta(0))
+            promedios[estado] = total / len(lista_tiempos)
+        
+        return promedios
 
 class Alerta(models.Model):
     TIPOS_ALERTA = (
