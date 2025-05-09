@@ -31,17 +31,12 @@ class EstadoEquipoSerializer(serializers.ModelSerializer):
         fields = ['id', 'nombre_estado', 'orden']
 
 class HistorialEquipoSerializer(serializers.ModelSerializer):
-    responsable_nombre = serializers.SerializerMethodField()
+    estado = EstadoCalibracionSerializer()
+    responsable = serializers.StringRelatedField()
 
     class Meta:
         model = HistorialEquipo
-        fields = ['id', 'equipo', 'estado', 'observaciones', 'fecha_cambio', 'responsable', 'responsable_nombre']
-
-    def get_responsable_nombre(self, obj):
-        if obj.responsable:
-            return obj.responsable.fullName
-        return "Sistema"
-
+        fields = '__all__'
 
 class EquipoSerializer(serializers.ModelSerializer):
     estado_actual = serializers.SerializerMethodField()
@@ -56,8 +51,7 @@ class EquipoSerializer(serializers.ModelSerializer):
             return {
                 'id': obj.estado_actual.id,
                 'nombre': obj.estado_actual.nombre_estado,
-                'fecha': obj.historialequipo_set.order_by('-fecha_cambio').first().fecha_cambio
-
+                'fecha': obj.historialequipo_set.last().fecha_cambio
             }
         return None
 
