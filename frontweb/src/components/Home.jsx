@@ -169,12 +169,7 @@ const Home = () => {
 
           {/* Estadísticas */}
           <li>
-            <Link
-              to="/estadisticas"
-              className={location.pathname === "/estadisticas" ? "active" : ""}
-            >
-              <i className="fas fa-chart-pie"></i> Estadísticas
-            </Link>
+            
           </li>
         </ul>
       </aside>
