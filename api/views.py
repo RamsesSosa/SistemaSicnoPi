@@ -33,6 +33,9 @@ from .serializer import (
     ReporteSerializer,
     EntregaRecoleccionSerializer,
     EquipoInfoBasicaSerializer,
+    ClienteConEquiposSerializer,
+    EquipoPorClienteSerializer,
+    
 )
 
 # Authentication
@@ -67,10 +70,28 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
 
-class ClienteViewSet(viewsets.ModelViewSet):
-    queryset = Cliente.objects.all()
-    serializer_class = ClienteSerializer
+class StandardPagination(PageNumberPagination):
+    page_size = 15
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
+class ClienteViewSet(viewsets.ModelViewSet):
+    queryset = Cliente.objects.all().order_by('-fecha_entrada')
+    serializer_class = ClienteSerializer
+    pagination_class = StandardPagination 
+    
+    @action(detail=True, methods=['get'])
+    def equipos(self, request, pk=None):
+        cliente = self.get_object()
+        equipos = cliente.equipo_set.all().order_by('-fecha_entrada')
+        
+        paginator = PageNumberPagination()
+        paginator.page_size = 15
+        result_page = paginator.paginate_queryset(equipos, request)
+        
+        serializer = EquipoPorClienteSerializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+    
     def create(self, request, *args, **kwargs):
         print("Datos recibidos:", request.data)
         serializer = self.get_serializer(data=request.data)
@@ -81,7 +102,8 @@ class ClienteViewSet(viewsets.ModelViewSet):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             except Exception as e:
                 print("Error después de guardar:", str(e))
-                return Response({'status': 'error', 'message': 'Error interno del servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({'status': 'error', 'message': 'Error interno del servidor'}, 
+                              status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             print("Error al crear cliente:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -224,10 +246,8 @@ def metricas_volumen(request):
     año = request.query_params.get('año', hoy.year)
     
     try:
-        # Obtener volumen de trabajo
         volumen = Equipo.volumen_trabajo_mes(int(mes), int(año))
         
-        # Obtener conteo por estado (todos los equipos)
         conteo_estados = Equipo.contar_equipos_por_estado()
         
         return Response({
@@ -245,19 +265,13 @@ def metricas_volumen(request):
             'mes': mes,
             'año': año
         }, status=400)
-    
-class EquipoPagination(PageNumberPagination):
-    page_size = 15
-    page_size_query_param = 'page_size'
-    max_page_size = 100
 
 class InfoEquipoView(APIView):
-    pagination_class = EquipoPagination
+    pagination_class = StandardPagination
     
     def get(self, request):
         equipos = Equipo.objects.all().order_by('-fecha_entrada')
         
-        # Configurar la paginación
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(equipos, request)
         

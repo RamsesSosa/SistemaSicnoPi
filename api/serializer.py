@@ -85,3 +85,19 @@ class EquipoInfoBasicaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Equipo
         fields = ['id', 'nombre_equipo', 'marca', 'consecutivo', 'fecha_entrada']
+        
+class EquipoPorClienteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Equipo
+        fields = ['id', 'nombre_equipo', 'numero_serie', 'marca', 'modelo', 'consecutivo', 'fecha_entrada']
+        
+class ClienteConEquiposSerializer(serializers.ModelSerializer):
+    equipos = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Cliente
+        fields = ['id', 'nombre_cliente', 'equipos']
+    
+    def get_equipos(self, obj):
+        equipos = obj.equipo_set.all().order_by('-fecha_entrada')[:15]  # Limita a 15 equipos
+        return EquipoPorClienteSerializer(equipos, many=True).data
