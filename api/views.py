@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action, api_view
 from django.contrib.auth import get_user_model
 from datetime import datetime
+from rest_framework.pagination import PageNumberPagination
 
 # JWT Auth 
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -31,6 +32,7 @@ from .serializer import (
     AlertaSerializer,
     ReporteSerializer,
     EntregaRecoleccionSerializer,
+    EquipoInfoBasicaSerializer,
 )
 
 # Authentication
@@ -243,3 +245,25 @@ def metricas_volumen(request):
             'mes': mes,
             'año': año
         }, status=400)
+    
+class EquipoPagination(PageNumberPagination):
+    page_size = 15
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+class InfoEquipoView(APIView):
+    pagination_class = EquipoPagination
+    
+    def get(self, request):
+        equipos = Equipo.objects.all().order_by('-fecha_entrada')
+        
+        # Configurar la paginación
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(equipos, request)
+        
+        if page is not None:
+            serializer = EquipoInfoBasicaSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+        
+        serializer = EquipoInfoBasicaSerializer(equipos, many=True)
+        return Response(serializer.data)

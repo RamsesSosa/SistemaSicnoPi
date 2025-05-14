@@ -79,3 +79,9 @@ class EntregaRecoleccionSerializer(serializers.ModelSerializer):
     class Meta:
         model = EntregaRecoleccion
         fields = '__all__'
+
+# Equipo info 
+class EquipoInfoBasicaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Equipo
+        fields = ['id', 'nombre_equipo', 'marca', 'consecutivo', 'fecha_entrada']
