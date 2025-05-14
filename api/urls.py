@@ -26,4 +26,5 @@ urlpatterns = [
     path('equipos/<int:pk>/cambiar-estado/', views.CambiarEstadoEquipoAPIView.as_view(), name='cambiar-estado-equipo'),
     path('metricas/volumen/', views.metricas_volumen, name='metricas-volumen'),
     path('info-equipos/', views.InfoEquipoView.as_view(), name='info-equipos'),
+    path('impresiones/equipos/', views.EquiposImpresionView.as_view(), name='impresiones-equipos'),
 ]
