@@ -35,7 +35,7 @@ from .serializer import (
     EquipoInfoBasicaSerializer,
     ClienteConEquiposSerializer,
     EquipoPorClienteSerializer,
-    
+    EquipoImpresionSerializer,
 )
 
 # Authentication
@@ -76,7 +76,7 @@ class StandardPagination(PageNumberPagination):
     max_page_size = 100
 
 class ClienteViewSet(viewsets.ModelViewSet):
-    queryset = Cliente.objects.all().order_by('-fecha_entrada')
+    queryset = Cliente.objects.all().order_by('nombre_cliente')
     serializer_class = ClienteSerializer
     pagination_class = StandardPagination 
     
@@ -280,4 +280,25 @@ class InfoEquipoView(APIView):
             return paginator.get_paginated_response(serializer.data)
         
         serializer = EquipoInfoBasicaSerializer(equipos, many=True)
+        return Response(serializer.data)
+
+class PrintPagination(PageNumberPagination):
+    page_size = 16
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+    
+class EquiposImpresionView(APIView):
+    pagination_class = PrintPagination 
+    
+    def get(self, request):
+        equipos = Equipo.objects.all().select_related('cliente').order_by('-fecha_entrada')
+        
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(equipos, request)
+        
+        if page is not None:
+            serializer = EquipoImpresionSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+        
+        serializer = EquipoImpresionSerializer(equipos, many=True)
         return Response(serializer.data)
