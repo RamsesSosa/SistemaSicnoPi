@@ -1,20 +1,30 @@
-/* Estilos para el componente Impresiones */
+/* Estilos generales */
 .impresiones-container {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  height: 100vh;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  padding: 20px;
+  overflow: hidden;
+  background-color: #f5f5f5;
 }
 
 .impresiones-header {
   margin-bottom: 20px;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .impresiones-header h1 {
+  margin: 0;
   color: #333;
-  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.impresiones-header p {
+  margin: 10px 0;
+  color: #666;
 }
 
 .filters-container {
@@ -25,124 +35,184 @@
 }
 
 .filter-group {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
   min-width: 200px;
 }
 
 .filter-group label {
-  display: block;
-  margin-bottom: 5px;
   font-weight: bold;
+  color: #444;
+  font-size: 14px;
 }
 
 .filter-group select,
 .filter-group input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
+  padding: 8px 12px;
   border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  background-color: white;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Contenedor de tabla con scroll */
+.table-scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .table-container {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  width: 100%;
+  overflow-x: auto;
 }
 
+/* Estilos de tabla */
 .impresiones-table {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
-}
-
-.impresiones-table thead {
-  display: table;
-  width: 100%;
+  font-size: 14px;
 }
 
 .impresiones-table th,
 .impresiones-table td {
   padding: 12px 15px;
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .impresiones-table th {
-  background-color: #ff8c42;
-  color: white;
-  font-weight: bold;
+  background-color: #f8f9fa;
   position: sticky;
   top: 0;
+  z-index: 10;
+  color: #444;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 0.5px;
 }
 
-.table-body-scroll {
-  display: block;
-  overflow-y: auto;
-  max-height: calc(100vh - 300px);
-  width: 100%;
-}
-
-.impresiones-table tbody tr {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
-}
-
-.impresiones-table tr:hover {
+.impresiones-table tbody tr:hover {
   background-color: #f5f5f5;
+}
+
+.impresiones-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .no-results {
   text-align: center;
   padding: 20px;
-  color: #666;
+  color: #6c757d;
 }
 
+/* Estilos para botones */
 .imprimir-btn {
+  padding: 8px 16px;
   background-color: #ff8c42;
   color: white;
   border: none;
-  padding: 10px 15px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 16px;
-  margin-top: 10px;
-  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  transition: background-color 0.2s;
 }
 
 .imprimir-btn:hover {
-  background-color: #e67e22;
+  background-color: #ff8c42;
 }
 
 .imprimir-btn:disabled {
-  background-color: #cccccc;
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Estilos para la paginación */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-btn {
+  padding: 5px 10px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  color: #333;
+  cursor: pointer;
+  border-radius: 4px;
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #f0f0f0;
+}
+
+.pagination-btn:disabled {
+  color: #ccc;
   cursor: not-allowed;
 }
 
-.imprimir-btn i {
-  margin-right: 8px;
+.pagination-btn.active {
+  background-color: #ff8c42;
+  color: white;
+  border-color: #ff8c42;
 }
 
-.loading-overlay {
+.pagination-ellipsis {
+  padding: 5px 10px;
+  color: #666;
+}
+
+/* Estilos para loading y error */
+.loading-overlay,
+.error-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  height: 200px;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 1000;
 }
 
 .loading-spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  border-radius: 50%;
+  border: 4px solid #f3f3f3;
   border-top: 4px solid #ff8c42;
+  border-radius: 50%;
   width: 40px;
   height: 40px;
   animation: spin 1s linear infinite;
-  margin-bottom: 10px;
 }
 
 @keyframes spin {
@@ -150,37 +220,36 @@
   100% { transform: rotate(360deg); }
 }
 
-.error-overlay {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-}
-
 .error-content {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  color: #d9534f;
+  gap: 10px;
 }
 
 .error-icon {
-  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #dc3545;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   font-weight: bold;
-  margin-right: 10px;
+  font-size: 20px;
 }
 
-.tabla-equipos {
-  width: 100%;
-  border-collapse: collapse;
+/* Estilos para checkbox */
+input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
 }
 
-.tabla-equipos th,
-.tabla-equipos td {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  text-align: left;
-}
-
-.tabla-equipos th {
-  background-color: #f2f2f2;
+/* Estilos para el mensaje de límite */
+.limit-message {
+  color: #d9534f;
+  font-size: 14px;
+  font-weight: 500;
 }
