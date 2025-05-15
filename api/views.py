@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from django.db.models import Max, F
+from django.db.models import Max, F, Prefetch
 from rest_framework import status, viewsets, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -112,42 +112,45 @@ class EquipoViewSet(viewsets.ModelViewSet):
     queryset = Equipo.objects.all()
     serializer_class = EquipoSerializer
 
-    @action(detail=True, methods=['post'])
-    def cambiar_estado(self, request, pk=None):
-        equipo = self.get_object()
-        estado_id = request.data.get('estado_id')
-        observaciones = request.data.get('observaciones', '')
+    # Sobrescribir el método retrieve para el detalle
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        # Optimización: Traer todo en una sola consulta
+        equipo = Equipo.objects.filter(pk=instance.pk).select_related('cliente').prefetch_related(
+            Prefetch(
+                'historialequipo_set',
+                queryset=HistorialEquipo.objects.select_related('estado', 'responsable').order_by('-fecha_cambio'),
+                to_attr='historial_completo'
+            )
+        ).first()
 
-        try:
-            nuevo_estado = EstadoCalibracion.objects.get(pk=estado_id)
-        except EstadoCalibracion.DoesNotExist:
-            return Response({'error': 'Estado no válido'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if equipo.cambiar_estado(nuevo_estado, request.user, observaciones):
-            return Response({'status': 'Estado actualizado'})
-        return Response({'status': 'El equipo ya está en este estado'}, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=False)
-    def por_estado(self, request):
-        estados = EstadoCalibracion.objects.all().order_by('orden')
-        data = []
-
-        for estado in estados:
-            equipos = Equipo.objects.filter(
-                historialequipo__estado=estado
-            ).annotate(
-                ultima_fecha=Max('historialequipo__fecha_cambio')
-            ).filter(
-                historialequipo__fecha_cambio=F('ultima_fecha')
-            ).distinct()
-
-            serializer = self.get_serializer(equipos, many=True)
-            data.append({
-                'estado': EstadoCalibracionSerializer(estado).data,
-                'equipos': serializer.data,
-                'total': equipos.count()
+        # Serializar los datos
+        historial_data = []
+        for registro in getattr(equipo, 'historial_completo', []):
+            historial_data.append({
+                'estado': registro.estado.nombre_estado,
+                'responsable': registro.responsable.fullName,
+                'fecha': registro.fecha_cambio,
+                'observaciones': registro.observaciones
             })
 
+        data = {
+            'equipo': {
+                'id': equipo.id,
+                'nombre_equipo': equipo.nombre_equipo,
+                'consecutivo': equipo.consecutivo,
+                'marca': equipo.marca,
+                'modelo': equipo.modelo,
+                'numero_serie': equipo.numero_serie,
+                'cliente': equipo.cliente.nombre_cliente if equipo.cliente else None,
+                'accesorios': equipo.accesorios,
+                'observaciones': equipo.observaciones,
+                'estado_actual': equipo.estado_actual.nombre_estado if equipo.estado_actual else None,
+            },
+            'historial': historial_data,
+            }
+        
         return Response(data)
 
 class EstadoCalibracionViewSet(viewsets.ModelViewSet):
@@ -302,3 +305,37 @@ class EquiposImpresionView(APIView):
         
         serializer = EquipoImpresionSerializer(equipos, many=True)
         return Response(serializer.data)
+
+class EquiposProcesoView(APIView):
+    
+    def get(self, request):
+        # Optimización: Prefetch del historial y estados en una sola consulta
+        equipos = Equipo.objects.all().select_related('cliente').prefetch_related(
+            Prefetch(
+                'historialequipo_set',
+                queryset=HistorialEquipo.objects.select_related('estado', 'responsable').order_by('-fecha_cambio'),
+                to_attr='historial_completo'
+            )
+        ).order_by('-fecha_entrada')
+
+        # Procesar los datos
+        data = []
+        for equipo in equipos:
+            historial = getattr(equipo, 'historial_completo', [])
+            estado_actual = historial[0].estado if historial else None
+            
+            data.append({
+                'id': equipo.id,
+                'nombre_equipo': equipo.nombre_equipo,
+                'consecutivo': equipo.consecutivo,
+                'cliente': equipo.cliente.nombre_cliente if equipo.cliente else "Sin cliente",
+                'fecha_entrada': equipo.fecha_entrada,
+                'estado_actual': {
+                    'id': estado_actual.id if estado_actual else None,
+                    'nombre': estado_actual.nombre_estado if estado_actual else None,
+                },
+                'ultima_observacion': historial[0].observaciones if historial and historial[0].observaciones else None,
+                'historial_url': f"/api/equipos/{equipo.id}/"  # URL para redirección a detalle
+            })
+            
+        return Response(data)
