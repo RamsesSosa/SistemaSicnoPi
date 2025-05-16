@@ -108,31 +108,40 @@ class Equipo(models.Model):
 
     @classmethod
     def volumen_trabajo_mes(cls, mes, año):
-        filtro_fecha = Q(fecha_entrada__month=mes, fecha_entrada__year=año)
-        equipos_mes = cls.objects.filter(filtro_fecha)
-        
-        # Prefetch los últimos estados para optimizar
-        equipos_mes = equipos_mes.prefetch_related(
+        # Primero obtenemos los equipos que tuvieron algún cambio de estado en el mes/año solicitado
+        equipos_con_cambios = cls.objects.filter(
+            historialequipo__fecha_cambio__month=mes,
+            historialequipo__fecha_cambio__year=año
+        ).distinct()
+
+        # Prefetch para optimizar
+        equipos_con_cambios = equipos_con_cambios.prefetch_related(
             Prefetch(
                 'historialequipo_set',
                 queryset=HistorialEquipo.objects.order_by('-fecha_cambio'),
                 to_attr='ultimos_estados'
             )
         )
-        
+
         # Contadores
-        recibidos = equipos_mes.count()
+        recibidos = 0
         calibrados = 0
         entregados = 0
         pendientes = 0
         
         estados_pendientes = ['En espera', 'Calibrando', 'Listo para entrega']
         
-        for equipo in equipos_mes:
+        for equipo in equipos_con_cambios:
             if not hasattr(equipo, 'ultimos_estados') or not equipo.ultimos_estados:
                 continue
                 
-            estado_actual = equipo.ultimos_estados[0].estado.nombre_estado
+            # Verificamos si el último estado del equipo fue en el mes/año solicitado
+            ultimo_historial = equipo.ultimos_estados[0]
+            if (ultimo_historial.fecha_cambio.month != mes or 
+                ultimo_historial.fecha_cambio.year != año):
+                continue
+                
+            estado_actual = ultimo_historial.estado.nombre_estado
             
             if estado_actual == 'Calibrado':
                 calibrados += 1
@@ -141,6 +150,13 @@ class Equipo(models.Model):
             elif estado_actual in estados_pendientes:
                 pendientes += 1
         
+        # Equipos recibidos son los que tuvieron su primer estado (Ingreso) en el mes/año
+        recibidos = cls.objects.filter(
+            historialequipo__estado__nombre_estado='Ingreso',
+            historialequipo__fecha_cambio__month=mes,
+            historialequipo__fecha_cambio__year=año
+        ).distinct().count()
+
         return {
             'equipos_recibidos': recibidos,
             'equipos_calibrados': calibrados,
@@ -149,20 +165,34 @@ class Equipo(models.Model):
         }
 
     @classmethod
-    def contar_equipos_por_estado(cls):
+    def contar_equipos_por_estado(cls, mes=None, año=None):
         conteo = {}
         estados = EstadoCalibracion.objects.all().order_by('orden')
         
         for estado in estados:
-            equipos = cls.objects.filter(
-                historialequipo__estado=estado
-            ).annotate(
-                ultima_fecha=Max('historialequipo__fecha_cambio')
-            ).filter(
-                historialequipo__fecha_cambio=F('ultima_fecha')
-            ).distinct()
+            # Subconsulta para obtener la última fecha de cambio por equipo
+            ultimos_historiales = HistorialEquipo.objects.filter(
+                equipo=OuterRef('pk')
+            ).order_by('-fecha_cambio')
             
-            conteo[estado.nombre_estado] = equipos.count()
+            equipos = cls.objects.annotate(
+                ultima_fecha=Subquery(ultimos_historiales.values('fecha_cambio')[:1]),
+                ultimo_estado_id=Subquery(ultimos_historiales.values('estado')[:1])
+            ).filter(
+                ultimo_estado_id=estado.id
+            )
+            
+            # Si se especificó mes y año, filtrar por ellos
+            if mes and año:
+                equipos = equipos.filter(
+                    historialequipo__fecha_cambio__month=mes,
+                    historialequipo__fecha_cambio__year=año,
+                    historialequipo__estado=estado
+                ).filter(
+                    historialequipo__fecha_cambio=F('ultima_fecha')
+                )
+            
+            conteo[estado.nombre_estado] = equipos.distinct().count()
         
         return conteo
 
