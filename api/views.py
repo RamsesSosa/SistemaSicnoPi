@@ -249,9 +249,11 @@ def metricas_volumen(request):
     año = request.query_params.get('año', hoy.year)
     
     try:
-        volumen = Equipo.volumen_trabajo_mes(int(mes), int(año))
+        mes = int(mes)
+        año = int(año)
         
-        conteo_estados = Equipo.contar_equipos_por_estado()
+        volumen = Equipo.volumen_trabajo_mes(mes, año)
+        conteo_estados = Equipo.contar_equipos_por_estado(mes, año)
         
         return Response({
             'volumen_trabajo': volumen,
